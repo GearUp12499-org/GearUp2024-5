@@ -19,7 +19,10 @@ extends LinearOpMode {
         DcMotor frontLeft=hardwareMap.get(DcMotor.class,"frontLeft");
        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         DistanceSensor sensor=hardwareMap.get(DistanceSensor.class,"distance");
 
 
@@ -27,8 +30,8 @@ extends LinearOpMode {
 
 
         if (isStopRequested()) return;
-
-        while (opModeIsActive()) {
+        double distance = 100;
+        while (opModeIsActive() && distance>10) {
             double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
             double rx = gamepad1.right_stick_x;
@@ -42,13 +45,18 @@ extends LinearOpMode {
             double frontRightPower = (y - x - rx) / denominator;
             double backRightPower = (y + x - rx) / denominator;
 
-            frontLeft.setPower(frontLeftPower);
-            backLeft.setPower(backLeftPower);
-            frontRight.setPower(frontRightPower);
-            backRight.setPower(backRightPower);
+            frontLeft.setPower(frontLeftPower/2);
+            backLeft.setPower(backLeftPower/2);
+            frontRight.setPower(frontRightPower/2);
+            backRight.setPower(backRightPower/2);
 
-            telemetry.addData("distance", sensor.getDistance(INCH));
+            distance=sensor.getDistance(INCH);
+            telemetry.addData("distance", distance);
             telemetry.update();
         }
+        frontLeft.setPower(0);
+        backLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
     }
 }
