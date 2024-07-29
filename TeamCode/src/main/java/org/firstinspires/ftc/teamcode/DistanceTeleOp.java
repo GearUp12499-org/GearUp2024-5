@@ -4,12 +4,15 @@ import static org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.I
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+//import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 @TeleOp
 public class DistanceTeleOp
+
 extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
@@ -24,14 +27,15 @@ extends LinearOpMode {
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         DistanceSensor sensor=hardwareMap.get(DistanceSensor.class,"distance");
-
+       // ColorSensor colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+        ColorRangeSensor color= hardwareMap.get(ColorRangeSensor.class, "colorSensor");
 
         waitForStart();
 
 
         if (isStopRequested()) return;
         double distance = 100;
-        while (opModeIsActive() && distance>10) {
+        while (opModeIsActive() && distance>0) {
             double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
             double rx = gamepad1.right_stick_x;
@@ -52,6 +56,14 @@ extends LinearOpMode {
 
             distance=sensor.getDistance(INCH);
             telemetry.addData("distance", distance);
+            telemetry.addData("Amount red", color.red());
+            telemetry.addData("Amount blue", color.blue());
+            telemetry.addData("Amount green", color.green());
+            telemetry.addData("argb", color.argb()&0xff);
+            //  telemetry.addData("Distance (IN)", color.getDistance(INCH));
+            telemetry.addData("Distance", color.getDistance(INCH));
+           // telemetry.addData("Distance (cm)", "%.3f", ((DistanceSensor) colorSensor).getDistance(DistanceUnit.INCH));
+
             telemetry.update();
         }
         frontLeft.setPower(0);
