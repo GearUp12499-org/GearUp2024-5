@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.vision.VisionPortal.CameraState.STREAMING;
+
 import android.graphics.Canvas;
 import android.os.Environment;
 import android.util.Log;
@@ -65,14 +67,20 @@ public class Capture extends LinearOpMode {
                 .setCameraResolution(new Size(1920, 1080))
                 .addProcessor(proc)
                 .build();
-        ExposureControl exposure = portal.getCameraControl(ExposureControl.class);
-        long micros = exposure.getMinExposure(TimeUnit.MICROSECONDS);
-        exposure.setExposure(micros, TimeUnit.MICROSECONDS);
 
         boolean isAPressed = false;
+        boolean configured = false;
 
         while (opModeInInit()) {
-            if (gamepad1.a && !isAPressed) {
+            if (portal.getCameraState() == STREAMING && !configured) {
+                ExposureControl exposure = portal.getCameraControl(ExposureControl.class);
+                exposure.setMode(ExposureControl.Mode.Manual);
+                long micros = exposure.getMinExposure(TimeUnit.MILLISECONDS);
+                exposure.setExposure(200, TimeUnit.MILLISECONDS);
+                configured = true;
+            }
+            boolean nonVolatileA = gamepad1.a;
+            if (nonVolatileA && !isAPressed) {
                 Log.i("Capture", "Saving");
                 // try to avoid getting deallocated while saving by cloning
                 Mat imm = proc.latest.clone();
@@ -80,11 +88,17 @@ public class Capture extends LinearOpMode {
                 imm.release();
                 Log.i("Capture", "Done");
             }
+            if (configured) {
+
+                ExposureControl exposure = portal.getCameraControl(ExposureControl.class);
+                telemetry.addData("Exposure (ms)", exposure.getExposure(TimeUnit.MILLISECONDS));
+            }
             telemetry.addData("Frame", proc.frameNo);
+            telemetry.addData("Push?", isAPressed);
             telemetry.addLine("(press A to save)");
             telemetry.update();
 
-            isAPressed = gamepad1.a;
+            isAPressed = nonVolatileA;
         }
     }
 }
