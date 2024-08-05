@@ -98,6 +98,7 @@ extends LinearOpMode {
                     .addData("roll", formatAngle(angles.angleUnit, angles.secondAngle))
                     .addData("pitch", "%s deg", formatAngle(angles.angleUnit, angles.thirdAngle));
             telemetry.update();
+            idle();
 
         }
 
