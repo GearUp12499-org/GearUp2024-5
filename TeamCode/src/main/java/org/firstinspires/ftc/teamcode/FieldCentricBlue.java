@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -27,6 +28,7 @@ public class FieldCentricBlue
     public void runOpMode() throws InterruptedException {
         navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "gyro");
         gyro = (IntegratingGyroscope)navxMicro;
+        Servo hand=hardwareMap.get(Servo.class,"hand");
         DcMotor backRight=hardwareMap.get(DcMotor.class,"backRight");
         DcMotor backLeft=hardwareMap.get(DcMotor.class,"backLeft");
         DcMotor frontRight=hardwareMap.get(DcMotor.class,"frontRight");
@@ -66,11 +68,14 @@ public class FieldCentricBlue
         if (isStopRequested()) return;
         double distance = 100;
         while (opModeIsActive()) {
+
             double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
             double rx = gamepad1.right_stick_x;
             Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
             double botheading = angles.firstAngle;
+            double servo = gamepad1.right_trigger;
+            double servoclose = gamepad1.left_trigger;
 
             //Rotate the movement direction counter to the bot's rotation.
             double rotX= x * Math.cos(-botheading)+ y * Math.sin(-botheading);
