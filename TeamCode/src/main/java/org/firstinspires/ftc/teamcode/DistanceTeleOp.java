@@ -35,12 +35,14 @@ extends LinearOpMode {
         DcMotor frontLeft=hardwareMap.get(DcMotor.class,"frontLeft");
        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+      // backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+      // backRight.setDirection(DcMotorSimple.Direction.FORWARD);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         DistanceSensor sensor=hardwareMap.get(DistanceSensor.class,"distance");
-        ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "colorSensor");
+  //      ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "colorSensor");
 
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
 
@@ -51,42 +53,57 @@ extends LinearOpMode {
             telemetry.update();
             Thread.sleep(50);
         }
-        telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
-        telemetry.clear(); telemetry.update();
+        telemetry.log().clear();
+        telemetry.log().add("Gyro Calibrated. Press Start.");
+        telemetry.clear();
+        telemetry.update();
 
 
         waitForStart();
         telemetry.log().clear();
 
 
+
+
         if (isStopRequested()) return;
         double distance = 100;
-        while (opModeIsActive()); {
+        while (opModeIsActive()) {
             double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
             double rx = gamepad1.right_stick_x;
+            Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
+            double botheading = angles.firstAngle;
+
+            //Rotate the movement direction counter to the bot's rotation.
+            double rotX= x * Math.cos(-botheading)- y * Math.sin(-botheading);
+            double rotY= x * Math.sin(-botheading)+ y * Math.cos(-botheading);
+
+            rotX = rotX * 1.1;
 
             // Denominator is the largest motor power (absolute value) or 1
             // This ensures all the powers maintain the same ratio,
             // but only if at least one is out of the range [-1, 1]
-            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-            double frontLeftPower = (y + x + rx) / denominator;
-            double backLeftPower = (y - x + rx) / denominator;
-            double frontRightPower = (y - x - rx) / denominator;
-            double backRightPower = (y + x - rx) / denominator;
+            double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+            double frontLeftPower = (rotY + rotX + rx) / denominator;
+            double backLeftPower = (rotY - rotX + rx) / denominator;
+            double frontRightPower = (rotY - rotX - rx) / denominator;
+            double backRightPower = (rotY + rotX - rx) / denominator;
+
+
+
 
             frontLeft.setPower(frontLeftPower/2);
             backLeft.setPower(backLeftPower/2);
             frontRight.setPower(frontRightPower/2);
             backRight.setPower(backRightPower/2);
 
-            double color= ribbit.argb();
+           // double color= ribbit.argb();
             distance=sensor.getDistance(INCH);
             telemetry.addData("distance", distance);
-            telemetry.addData("color",color);
+          //  telemetry.addData("color",color);
 
             AngularVelocity rates = gyro.getAngularVelocity(AngleUnit.DEGREES);
-            Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+           // Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
             telemetry.addLine()
                     .addData("dx", formatRate(rates.xRotationRate))
