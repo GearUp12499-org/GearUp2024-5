@@ -5,12 +5,10 @@ import static org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.I
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -20,8 +18,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @TeleOp
-public class DistanceTeleOp
-extends LinearOpMode {
+public class FieldCentricBlue
+        extends LinearOpMode {
     IntegratingGyroscope gyro;
     NavxMicroNavigationSensor navxMicro;
     ElapsedTime timer = new ElapsedTime();
@@ -33,16 +31,16 @@ extends LinearOpMode {
         DcMotor backLeft=hardwareMap.get(DcMotor.class,"backLeft");
         DcMotor frontRight=hardwareMap.get(DcMotor.class,"frontRight");
         DcMotor frontLeft=hardwareMap.get(DcMotor.class,"frontLeft");
-       backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-       frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-      // backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-      // backRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+       //  backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        // backRight.setDirection(DcMotorSimple.Direction.FORWARD);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         DistanceSensor sensor=hardwareMap.get(DistanceSensor.class,"distance");
-  //      ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "colorSensor");
+        //      ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "colorSensor");
 
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
 
@@ -75,8 +73,8 @@ extends LinearOpMode {
             double botheading = angles.firstAngle;
 
             //Rotate the movement direction counter to the bot's rotation.
-            double rotX= x * Math.cos(-botheading)- y * Math.sin(-botheading);
-            double rotY= x * Math.sin(-botheading)+ y * Math.cos(-botheading);
+            double rotX= x * Math.cos(-botheading)+ y * Math.sin(-botheading);
+            double rotY= x * Math.sin(-botheading)- y * Math.cos(-botheading);
 
             rotX = rotX * 1.1;
 
@@ -97,13 +95,13 @@ extends LinearOpMode {
             frontRight.setPower(frontRightPower/2);
             backRight.setPower(backRightPower/2);
 
-           // double color= ribbit.argb();
+            // double color= ribbit.argb();
             distance=sensor.getDistance(INCH);
             telemetry.addData("distance", distance);
-          //  telemetry.addData("color",color);
+            //  telemetry.addData("color",color);
 
             AngularVelocity rates = gyro.getAngularVelocity(AngleUnit.DEGREES);
-           // Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            // Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
             telemetry.addLine()
                     .addData("dx", formatRate(rates.xRotationRate))
