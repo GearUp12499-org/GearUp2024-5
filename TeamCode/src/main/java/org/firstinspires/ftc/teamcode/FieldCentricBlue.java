@@ -26,6 +26,7 @@ public class FieldCentricBlue
     ElapsedTime timer = new ElapsedTime();
     @Override
     public void runOpMode() throws InterruptedException {
+        StraferHardware hardware=new StraferHardware(hardwareMap);
         navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "gyro");
         gyro = (IntegratingGyroscope)navxMicro;
        // Servo hand=hardwareMap.get(Servo.class,"hand");
