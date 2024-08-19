@@ -85,7 +85,7 @@ public class GyroTeleOp extends LinearOpMode {
         }
         telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
         telemetry.clear(); telemetry.update();
-
+        double target=45;
         // Wait for the start button to be pressed
         waitForStart();
         telemetry.log().clear();

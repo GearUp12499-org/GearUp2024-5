@@ -28,7 +28,7 @@ public class FieldCentricBlue
     public void runOpMode() throws InterruptedException {
         navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "gyro");
         gyro = (IntegratingGyroscope)navxMicro;
-        Servo hand=hardwareMap.get(Servo.class,"hand");
+       // Servo hand=hardwareMap.get(Servo.class,"hand");
         DcMotor backRight=hardwareMap.get(DcMotor.class,"backRight");
         DcMotor backLeft=hardwareMap.get(DcMotor.class,"backLeft");
         DcMotor frontRight=hardwareMap.get(DcMotor.class,"frontRight");
@@ -58,7 +58,6 @@ public class FieldCentricBlue
         telemetry.clear();
         telemetry.update();
 
-
         waitForStart();
         telemetry.log().clear();
 
@@ -78,8 +77,8 @@ public class FieldCentricBlue
             double servoclose = gamepad1.left_trigger;
 
             //Rotate the movement direction counter to the bot's rotation.
-            double rotX= x * Math.cos(-botheading)+ y * Math.sin(-botheading);
-            double rotY= x * Math.sin(-botheading)- y * Math.cos(-botheading);
+            double rotX = x * Math.cos(-botheading) + y * Math.sin(-botheading);
+            double rotY = x * Math.sin(-botheading) - y * Math.cos(-botheading);
 
             rotX = rotX * 1.1;
 
@@ -93,15 +92,13 @@ public class FieldCentricBlue
             double backRightPower = (rotY + rotX - rx) / denominator;
 
 
-
-
-            frontLeft.setPower(frontLeftPower/2);
-            backLeft.setPower(backLeftPower/2);
-            frontRight.setPower(frontRightPower/2);
-            backRight.setPower(backRightPower/2);
+            frontLeft.setPower(frontLeftPower / 2);
+            backLeft.setPower(backLeftPower / 2);
+            frontRight.setPower(frontRightPower / 2);
+            backRight.setPower(backRightPower / 2);
 
             // double color= ribbit.argb();
-            distance=sensor.getDistance(INCH);
+            distance = sensor.getDistance(INCH);
             telemetry.addData("distance", distance);
             //  telemetry.addData("color",color);
 
@@ -118,6 +115,7 @@ public class FieldCentricBlue
                     .addData("roll", formatAngle(angles.angleUnit, angles.secondAngle))
                     .addData("pitch", "%s deg", formatAngle(angles.angleUnit, angles.thirdAngle));
             telemetry.update();
+            turn(-90);
             idle();
 
         }
@@ -135,4 +133,36 @@ public class FieldCentricBlue
     String formatDegrees(double degrees){
         return String.format("%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    public void turn(double target){
+        DcMotor backRight=hardwareMap.get(DcMotor.class,"backRight");
+        DcMotor backLeft=hardwareMap.get(DcMotor.class,"backLeft");
+        DcMotor frontRight=hardwareMap.get(DcMotor.class,"frontRight");
+        DcMotor frontLeft=hardwareMap.get(DcMotor.class,"frontLeft");
+        double p=.005;
+        double power=0;
+        double error= 180;
+        while (error>0) {
+
+            frontLeft.setPower(power);
+            backLeft.setPower(power);
+            frontRight.setPower(-power);
+            backRight.setPower(-power);
+            Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+            error= angles.firstAngle-target;
+            power= error*(0.8/180)*p+0.2;
+            telemetry.addData("error",error);
+            telemetry.addData("heading",angles.firstAngle);
+            telemetry.addData("target",target);
+            telemetry.update();
+        }
+        frontLeft.setPower(0);
+        backLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
+
+
+    }
 }
+
