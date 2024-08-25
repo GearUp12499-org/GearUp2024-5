@@ -25,20 +25,11 @@ extends LinearOpMode {
     ElapsedTime timer = new ElapsedTime();
     @Override
     public void runOpMode() throws InterruptedException {
+        StraferHardware hardware=new StraferHardware(hardwareMap);
         navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "gyro");
         gyro = (IntegratingGyroscope)navxMicro;
-        DcMotor backRight=hardwareMap.get(DcMotor.class,"backRight");
-        DcMotor backLeft=hardwareMap.get(DcMotor.class,"backLeft");
-        DcMotor frontRight=hardwareMap.get(DcMotor.class,"frontRight");
-        DcMotor frontLeft=hardwareMap.get(DcMotor.class,"frontLeft");
-       backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-       frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
       // backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
       // backRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         DistanceSensor sensor=hardwareMap.get(DistanceSensor.class,"distance");
   //      ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "colorSensor");
 
@@ -71,6 +62,7 @@ extends LinearOpMode {
             double rx = gamepad1.right_stick_x;
             Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
             double botheading = angles.firstAngle;
+            
 
             //Rotate the movement direction counter to the bot's rotation.
             double rotX= x * Math.cos(-botheading)- y * Math.sin(-botheading);
@@ -90,10 +82,10 @@ extends LinearOpMode {
 
 
 
-            frontLeft.setPower(frontLeftPower/2);
-            backLeft.setPower(backLeftPower/2);
-            frontRight.setPower(frontRightPower/2);
-            backRight.setPower(backRightPower/2);
+            hardware.frontLeft.setPower(frontLeftPower/2);
+            hardware.backLeft.setPower(backLeftPower/2);
+            hardware.frontRight.setPower(frontRightPower/2);
+            hardware.backRight.setPower(backRightPower/2);
 
            // double color= ribbit.argb();
             distance=sensor.getDistance(INCH);

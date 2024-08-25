@@ -29,19 +29,14 @@ public class FieldCentricBlue
         StraferHardware hardware=new StraferHardware(hardwareMap);
         navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "gyro");
         gyro = (IntegratingGyroscope)navxMicro;
+
        // Servo hand=hardwareMap.get(Servo.class,"hand");
-        DcMotor backRight=hardwareMap.get(DcMotor.class,"backRight");
-        DcMotor backLeft=hardwareMap.get(DcMotor.class,"backLeft");
-        DcMotor frontRight=hardwareMap.get(DcMotor.class,"frontRight");
-        DcMotor frontLeft=hardwareMap.get(DcMotor.class,"frontLeft");
-        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        //DcMotor backRight=hardwareMap.get(DcMotor.class,"backRight");
+        //DcMotor backLeft=hardwareMap.get(DcMotor.class,"backLeft");
+        //DcMotor frontRight=hardwareMap.get(DcMotor.class,"frontRight");
+        //DcMotor frontLeft=hardwareMap.get(DcMotor.class,"frontLeft");
        //  backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         // backRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         DistanceSensor sensor=hardwareMap.get(DistanceSensor.class,"distance");
         //      ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "colorSensor");
 
@@ -93,10 +88,10 @@ public class FieldCentricBlue
             double backRightPower = (rotY + rotX - rx) / denominator;
 
 
-            frontLeft.setPower(frontLeftPower / 2);
-            backLeft.setPower(backLeftPower / 2);
-            frontRight.setPower(frontRightPower / 2);
-            backRight.setPower(backRightPower / 2);
+            hardware.frontLeft.setPower(frontLeftPower / 2);
+            hardware.backLeft.setPower(backLeftPower / 2);
+            hardware.frontRight.setPower(frontRightPower / 2);
+            hardware.backRight.setPower(backRightPower / 2);
 
             // double color= ribbit.argb();
             distance = sensor.getDistance(INCH);
@@ -116,7 +111,7 @@ public class FieldCentricBlue
                     .addData("roll", formatAngle(angles.angleUnit, angles.secondAngle))
                     .addData("pitch", "%s deg", formatAngle(angles.angleUnit, angles.thirdAngle));
             telemetry.update();
-            turn(-90);
+            turn(90);
             idle();
 
         }
@@ -135,35 +130,60 @@ public class FieldCentricBlue
         return String.format("%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
-    public void turn(double target){
-        DcMotor backRight=hardwareMap.get(DcMotor.class,"backRight");
-        DcMotor backLeft=hardwareMap.get(DcMotor.class,"backLeft");
-        DcMotor frontRight=hardwareMap.get(DcMotor.class,"frontRight");
-        DcMotor frontLeft=hardwareMap.get(DcMotor.class,"frontLeft");
-        double p=.005;
-        double power=0;
-        double error= 180;
-        while (error>0) {
+    public void turn(double target) {
+        StraferHardware hardware=new StraferHardware(hardwareMap);
+        //DcMotor backRight = hardwareMap.get(DcMotor.class, "backRight");
+        //DcMotor backLeft = hardwareMap.get(DcMotor.class, "backLeft");
+        //DcMotor frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+        //DcMotor frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
+        Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        double p = 0.7;
+        double power = 0;
+        double error = angles.firstAngle - target;
+        if (target < 0) {
+            while (error > 0) {
 
-            frontLeft.setPower(power);
-            backLeft.setPower(power);
-            frontRight.setPower(-power);
-            backRight.setPower(-power);
-            Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                hardware.frontLeft.setPower(power);
+                hardware.backLeft.setPower(power);
+                hardware.frontRight.setPower(-power);
+                hardware.backRight.setPower(-power);
 
-            error= angles.firstAngle-target;
-            power= error*(0.8/180)*p+0.2;
-            telemetry.addData("error",error);
-            telemetry.addData("heading",angles.firstAngle);
-            telemetry.addData("target",target);
-            telemetry.update();
+                angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                error = angles.firstAngle - target;
+                power = error * (0.013) * p + 0.2;
+
+                telemetry.addData("errorccw", error);
+                telemetry.addData("headingccw", angles.firstAngle);
+                telemetry.addData("targetccw", target);
+                telemetry.update();
+            }
         }
-        frontLeft.setPower(0);
-        backLeft.setPower(0);
-        frontRight.setPower(0);
-        backRight.setPower(0);
+            else{
+                while (error < 0) {
+
+                    hardware.frontLeft.setPower(-power);
+                    hardware.backLeft.setPower(-power);
+                    hardware.frontRight.setPower(power);
+                    hardware.backRight.setPower(power);
+
+                    angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                    error = angles.firstAngle - target;
+                    power = error * (-0.013) * p + 0.2;
+
+                    telemetry.addData("errorcw", error);
+                    telemetry.addData("headingcw", angles.firstAngle);
+                    telemetry.addData("targetcw", target);
+                    telemetry.update();
+
+                }
+                hardware.frontLeft.setPower(0);
+                hardware.backLeft.setPower(0);
+                hardware.frontRight.setPower(0);
+                hardware.backRight.setPower(0);
 
 
+            }
+        }
     }
-}
+
 
