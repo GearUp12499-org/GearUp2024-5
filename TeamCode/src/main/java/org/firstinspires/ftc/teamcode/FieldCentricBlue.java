@@ -62,7 +62,9 @@ public class FieldCentricBlue
 
         if (isStopRequested()) return;
         double distance = 100;
+        boolean haveTurned = false;
         while (opModeIsActive()) {
+
 
             double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
@@ -111,7 +113,10 @@ public class FieldCentricBlue
                     .addData("roll", formatAngle(angles.angleUnit, angles.secondAngle))
                     .addData("pitch", "%s deg", formatAngle(angles.angleUnit, angles.thirdAngle));
             telemetry.update();
-            turn(90);
+            if (!haveTurned) {
+                turn2(90);
+                haveTurned = true;
+            }
             idle();
 
         }
@@ -181,6 +186,29 @@ public class FieldCentricBlue
                 hardware.frontRight.setPower(0);
                 hardware.backRight.setPower(0);
 
+
+            }
+        }
+        public void turn2(double target) {
+            StraferHardware hardware = new StraferHardware(hardwareMap);
+            double allowedError = 5.0;
+            double maxPower = 0.3;
+            while (true) {
+
+               Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                double error = target - angles.firstAngle;
+                if (Math.abs(error)<allowedError) {
+                    hardware.frontLeft.setPower(0);
+                    hardware.backLeft.setPower(0);
+                    hardware.frontRight.setPower(0);
+                    hardware.backRight.setPower(0);
+                    return;
+                }
+                double power = error > 0 ? +maxPower:-maxPower;
+                hardware.frontLeft.setPower(-power);
+                hardware.backLeft.setPower(-power);
+                hardware.frontRight.setPower(power);
+                hardware.backRight.setPower(power);
 
             }
         }
