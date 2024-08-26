@@ -192,7 +192,10 @@ public class FieldCentricBlue
         public void turn2(double target) {
             StraferHardware hardware = new StraferHardware(hardwareMap);
             double allowedError = 5.0;
-            double maxPower = 0.3;
+            double maxPower = 1;
+            double minPower = 0.1;
+            double kp = 1.0/60.0;
+
             while (true) {
 
                Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
@@ -204,7 +207,14 @@ public class FieldCentricBlue
                     hardware.backRight.setPower(0);
                     return;
                 }
-                double power = error > 0 ? +maxPower:-maxPower;
+                double rampDown = kp * Math.abs(error);
+                double power = Math.min(maxPower,rampDown);
+                if (power<minPower) {
+                    power = minPower;
+                }
+                if (error <0.0){
+                    power = -power;
+                }
                 hardware.frontLeft.setPower(-power);
                 hardware.backLeft.setPower(-power);
                 hardware.frontRight.setPower(power);
