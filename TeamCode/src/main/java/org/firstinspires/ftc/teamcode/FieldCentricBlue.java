@@ -113,9 +113,12 @@ public class FieldCentricBlue
                     .addData("roll", formatAngle(angles.angleUnit, angles.secondAngle))
                     .addData("pitch", "%s deg", formatAngle(angles.angleUnit, angles.thirdAngle));
             telemetry.update();
-            if (!haveTurned) {
+            if (gamepad1.b) {
                 turn2(90);
-                haveTurned = true;
+
+            }
+            if(gamepad1.a) {
+                turn2(-90);
             }
             idle();
 
@@ -189,8 +192,10 @@ public class FieldCentricBlue
 
             }
         }
-        public void turn2(double target) {
+        public void turn2(double deltaAngle) {
             StraferHardware hardware = new StraferHardware(hardwareMap);
+            Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            double target = angles.firstAngle + deltaAngle;
             double allowedError = 5.0;
             double maxPower = 1;
             double minPower = 0.1;
@@ -198,8 +203,14 @@ public class FieldCentricBlue
 
             while (true) {
 
-               Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
                 double error = target - angles.firstAngle;
+                if (error>180){
+                    error -= 360;
+                }
+                if (error<-180){
+                    error+=360;
+                }
                 if (Math.abs(error)<allowedError) {
                     hardware.frontLeft.setPower(0);
                     hardware.backLeft.setPower(0);
