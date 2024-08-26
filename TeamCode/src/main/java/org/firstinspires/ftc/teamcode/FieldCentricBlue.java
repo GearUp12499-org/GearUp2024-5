@@ -193,6 +193,7 @@ public class FieldCentricBlue
             }
         }
         public void turn2(double deltaAngle) {
+            ElapsedTime timer = new ElapsedTime();
             StraferHardware hardware = new StraferHardware(hardwareMap);
             Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             double target = angles.firstAngle + deltaAngle;
@@ -200,8 +201,11 @@ public class FieldCentricBlue
             double maxPower = 1;
             double minPower = 0.1;
             double kp = 1.0/60.0;
+            double timeOutSeconds = 3;
 
-            while (true) {
+            while (timer.time()<timeOutSeconds) {
+            telemetry.addData("timer",timer.time());
+            telemetry.update();
 
                 angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
                 double error = target - angles.firstAngle;
