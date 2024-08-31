@@ -4,6 +4,7 @@ import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 
 import org.firstinspires.ftc.teamcode.hardware.HardwareMapper;
@@ -15,6 +16,11 @@ public class StraferHardware extends HardwareMapper {
     public StraferHardware(HardwareMap map) {
         super(map);
     }
+
+    @HardwareName("hand")
+   // Servo Servo;
+    public Servo hand;
+
 
     @ZeroPower(DcMotor.ZeroPowerBehavior.BRAKE)
     @HardwareName("backRight")
@@ -40,6 +46,6 @@ public class StraferHardware extends HardwareMapper {
     @HardwareName("gyro")
     public NavxMicroNavigationSensor gyro;
 
-    //public Servo hand;
+  //  public Servo hand;
 
 }

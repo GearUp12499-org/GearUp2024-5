@@ -40,7 +40,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  * INCREMENT sets how much to increase/decrease the servo position each cycle
  * CYCLE_MS sets the update period.
  *
- * This code assumes a Servo configured with the name "left_hand" as is found on a Robot.
+ * This code assumes a Servo configured with the name "hand" as is found on a Robot.
  *
  * NOTE: When any servo position is set, ALL attached servos are activated, so ensure that any other
  * connected servos are able to move freely before running this test.
@@ -48,7 +48,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-@TeleOp(name = "Concept: Scan Servo", group = "Concept")
+@TeleOp(name = "ServoTeleOp", group = "Concept")
 //@Disabled
 public class ServoTeleOp extends LinearOpMode {
 
@@ -68,7 +68,7 @@ public class ServoTeleOp extends LinearOpMode {
 
         // Connect to servo (Assume Robot Left Hand)
         // Change the text in quotes to match any servo name on your robot.
-        servo = hardwareMap.get(Servo.class, "left_hand");
+        servo = hardwareMap.get(Servo.class, "hand");
 
         // Wait for the start button
         telemetry.addData(">", "Press Start to scan Servo." );
@@ -79,8 +79,15 @@ public class ServoTeleOp extends LinearOpMode {
         // Scan servo till stop pressed.
         while(opModeIsActive()){
 
+            if (gamepad1.left_bumper){
+
+            }
+
+
+
+
             // slew the servo, according to the rampUp (direction) variable.
-            if (rampUp) {
+           /* if (rampUp) {
                 // Keep stepping up until we hit the max value.
                 position += INCREMENT ;
                 if (position >= MAX_POS ) {
@@ -96,7 +103,7 @@ public class ServoTeleOp extends LinearOpMode {
                     rampUp = !rampUp;  // Switch ramp direction
                 }
             }
-
+            */
             // Display the current value
             telemetry.addData("Servo Position", "%5.2f", position);
             telemetry.addData(">", "Press Stop to end test." );
