@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH;
 
+import android.media.MediaPlayer;
+
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -11,6 +13,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
+//servo impost did not come with the class. so just incase you make a new one please make sure to put import servo. thank you
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -48,6 +51,7 @@ public class FieldCentricBlue
         telemetry.log().add("Gyro Calibrated. Press Start.");
         telemetry.clear();
         telemetry.update();
+        //this makes it so that the servo automatically sets to position when the program is initialised. not started. this is because it comes before the waitForStart. thank you
         hardware.hand.setPosition(1.0);
 
         waitForStart();
@@ -61,15 +65,14 @@ public class FieldCentricBlue
         boolean haveTurned = false;
         while (opModeIsActive()) {
 
-
+            // this is the gamepad controls for the driving. good luck
             double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
             double rx = gamepad1.right_stick_x;
            // double MAX_POS = 1.0;
             Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
             double botheading = angles.firstAngle;
-          //  double servo = gamepad1.right_trigger;
-          //  double servoclose = gamepad1.left_trigger;
+
 
             //Rotate the movement direction counter to the bot's rotation.
             double rotX = x * Math.cos(-botheading) + y * Math.sin(-botheading);
@@ -114,7 +117,7 @@ public class FieldCentricBlue
             handservo(1.0);
 
             if(gamepad1.dpad_up){
-                straightline(0.3,20.0,0.0);
+                straightline(0.3,24.0,0.0);
             }
 
             if (gamepad1.b) {
@@ -142,6 +145,7 @@ public class FieldCentricBlue
         return String.format("%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
+
     public void turn(double target) {
         StraferHardware hardware=new StraferHardware(hardwareMap);
         //DcMotor backRight = hardwareMap.get(DcMotor.class, "backRight");
@@ -197,7 +201,9 @@ public class FieldCentricBlue
             }
         }
         ////////////////////////////////////////////////////////////////////////////////////
+
         public void turn2(double deltaAngle) {
+            //turn to an angle accurately.
             ElapsedTime timer = new ElapsedTime();
             StraferHardware hardware = new StraferHardware(hardwareMap);
             Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
@@ -244,6 +250,7 @@ public class FieldCentricBlue
         }
         /////////////////////////////////////////////////////////////////////////////////
         public void handservo(double deltaAngle) {
+        //hand teleop controls :}
             StraferHardware hardware = new StraferHardware(hardwareMap);
 
             if (gamepad1.left_bumper) {
@@ -254,7 +261,8 @@ public class FieldCentricBlue
              }
         }
         //////////////////////////////////////////////////////////////////////////////////
-        public  void straightline(double power,double time, double heading){
+        public  void straightline(double power,double distance, double heading){
+        //drives in a straight line from robots current orientation
             ElapsedTime timer = new ElapsedTime();
             StraferHardware hardware = new StraferHardware(hardwareMap);
             Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
@@ -265,12 +273,16 @@ public class FieldCentricBlue
             double currentHeading = 0;
             double delta = 0;
 
-                while (timer.time()<time) {
+            //537.7 is the count per rotation of the gobilda planetary motor.
+            //https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-19-2-1-ratio-24mm-length-8mm-rex-shaft-312-rpm-3-3-5v-encoder/?srsltid=AfmBOop1YfJqiOXEErvydFNjwvWoea8tDZOZ1Pz4a9llh_pNC8bSNKKy
+            double distancePerTicks = 4*3.14/537.7;
+            int current = hardware.frontLeft.getCurrentPosition();
+                while (current<distance/distancePerTicks) {
                     angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
                     currentHeading = angles.firstAngle;
                     error = currentHeading - target;
                     delta = error * kp;
-
+                    current = hardware.frontLeft.getCurrentPosition();
 
                     hardware.frontLeft.setPower(power + delta);
                     hardware.backLeft.setPower(power + delta);
@@ -280,6 +292,8 @@ public class FieldCentricBlue
                     telemetry.addData("timer", timer.time());
                     telemetry.addData("headingcw", angles.firstAngle);
                     telemetry.addData("error", error);
+                    telemetry.addData("distance", distancePerTicks);
+                    telemetry.addData("current position", current);
                     telemetry.update();
                 }
             hardware.frontRight.setPower(0.0);
@@ -289,6 +303,7 @@ public class FieldCentricBlue
 
 
         }
+
     }
 
 

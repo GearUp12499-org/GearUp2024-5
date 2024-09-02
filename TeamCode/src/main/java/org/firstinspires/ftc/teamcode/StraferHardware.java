@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 
+import org.firstinspires.ftc.teamcode.hardware.AutoClearEncoder;
 import org.firstinspires.ftc.teamcode.hardware.HardwareMapper;
 import org.firstinspires.ftc.teamcode.hardware.HardwareName;
 import org.firstinspires.ftc.teamcode.hardware.Reversed;
@@ -20,21 +21,24 @@ public class StraferHardware extends HardwareMapper {
     @HardwareName("hand")
     public Servo hand;
 
-
-    @ZeroPower(DcMotor.ZeroPowerBehavior.BRAKE)
     @HardwareName("backRight")
+    @AutoClearEncoder
+    @ZeroPower(DcMotor.ZeroPowerBehavior.BRAKE)
     public DcMotor backRight;
 
     @HardwareName("backLeft")
+    @AutoClearEncoder
     @ZeroPower(DcMotor.ZeroPowerBehavior.BRAKE)
     @Reversed
     public DcMotor backLeft;
 
     @HardwareName("frontRight")
+    @AutoClearEncoder
     @ZeroPower(DcMotor.ZeroPowerBehavior.BRAKE)
     public DcMotor frontRight;
 
     @HardwareName("frontLeft")
+    @AutoClearEncoder
     @ZeroPower(DcMotor.ZeroPowerBehavior.BRAKE)
     @Reversed
     public DcMotor frontLeft;
