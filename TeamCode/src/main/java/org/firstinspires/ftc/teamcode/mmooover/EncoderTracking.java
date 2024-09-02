@@ -66,6 +66,13 @@ public class EncoderTracking {
         lastCenter = currentCenter;
         lastRight = currentRight;
     }
+
+    public void clear() {
+        x = 0;
+        y = 0;
+        heading = 0;
+    }
+
 // Gets current pose
     public Pose getPose() {
         return new Pose(
