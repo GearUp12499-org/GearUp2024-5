@@ -110,6 +110,13 @@ public class FieldCentricBlue
                     .addData("roll", formatAngle(angles.angleUnit, angles.secondAngle))
                     .addData("pitch", "%s deg", formatAngle(angles.angleUnit, angles.thirdAngle));
             telemetry.update();
+
+            handservo(1.0);
+
+            if(gamepad1.dpad_up){
+                straightline(0.3,20.0,0.0);
+            }
+
             if (gamepad1.b) {
                 turn2(90);
 
@@ -163,32 +170,33 @@ public class FieldCentricBlue
                 telemetry.update();
             }
         }
-            else{
-                while (error < 0) {
+            else {
+            while (error < 0) {
 
-                    hardware.frontLeft.setPower(-power);
-                    hardware.backLeft.setPower(-power);
-                    hardware.frontRight.setPower(power);
-                    hardware.backRight.setPower(power);
+                hardware.frontLeft.setPower(-power);
+                hardware.backLeft.setPower(-power);
+                hardware.frontRight.setPower(power);
+                hardware.backRight.setPower(power);
 
-                    angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                    error = angles.firstAngle - target;
-                    power = error * (-0.013) * p + 0.2;
+                angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                error = angles.firstAngle - target;
+                power = error * (-0.013) * p + 0.2;
 
-                    telemetry.addData("errorcw", error);
-                    telemetry.addData("headingcw", angles.firstAngle);
-                    telemetry.addData("targetcw", target);
-                    telemetry.update();
+                telemetry.addData("errorcw", error);
+                telemetry.addData("headingcw", angles.firstAngle);
+                telemetry.addData("targetcw", target);
+                telemetry.update();
 
-                }
-                hardware.frontLeft.setPower(0);
-                hardware.backLeft.setPower(0);
-                hardware.frontRight.setPower(0);
-                hardware.backRight.setPower(0);
+            }
+            hardware.frontLeft.setPower(0);
+            hardware.backLeft.setPower(0);
+            hardware.frontRight.setPower(0);
+            hardware.backRight.setPower(0);
 
 
             }
         }
+        ////////////////////////////////////////////////////////////////////////////////////
         public void turn2(double deltaAngle) {
             ElapsedTime timer = new ElapsedTime();
             StraferHardware hardware = new StraferHardware(hardwareMap);
@@ -234,6 +242,54 @@ public class FieldCentricBlue
 
             }
         }
+        /////////////////////////////////////////////////////////////////////////////////
+        public void handservo(double deltaAngle) {
+            StraferHardware hardware = new StraferHardware(hardwareMap);
+
+            if (gamepad1.left_bumper) {
+                hardware.hand.setPosition(0.0);
+            }
+             if (gamepad1.right_bumper){
+                hardware.hand.setPosition(1.0);
+             }
+        }
+        //////////////////////////////////////////////////////////////////////////////////
+        public  void straightline(double power,double time, double heading){
+            ElapsedTime timer = new ElapsedTime();
+            StraferHardware hardware = new StraferHardware(hardwareMap);
+            Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            double target = angles.firstAngle;
+            double kp = 0.9/45;
+            double p = 0.7;
+            double error = angles.firstAngle - target;
+            double currentHeading = 0;
+            double delta = 0;
+
+                while (timer.time()<time) {
+                    angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                    currentHeading = angles.firstAngle;
+                    error = currentHeading - target;
+                    delta = error * kp;
+
+
+                    hardware.frontLeft.setPower(power + delta);
+                    hardware.backLeft.setPower(power + delta);
+                    hardware.frontRight.setPower(power - delta);
+                    hardware.backRight.setPower(power - delta);
+
+                    telemetry.addData("timer", timer.time());
+                    telemetry.addData("headingcw", angles.firstAngle);
+                    telemetry.addData("error", error);
+                    telemetry.update();
+                }
+            hardware.frontRight.setPower(0.0);
+             hardware.frontLeft.setPower(0.0);
+             hardware.backRight.setPower(0.0);
+              hardware.backLeft.setPower(0.0);
+
+
+        }
     }
+
 
 

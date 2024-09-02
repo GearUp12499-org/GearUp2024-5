@@ -18,7 +18,6 @@ public class StraferHardware extends HardwareMapper {
     }
 
     @HardwareName("hand")
-   // Servo Servo;
     public Servo hand;
 
 
@@ -45,6 +44,7 @@ public class StraferHardware extends HardwareMapper {
 
     @HardwareName("gyro")
     public NavxMicroNavigationSensor gyro;
+
 
   //  public Servo hand;
 
