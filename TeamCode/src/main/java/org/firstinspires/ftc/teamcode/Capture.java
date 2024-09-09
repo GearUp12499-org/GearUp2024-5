@@ -65,6 +65,7 @@ public class Capture extends LinearOpMode {
         VisionPortal portal = new VisionPortal.Builder()
                 .setCamera(hw.webcam)
                 .setCameraResolution(new Size(1920, 1080))
+                .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
                 .addProcessor(proc)
                 .build();
 

@@ -7,8 +7,6 @@ import org.firstinspires.ftc.teamcode.hardware.HardwareMapper;
 import org.firstinspires.ftc.teamcode.hardware.HardwareName;
 
 public class CameraHardware extends HardwareMapper {
-
-
     @HardwareName("Webcam 1")
     public WebcamName webcam;
     public CameraHardware(HardwareMap map) {
