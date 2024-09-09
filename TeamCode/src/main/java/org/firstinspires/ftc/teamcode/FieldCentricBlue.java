@@ -111,8 +111,7 @@ public class FieldCentricBlue
                     .addData("roll", formatAngle(angles.angleUnit, angles.secondAngle))
                     .addData("pitch", "%s deg", formatAngle(angles.angleUnit, angles.thirdAngle));
             telemetry.update();
-            //turnAbsolute(90);
-            turnRelative(-90);
+            turn(90);
             idle();
 
         }
@@ -131,8 +130,12 @@ public class FieldCentricBlue
         return String.format("%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
-    public void turnAbsolute(double target) {
+    public void turn(double target) {
         StraferHardware hardware=new StraferHardware(hardwareMap);
+        //DcMotor backRight = hardwareMap.get(DcMotor.class, "backRight");
+        //DcMotor backLeft = hardwareMap.get(DcMotor.class, "backLeft");
+        //DcMotor frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+        //DcMotor frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
         Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double p = 0.7;
         double power = 0;
@@ -181,35 +184,6 @@ public class FieldCentricBlue
 
             }
         }
-        //////////////////////////////////////////////////////////////////////////
-    public void turnRelative(double Relativetarget){
-        StraferHardware hardware=new StraferHardware(hardwareMap);
-        Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        double p = 0.5;
-        double power = 0;
-        double start = angles.firstAngle;
-        double absoluteTarget = start + Relativetarget;
-        double error = angles.firstAngle - absoluteTarget;
-
-        if (Relativetarget < 0){
-            while (error > 0) {
-
-                hardware.frontLeft.setPower(power);
-                hardware.backLeft.setPower(power);
-                hardware.frontRight.setPower(-power);
-                hardware.backRight.setPower(-power);
-
-                angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                error = angles.firstAngle - absoluteTarget;
-                power = error * (0.013) * p + 0.2;
-
-                telemetry.addData("errorccw", error);
-                telemetry.addData("headingccw", angles.firstAngle);
-                telemetry.addData("targetccw", absoluteTarget);
-                telemetry.update();
-            }
-
-        }
-
     }
-}
+
+
