@@ -53,35 +53,104 @@ class UARTBridgeI2CDevice(deviceClient: I2cDeviceSynch, deviceClientIsOwned: Boo
         FCR(0x02),
 
         /**
-         * Line Control Register (read)
+         * Line Control Register (read/write)
          */
         LCR(0x03),
 
         /**
-         * Modem Control Register (read)
+         * Modem Control Register (read/write)
          */
         MCR(0x04),
+
+        /**
+         * Line Status Register (read)
+         */
         LSR(0x05),
+
+        /**
+         * Modem Status Register (read)
+         */
         MSR(0x06),
+
+        /**
+         * Scratchpad Register (read/write)
+         */
         SPR(0x07),
+
+        /**
+         * Transmission Control Register (read/write)
+         */
         TCR(0x06),
+
+        /**
+         * Trigger Level Register (read/write)
+         */
         TLR(0x07),
+
+        /**
+         * Transmit FIFO Level Register (read)
+         */
         TXLVL(0x08),
+
+        /**
+         * Receive FIFO Level Register (read)
+         */
         RXLVL(0x09),
+
+        /**
+         * I/O pin Direction Register (read/write)
+         */
         IODir(0x0a),
+
+        /**
+         * I/O pin States Register (read)
+         */
         IOState(0x0b),
+
+        /**
+         * I/O Interrupt Enable Register (read/write)
+         */
         IOIntEna(0x0c),
         RESERVED1(0x0d),
+
+        /**
+         * I/O pins Control Register (read/write)
+         */
         IOControl(0x0e),
+
+        /**
+         * Extra Features Register (read/write)
+         */
         EFCR(0x0f),
 
+        /**
+         * Divisor latch LSB (read/write)
+         */
         DLL(0x00),
+        /**
+         * Divisor latch MSB (read/write)
+         */
         DLH(0x01),
 
+        /**
+         * Enhanced Feature Register (read/write)
+         */
         EFR(0x02),
+        /**
+         * Xon1 word (read/write)
+         */
         XON1(0x04),
+        /**
+         * Xon2 word (read/write)
+         */
         XON2(0x05),
+        /**
+         * Xoff1 word (read/write)
+         */
         XOFF1(0x06),
+        /**
+         * Xoff2 word (read/write)
+         */
         XOFF2(0x07)
     }
 
