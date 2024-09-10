@@ -242,7 +242,6 @@ class UARTBridgeI2CDevice(deviceClient: I2cDeviceSynch, deviceClientIsOwned: Boo
 
     @Synchronized
     override fun doInitialize(): Boolean {
-
         TODO()
     }
 }
