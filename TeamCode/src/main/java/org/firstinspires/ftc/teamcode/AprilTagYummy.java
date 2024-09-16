@@ -152,7 +152,7 @@ public class AprilTagYummy extends LinearOpMode {
                 //.setDrawAxes(false)
                 //.setDrawCubeProjection(false)
                 //.setDrawTagOutline(true)
-                //.setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
+                //.setTagFamily(AprilTagProcesosesor.TagFamily.TAG_36h11)
                 //.setTagLibrary(AprilTagGameDatabase.getCenterStageTagLibrary())
                 //.setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
                 .setCameraPose(cameraPosition, cameraOrientation)
@@ -241,4 +241,4 @@ public class AprilTagYummy extends LinearOpMode {
 
     }   // end method telemetryAprilTag()
 
-}   // end class
+}   // end class.

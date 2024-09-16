@@ -59,3 +59,4 @@ public class StraferHardware extends HardwareMapper {
   //  public Servo hand;
 
 }
+//end class.
