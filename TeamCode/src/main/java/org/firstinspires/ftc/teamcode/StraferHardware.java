@@ -4,6 +4,7 @@ import android.graphics.Camera;
 
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -56,6 +57,8 @@ public class StraferHardware extends HardwareMapper {
     @HardwareName("Webcam 1")
     public CameraName Webcam1;
 
+    @HardwareName("ribbit")
+    public ColorSensor ribbit;
   //  public Servo hand;
 
 }
