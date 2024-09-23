@@ -18,6 +18,14 @@ import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 //servo impost did not come with the class. so just incase you make a new one please make sure to put import servo. thank you
 import com.qualcomm.robotcore.util.ElapsedTime;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
@@ -25,15 +33,25 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
+import java.util.List;
+
 @TeleOp
 public class FieldCentricBlue
         extends LinearOpMode {
+    private static final boolean USE_WEBCAM = true;
+    private Position cameraPosition = new Position(DistanceUnit.INCH,
+            5, 7, 0, 0);
+    private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES,
+            0, -90, 0, 0);
+    private AprilTagProcessor aprilTag;
+    private VisionPortal visionPortal;
     IntegratingGyroscope gyro;
     NavxMicroNavigationSensor navxMicro;
     ElapsedTime timer = new ElapsedTime();
 
     @Override
     public void runOpMode() throws InterruptedException {
+        initAprilTag();
         StraferHardware hardware = new StraferHardware(hardwareMap);
         navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "gyro");
         gyro = (IntegratingGyroscope) navxMicro;
@@ -66,6 +84,8 @@ public class FieldCentricBlue
         double distance = 100;
         boolean haveTurned = false;
         while (opModeIsActive()) {
+            telemetryAprilTag();
+            telemetry.update();
 
             // this is the gamepad controls for the driving. good luck
             double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
@@ -99,13 +119,13 @@ public class FieldCentricBlue
 
             // double color= ribbit.argb();
             distance = sensor.getDistance(INCH);
-            telemetry.addData("distance", distance);
+           // telemetry.addData("distance", distance);
             //  telemetry.addData("color",color);
 
             AngularVelocity rates = gyro.getAngularVelocity(AngleUnit.DEGREES);
             // Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
-            telemetry.addLine()
+         /*   telemetry.addLine()
                     .addData("dx", formatRate(rates.xRotationRate))
                     .addData("dy", formatRate(rates.yRotationRate))
                     .addData("dz", "%s deg/s", formatRate(rates.zRotationRate));
@@ -115,7 +135,7 @@ public class FieldCentricBlue
                     .addData("roll", formatAngle(angles.angleUnit, angles.secondAngle))
                     .addData("pitch", "%s deg", formatAngle(angles.angleUnit, angles.thirdAngle));
             telemetry.update();
-
+*/
             handservo(1.0);
 
             if (gamepad1.dpad_up) {
@@ -129,11 +149,59 @@ public class FieldCentricBlue
             if (gamepad1.a) {
                 turn2(-90);
             }
-            Rumble();
+            //Rumble();
 
             idle();
 
         }
+
+    }
+    private void initAprilTag() {
+
+        // Create the AprilTag processor.
+        aprilTag = new AprilTagProcessor.Builder()
+                .setCameraPose(cameraPosition, cameraOrientation)
+                .build();
+
+        VisionPortal.Builder builder = new VisionPortal.Builder();
+
+        // Set the camera (webcam vs. built-in RC phone camera).
+        if (USE_WEBCAM) {
+            builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
+        } else {
+            builder.setCamera(BuiltinCameraDirection.BACK);
+        }
+
+        builder.addProcessor(aprilTag);
+        visionPortal = builder.build();
+
+    }
+    private void telemetryAprilTag() {
+
+        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+        telemetry.addData("# AprilTags Detected", currentDetections.size());
+
+        // Step through the list of detections and display info for each one.
+        for (AprilTagDetection detection : currentDetections) {
+            if (detection.metadata != null) {
+                telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
+                telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)",
+                        detection.robotPose.getPosition().x,
+                        detection.robotPose.getPosition().y,
+                        detection.robotPose.getPosition().z));
+                telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)",
+                        detection.robotPose.getOrientation().getPitch(AngleUnit.DEGREES),
+                        detection.robotPose.getOrientation().getRoll(AngleUnit.DEGREES),
+                        detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)));
+            } else {
+                telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
+                telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
+            }
+        }   // end for() loop
+
+        // Add "key" information to telemetry
+        telemetry.addLine("\nkey:\nXYZ = X (Right), Y (Forward), Z (Up) dist.");
+        telemetry.addLine("PRY = Pitch, Roll & Yaw (XYZ Rotation)");
 
     }
 
@@ -311,7 +379,7 @@ public class FieldCentricBlue
 
     }
 
-    public void Rumble() {
+  /*  public void Rumble() {
         StraferHardware hardware = new StraferHardware(hardwareMap);
         ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "colorSensor");
         double red = ribbit.red();
@@ -328,7 +396,7 @@ public class FieldCentricBlue
 
 
     }
-
+*/
 }
 
 
