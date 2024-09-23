@@ -58,7 +58,7 @@ public class StraferHardware extends HardwareMapper {
     public CameraName Webcam1;
 
     @HardwareName("ribbit")
-    public ColorSensor ribbit;
+    public ColorSensor colorSensor;
   //  public Servo hand;
 
 }
