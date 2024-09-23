@@ -57,12 +57,12 @@ public class ColorSensorTeleOp
             double blue = ribbit.blue();
             double green = ribbit.green();
 
-            //if (green - blue > 100 && green - red > 100) { telemetry.addLine("green");}
-            //if (red - blue > 100 && red - green > 100) { telemetry.addLine("red");}
+            if (blue - green > 100 && blue - red > 100) { telemetry.addLine("blue");}
+            if (red - blue > 100 && red - green > 100) { telemetry.addLine("red");}
             //if (blue - green > 100 && blue - red > 100)
-            if (blue + green + red > 2700) {telemetry.addLine("white");}
-            if (blue + red >= 1100 && red < 450) {telemetry.addLine("purple");}
-            if (green - blue > 100 && green - red > 100 && red < 350) {telemetry.addLine("green");}
+            //if (blue + green + red > 2700) {telemetry.addLine("white");}
+            //if (blue + red >= 1100 && red < 450) {telemetry.addLine("purple");}
+            //if (green - blue > 100 && green - red > 100 && red < 350) {telemetry.addLine("green");}
             if (green - blue > 100 && green - red > 100 && red >= 350) { telemetry.addLine("yellow");
 
                 }
