@@ -17,6 +17,8 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+
 import com.qualcomm.robotcore.hardware.Servo;
 //servo impost did not come with the class. so just incase you make a new one please make sure to put import servo. thank you
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -57,10 +59,12 @@ public class FieldCentricBlue
     @Override
     public void runOpMode() throws InterruptedException {
         initAprilTag();
+
         StraferHardware hardware = new StraferHardware(hardwareMap);
         navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "gyro");
         gyro = (IntegratingGyroscope) navxMicro;
 
+        RevBlinkinLedDriver lights = hardwareMap.get(RevBlinkinLedDriver.class,"lights");
 
         DistanceSensor sensor = hardwareMap.get(DistanceSensor.class, "distance");
         //      ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "colorSensor");
@@ -82,8 +86,10 @@ public class FieldCentricBlue
 
         waitForStart();
         telemetry.log().clear();
-
-
+        if(gamepad2.a)
+            lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+        if(gamepad2.b)
+            lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
         if (isStopRequested()) return;
         double distance = 100;
         boolean haveTurned = false;
@@ -121,7 +127,7 @@ public class FieldCentricBlue
             hardware.frontRight.setPower(frontRightPower / 2);
             hardware.backRight.setPower(backRightPower / 2);
 
-            // double color= ribbit.argb();
+            double color= 15;
             distance = sensor.getDistance(INCH);
            // telemetry.addData("distance", distance);
             //  telemetry.addData("color",color);
@@ -155,6 +161,9 @@ public class FieldCentricBlue
             }
             if (gamepad1.dpad_down) {
                 crservo(90);
+            }
+            if (gamepad2.x){
+                blinkin(1);
             }
             //Rumble();
             //gamepad controls here.
@@ -293,6 +302,7 @@ public class FieldCentricBlue
         con_servo=hardwareMap.crservo.get("intakeServo");
         waitForStart();
         while (opModeIsActive()){
+
             if (gamepad1.dpad_left){
                 con_servo.setPower(1);
             }
@@ -429,7 +439,16 @@ public class FieldCentricBlue
 
 
     }
+ ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void blinkin (double color){
+        StraferHardware hardware = new StraferHardware(hardwareMap);
+        RevBlinkinLedDriver lights = hardwareMap.get(RevBlinkinLedDriver.class,"lights");
+        if(gamepad2.a)
+            lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+        if(gamepad2.b)
+            lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
 
+    }
 }
 
 
