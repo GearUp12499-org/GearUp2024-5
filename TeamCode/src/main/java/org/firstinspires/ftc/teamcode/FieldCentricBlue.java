@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import static org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH;
 
 import android.media.MediaPlayer;
+import android.util.Size;
 
 //import androidx.room.parser.expansion.Position;
 
@@ -52,7 +53,7 @@ public class FieldCentricBlue
     IntegratingGyroscope gyro;
     NavxMicroNavigationSensor navxMicro;
     ElapsedTime timer = new ElapsedTime();
-
+// this is code is code you know what code it is i like coding yippee code epic epic epic epic for robot straferbot coiding code
     @Override
     public void runOpMode() throws InterruptedException {
         initAprilTag();
@@ -91,7 +92,7 @@ public class FieldCentricBlue
             telemetry.update();
 
             // this is the gamepad controls for the driving. good luck
-            double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
+            double y = gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
             double rx = gamepad1.right_stick_x;
             // double MAX_POS = 1.0;
@@ -167,9 +168,14 @@ public class FieldCentricBlue
         // Create the AprilTag processor.
         aprilTag = new AprilTagProcessor.Builder()
                 .setCameraPose(cameraPosition, cameraOrientation)
+                .setLensIntrinsics(403.13009118522405, 403.5656686207128, 607.1138266591205, 349.2411860514311)
                 .build();
 
         VisionPortal.Builder builder = new VisionPortal.Builder();
+
+
+
+
 
         // Set the camera (webcam vs. built-in RC phone camera).
         if (USE_WEBCAM) {
@@ -177,6 +183,11 @@ public class FieldCentricBlue
         } else {
             builder.setCamera(BuiltinCameraDirection.BACK);
         }
+
+        builder.enableLiveView(true);
+        // Set the stream format; MJPEG uses less bandwidth than default YUY2.
+        builder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
+        builder.setCameraResolution(new Size(1280, 720));
 
         builder.addProcessor(aprilTag);
         visionPortal = builder.build();
