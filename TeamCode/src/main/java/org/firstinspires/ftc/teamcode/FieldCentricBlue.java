@@ -168,7 +168,7 @@ public class FieldCentricBlue
         // Create the AprilTag processor.
         aprilTag = new AprilTagProcessor.Builder()
                 .setCameraPose(cameraPosition, cameraOrientation)
-                .setLensIntrinsics(403.13009118522405, 403.5656686207128, 607.1138266591205, 349.2411860514311)
+                .setLensIntrinsics(398.594738, 399.15892412, 607.828341529, 350.16356284)
                 .build();
 
         VisionPortal.Builder builder = new VisionPortal.Builder();
