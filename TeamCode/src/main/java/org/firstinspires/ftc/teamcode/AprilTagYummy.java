@@ -131,12 +131,12 @@ public class AprilTagYummy extends LinearOpMode {
                 visionPortal.resumeStreaming();
             }
 
+            // Share the CPU.
+            sleep(20);
+        }
+
         // Save more CPU resources when camera is no longer needed.
         visionPortal.close();
-
-        // Share the CPU.
-        sleep(20);
-    }
 
     }   // end method runOpMode()
 
@@ -160,7 +160,7 @@ public class AprilTagYummy extends LinearOpMode {
                 // == CAMERA CALIBRATION ==
                 // If you do not manually specify calibration parameters, the SDK will attempt
                 // to load a predefined calibration for your camera.
-                .setLensIntrinsics(403.13, 403.56, 607.11, 349.24)
+                //.setLensIntrinsics(578.272, 578.272, 402.145, 221.506)
                 // ... these parameters are fx, fy, cx, cy.
 
                 .build();
@@ -184,21 +184,22 @@ public class AprilTagYummy extends LinearOpMode {
             builder.setCamera(BuiltinCameraDirection.BACK);
         }
 
-        /*
-         Choose a camera resolution. Not all cameras support all resolutions.
-        builder.setCameraResolution(new Size(640, 480));
-         Enable the RC preview (LiveView).  Set "false" to omit camera monitoring.
-        builder.enableLiveView(true);
-         Set the stream format; MJPEG uses less bandwidth than default YUY2.
-        builder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
-         Choose whether or not LiveView stops if no processors are enabled.
-         If set "true", monitor shows solid orange screen if no processors enabled.
-         If set "false", monitor shows camera view without annotations.
-        builder.setAutoStopLiveView(false);
-         Set and enable the processor.
-        */
+        // Choose a camera resolution. Not all cameras support all resolutions.
+        //builder.setCameraResolution(new Size(640, 480));
 
-         builder.addProcessor(aprilTag);
+        // Enable the RC preview (LiveView).  Set "false" to omit camera monitoring.
+        //builder.enableLiveView(true);
+
+        // Set the stream format; MJPEG uses less bandwidth than default YUY2.
+        //builder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
+
+        // Choose whether or not LiveView stops if no processors are enabled.
+        // If set "true", monitor shows solid orange screen if no processors enabled.
+        // If set "false", monitor shows camera view without annotations.
+        //builder.setAutoStopLiveView(false);
+
+        // Set and enable the processor.
+        builder.addProcessor(aprilTag);
 
         // Build the Vision Portal, using the above settings.
         visionPortal = builder.build();

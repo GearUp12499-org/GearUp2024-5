@@ -26,7 +26,7 @@ public class ColorSensorTeleOp
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         DistanceSensor sensor = hardwareMap.get(DistanceSensor.class, "distance");
-        ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "colorSensor");
+        ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "ribbit");
 
 
         waitForStart();
@@ -57,27 +57,50 @@ public class ColorSensorTeleOp
             double blue = ribbit.blue();
             double green = ribbit.green();
 
-            if (blue - green > 100 && blue - red > 100) { telemetry.addLine("blue");}
-            if (red - blue > 100 && red - green > 100) { telemetry.addLine("red");}
+            if (blue - green > 100 && blue - red > 100) {
+                telemetry.addLine("blue");
+            }
+            if (red - blue > 100 && red - green > 100) {
+                telemetry.addLine("red");
+            }
             //if (blue - green > 100 && blue - red > 100)
             //if (blue + green + red > 2700) {telemetry.addLine("white");}
             //if (blue + red >= 1100 && red < 450) {telemetry.addLine("purple");}
             //if (green - blue > 100 && green - red > 100 && red < 350) {telemetry.addLine("green");}
-            if (green - blue > 100 && green - red > 100 && red >= 350) { telemetry.addLine("yellow");
-
-                }
-
-                telemetry.addData("amount green", green);
-                telemetry.addData("amount red", red);
-                telemetry.addData("amount blue", blue);
-                telemetry.update();
+            if (green - blue > 100 && green - red > 100 && red >= 350) {
+                telemetry.addLine("yellow");
 
             }
-            frontLeft.setPower(0);
-            backLeft.setPower(0);
-            frontRight.setPower(0);
-            backRight.setPower(0);
+
+            telemetry.addData("amount green", green);
+            telemetry.addData("amount red", red);
+            telemetry.addData("amount blue", blue);
+            telemetry.update();
+
         }
+        frontLeft.setPower(0);
+        backLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
     }
+
+    public void Rumble() {
+        StraferHardware hardware = new StraferHardware(hardwareMap);
+        ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "colorSensor");
+        double red = ribbit.red();
+        double blue = ribbit.blue();
+        double green = ribbit.green();
+        boolean yellow = (green - blue > 200 && green - red > 300 && red >= 350);
+
+
+        if (yellow) {
+            gamepad1.rumble(1000);
+        } else {
+            gamepad1.rumbleBlips(1);
+        }
+
+    }
+}
+
 
 //end class.

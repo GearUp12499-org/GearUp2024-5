@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 //servo impost did not come with the class. so just incase you make a new one please make sure to put import servo. thank you
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -26,6 +27,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
@@ -43,8 +45,10 @@ public class FieldCentricBlue
             5, 7, 0, 0);
     private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES,
             0, -90, 0, 0);
+    //this is all copy-pasted from AprilTagYummy
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
+    private CRServo con_servo;
     IntegratingGyroscope gyro;
     NavxMicroNavigationSensor navxMicro;
     ElapsedTime timer = new ElapsedTime();
@@ -59,7 +63,6 @@ public class FieldCentricBlue
 
         DistanceSensor sensor = hardwareMap.get(DistanceSensor.class, "distance");
         //      ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "colorSensor");
-
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
 
         // Wait until the gyro calibration is complete
@@ -149,8 +152,11 @@ public class FieldCentricBlue
             if (gamepad1.a) {
                 turn2(-90);
             }
+            if (gamepad1.dpad_down) {
+                crservo(90);
+            }
             //Rumble();
-
+            //gamepad controls here.
             idle();
 
         }
@@ -272,7 +278,23 @@ public class FieldCentricBlue
         }
     }
     ////////////////////////////////////////////////////////////////////////////////////
-
+    public void crservo(double deltaAngle){
+        con_servo=hardwareMap.crservo.get("intakeServo");
+        waitForStart();
+        while (opModeIsActive()){
+            if (gamepad1.dpad_left){
+                con_servo.setPower(1);
+            }
+            if (gamepad1.dpad_right){
+                con_servo.setPower(-1);
+            }
+            if (gamepad1.atRest()){
+                con_servo.setPower(0);
+            }
+            telemetry.update();
+        }
+    }
+//////////////////////////////////////////////////////////////////////////////////////////
     public void turn2(double deltaAngle) {
         //turn to an angle accurately.
         ElapsedTime timer = new ElapsedTime();
@@ -378,8 +400,8 @@ public class FieldCentricBlue
 
 
     }
-
-  /*  public void Rumble() {
+////////////////////////////////////////////////////////////////////////////////////////////////
+    public void Rumble() {
         StraferHardware hardware = new StraferHardware(hardwareMap);
         ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "colorSensor");
         double red = ribbit.red();
@@ -396,7 +418,7 @@ public class FieldCentricBlue
 
 
     }
-*/
+
 }
 
 
