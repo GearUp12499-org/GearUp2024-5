@@ -96,15 +96,7 @@ public class FieldCentricBlue
         double distance = 100;
         boolean haveTurned = false;
         while (opModeIsActive()) {
-            telemetryAprilTag();
-            telemetry.update();
-            double red = ribbit.red();
-            double blue = ribbit.blue();
-            double green = ribbit.green();
-            telemetry.addData("blue",blue);
-            telemetry.addData("red",red);
-            telemetry.addData("green",green);
-            }
+
             // this is the gamepad controls for the driving. good luck
             double y = gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
@@ -112,21 +104,26 @@ public class FieldCentricBlue
             double red = ribbit.red();
             double blue = ribbit.blue();
             double green = ribbit.green();
-            telemetry.addData("blue",blue);
-            telemetry.addData("red",red);
-            telemetry.addData("green",green);
+
+
             // double MAX_POS = 1.0;
             Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
             double botheading = angles.firstAngle;
 
-        if (blue - green > 100 && blue - red > 100) {
+            if (blue - green > 100 && blue - red > 100) {
             telemetry.addLine("blue");
-        }
-        if (red - blue > 100 && red - green > 100) {
+            }
+             if (red - blue > 100 && red - green > 100) {
             telemetry.addLine("red");
-        }
-        if (green - blue > 100 && green - red > 100 && red >= 350) {
-            telemetry.addLine("yellow");
+            }
+            if (green - blue > 100 && green - red > 100 && red >= 350) {
+                telemetry.addLine("yellow");
+            }
+            telemetry.addData("amount green", green);
+            telemetry.addData("amount red", red);
+            telemetry.addData("amount blue", blue);
+            telemetryAprilTag();
+            telemetry.update();
             //Rotate the movement direction counter to the bot's rotation.
             double rotX = x * Math.cos(-botheading) + y * Math.sin(-botheading);
             double rotY = x * Math.sin(-botheading) - y * Math.cos(-botheading);
@@ -486,25 +483,31 @@ public class FieldCentricBlue
         double red = ribbit.red();
         double blue = ribbit.blue();
         double green = ribbit.green();
+        boolean rred = red - blue > 100 && red - green > 100;
+        boolean bblue = blue - green > 100 && blue - red > 100;
+        //boolean ggreen = green != 0;
         boolean yellow = ((green - blue) > 100) && ((green - red) > 100) && (red >= 350);
-        if (blue - green > 100 && blue - red > 100) {
-            telemetry.addLine("blue");
-        }
-        if (red - blue > 100 && red - green > 100) {
-            telemetry.addLine("red");
-        }
-        if (green - blue > 100 && green - red > 100 && red >= 350) {
-            telemetry.addLine("yellow");
-        }
-    if (red<0){
+
+    if (rred){
         lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
     }
-    if(blue<0){
+    else{
+        lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+    }
+
+    if(bblue){
         lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+    }
+    else {
+        lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
     }
     if(yellow){
         lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
     }
+    else {
+          lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+
+        }
     }
 }
 
