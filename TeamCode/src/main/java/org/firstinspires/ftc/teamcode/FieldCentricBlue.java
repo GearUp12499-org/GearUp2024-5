@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH;
 
+import android.annotation.SuppressLint;
 import android.media.MediaPlayer;
 import android.util.Size;
 
@@ -44,11 +45,12 @@ import java.util.List;
 public class FieldCentricBlue
         extends LinearOpMode {
     private static final boolean USE_WEBCAM = true;
-    private Position cameraPosition = new Position(DistanceUnit.INCH,
+    private final Position cameraPosition = new Position(DistanceUnit.INCH,
             5, 7, 0, 0);
-    private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES,
+    private final YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES,
             0, -90, 0, 0);
     //this is all copy-pasted from AprilTagYummy
+
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
     private CRServo con_servo;
@@ -61,13 +63,13 @@ public class FieldCentricBlue
         initAprilTag();
 
         StraferHardware hardware = new StraferHardware(hardwareMap);
+        ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "ribbit");
         navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "gyro");
         gyro = (IntegratingGyroscope) navxMicro;
 
         RevBlinkinLedDriver lights = hardwareMap.get(RevBlinkinLedDriver.class,"lights");
 
         DistanceSensor sensor = hardwareMap.get(DistanceSensor.class, "distance");
-        //      ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "colorSensor");
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
 
         // Wait until the gyro calibration is complete
@@ -96,16 +98,35 @@ public class FieldCentricBlue
         while (opModeIsActive()) {
             telemetryAprilTag();
             telemetry.update();
-
+            double red = ribbit.red();
+            double blue = ribbit.blue();
+            double green = ribbit.green();
+            telemetry.addData("blue",blue);
+            telemetry.addData("red",red);
+            telemetry.addData("green",green);
+            }
             // this is the gamepad controls for the driving. good luck
             double y = gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
             double rx = gamepad1.right_stick_x;
+            double red = ribbit.red();
+            double blue = ribbit.blue();
+            double green = ribbit.green();
+            telemetry.addData("blue",blue);
+            telemetry.addData("red",red);
+            telemetry.addData("green",green);
             // double MAX_POS = 1.0;
             Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
             double botheading = angles.firstAngle;
 
-
+        if (blue - green > 100 && blue - red > 100) {
+            telemetry.addLine("blue");
+        }
+        if (red - blue > 100 && red - green > 100) {
+            telemetry.addLine("red");
+        }
+        if (green - blue > 100 && green - red > 100 && red >= 350) {
+            telemetry.addLine("yellow");
             //Rotate the movement direction counter to the bot's rotation.
             double rotX = x * Math.cos(-botheading) + y * Math.sin(-botheading);
             double rotY = x * Math.sin(-botheading) - y * Math.cos(-botheading);
@@ -126,6 +147,7 @@ public class FieldCentricBlue
             hardware.backLeft.setPower(backLeftPower / 2);
             hardware.frontRight.setPower(frontRightPower / 2);
             hardware.backRight.setPower(backRightPower / 2);
+
 
             double color= 15;
             distance = sensor.getDistance(INCH);
@@ -165,6 +187,9 @@ public class FieldCentricBlue
             if (gamepad2.x){
                 blinkin(1);
             }
+            if (gamepad2.y){
+                display(1);
+            }
             //Rumble();
             //gamepad controls here.
             idle();
@@ -202,6 +227,7 @@ public class FieldCentricBlue
         visionPortal = builder.build();
 
     }
+    @SuppressLint("DefaultLocale")
     private void telemetryAprilTag() {
 
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
@@ -231,6 +257,7 @@ public class FieldCentricBlue
 
     }
 
+    @SuppressLint("DefaultLocale")
     String formatRate(float rate) {
         return String.format("%.3f", rate);
     }
@@ -239,10 +266,11 @@ public class FieldCentricBlue
         return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
     }
 
+    @SuppressLint("DefaultLocale")
     String formatDegrees(double degrees) {
         return String.format("%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
-    /////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void turn(double target) {
         StraferHardware hardware = new StraferHardware(hardwareMap);
@@ -297,7 +325,7 @@ public class FieldCentricBlue
 
         }
     }
-    ////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void crservo(double deltaAngle){
         con_servo=hardwareMap.crservo.get("intakeServo");
         waitForStart();
@@ -315,7 +343,7 @@ public class FieldCentricBlue
             telemetry.update();
         }
     }
-//////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void turn2(double deltaAngle) {
         //turn to an angle accurately.
         ElapsedTime timer = new ElapsedTime();
@@ -363,7 +391,7 @@ public class FieldCentricBlue
         }
     }
 
-    /////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void handservo(double deltaAngle) {
         //hand teleop controls :}
         StraferHardware hardware = new StraferHardware(hardwareMap);
@@ -376,7 +404,7 @@ public class FieldCentricBlue
         }
     }
 
-    //////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void straightline(double power, double distance, double heading) {
         //drives in a straight line from robots current orientation
         ElapsedTime timer = new ElapsedTime();
@@ -421,10 +449,11 @@ public class FieldCentricBlue
 
 
     }
-////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public void Rumble() {
         StraferHardware hardware = new StraferHardware(hardwareMap);
-        ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "colorSensor");
+        ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "ribbit");
         double red = ribbit.red();
         double blue = ribbit.blue();
         double green = ribbit.green();
@@ -439,7 +468,7 @@ public class FieldCentricBlue
 
 
     }
- ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void blinkin (double color){
         StraferHardware hardware = new StraferHardware(hardwareMap);
         RevBlinkinLedDriver lights = hardwareMap.get(RevBlinkinLedDriver.class,"lights");
@@ -448,6 +477,34 @@ public class FieldCentricBlue
         if(gamepad2.b)
             lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
 
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void display (double color){
+        StraferHardware hardware = new StraferHardware(hardwareMap);
+        RevBlinkinLedDriver lights = hardwareMap.get(RevBlinkinLedDriver.class,"lights");
+        ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "ribbit");
+        double red = ribbit.red();
+        double blue = ribbit.blue();
+        double green = ribbit.green();
+        boolean yellow = ((green - blue) > 100) && ((green - red) > 100) && (red >= 350);
+        if (blue - green > 100 && blue - red > 100) {
+            telemetry.addLine("blue");
+        }
+        if (red - blue > 100 && red - green > 100) {
+            telemetry.addLine("red");
+        }
+        if (green - blue > 100 && green - red > 100 && red >= 350) {
+            telemetry.addLine("yellow");
+        }
+    if (red<0){
+        lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+    }
+    if(blue<0){
+        lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+    }
+    if(yellow){
+        lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+    }
     }
 }
 

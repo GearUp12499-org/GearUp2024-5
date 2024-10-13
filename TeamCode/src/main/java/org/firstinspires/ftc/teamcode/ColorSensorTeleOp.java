@@ -1,14 +1,17 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 import static org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
 
 @TeleOp
 public class ColorSensorTeleOp
@@ -56,7 +59,8 @@ public class ColorSensorTeleOp
             double red = ribbit.red();
             double blue = ribbit.blue();
             double green = ribbit.green();
-
+            if(gamepad2.y)
+                display(1);
             if (blue - green > 100 && blue - red > 100) {
                 telemetry.addLine("blue");
             }
@@ -84,6 +88,26 @@ public class ColorSensorTeleOp
         backRight.setPower(0);
     }
 
+    public void display (double color){
+        StraferHardware hardware = new StraferHardware(hardwareMap);
+        RevBlinkinLedDriver lights = hardwareMap.get(RevBlinkinLedDriver.class,"lights");
+        ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "ribbit");
+        double red = ribbit.red();
+        double blue = ribbit.blue();
+        double green = ribbit.green();
+        boolean yellow = (green - blue > 100 && green - red > 100 && red >= 350);
+
+        if (red<0){
+            lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+        }
+        if(blue<0){
+            lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+        }
+        if(yellow){
+            lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+        }
+    }
+
     public void Rumble() {
         StraferHardware hardware = new StraferHardware(hardwareMap);
         ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "colorSensor");
@@ -99,8 +123,11 @@ public class ColorSensorTeleOp
             gamepad1.rumbleBlips(1);
         }
 
+
+
     }
-}
+
+        }
 
 
 //end class.
