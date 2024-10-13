@@ -491,19 +491,17 @@ public class FieldCentricBlue
         boolean yellow = ((green - blue) > 100) && ((green - red) > 100) && (red >= 350);
 
     if (rred){
-        lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_LAVA_PALETTE);
-    }
-    else{
-        lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+        lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+        telemetry.addLine("VERYRED");
     }
 
-    if(bblue) {
-        lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_OCEAN_PALETTE);
+
+    else if(bblue) {
+        lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+        telemetry.addLine("VERYBLUE");
     }
-    else {
-        lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
-    }
-    if(yellow){
+
+    else if(yellow){
         lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
     }
     else {
