@@ -49,7 +49,6 @@ public class StraferHardware extends HardwareMapper {
     @HardwareName("frontLeft")
     @AutoClearEncoder
     @ZeroPower(DcMotor.ZeroPowerBehavior.BRAKE)
-    @Reversed
     public DcMotor frontLeft;
 
     @HardwareName("distance")

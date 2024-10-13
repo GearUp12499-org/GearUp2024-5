@@ -166,6 +166,11 @@ public class FieldCentricBlue
             telemetry.update();
 */
             handservo(1.0);
+            display(1);
+
+           if(gamepad1.dpad_down)
+            crservo(90);
+
 
             if (gamepad1.dpad_up) {
                 straightline(0.3, 24.0, 0.0);
@@ -178,15 +183,12 @@ public class FieldCentricBlue
             if (gamepad1.a) {
                 turn2(-90);
             }
-            if (gamepad1.dpad_down) {
-                crservo(90);
-            }
+
             if (gamepad2.x){
                 blinkin(1);
             }
-            if (gamepad2.y){
-                display(1);
-            }
+
+
             //Rumble();
             //gamepad controls here.
             idle();
@@ -323,7 +325,7 @@ public class FieldCentricBlue
         }
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void crservo(double deltaAngle){
+        public void crservo(double deltaAngle){
         con_servo=hardwareMap.crservo.get("intakeServo");
         waitForStart();
         while (opModeIsActive()){
@@ -483,20 +485,20 @@ public class FieldCentricBlue
         double red = ribbit.red();
         double blue = ribbit.blue();
         double green = ribbit.green();
-        boolean rred = red - blue > 100 && red - green > 100;
-        boolean bblue = blue - green > 100 && blue - red > 100;
+        boolean rred = ((red - blue > 100) && (red - green > 100));
+        boolean bblue = ((blue - green > 100) && (blue - red > 100));
         //boolean ggreen = green != 0;
         boolean yellow = ((green - blue) > 100) && ((green - red) > 100) && (red >= 350);
 
     if (rred){
-        lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+        lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_LAVA_PALETTE);
     }
     else{
         lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
     }
 
-    if(bblue){
-        lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+    if(bblue) {
+        lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_OCEAN_PALETTE);
     }
     else {
         lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
