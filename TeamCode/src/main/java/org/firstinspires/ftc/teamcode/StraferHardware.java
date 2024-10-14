@@ -4,6 +4,7 @@ import android.graphics.Camera;
 
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -25,6 +26,9 @@ public class StraferHardware extends HardwareMapper {
 
     @HardwareName("hand")
     public Servo hand;
+
+    @HardwareName("lights")
+    public RevBlinkinLedDriver lights;
 
     @HardwareName("backRight")
     @AutoClearEncoder
