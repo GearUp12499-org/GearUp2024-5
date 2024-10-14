@@ -96,6 +96,7 @@ public class FieldCentricBlue
         double distance = 100;
         boolean haveTurned = false;
         while (opModeIsActive()) {
+            Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
 
             // this is the gamepad controls for the driving. good luck
             double y = gamepad1.left_stick_y; // Remember, Y stick value is reversed
@@ -104,12 +105,14 @@ public class FieldCentricBlue
             double red = ribbit.red();
             double blue = ribbit.blue();
             double green = ribbit.green();
-
-
-            // double MAX_POS = 1.0;
-            Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
             double botheading = angles.firstAngle;
-
+            double rotX = x * Math.cos(-botheading) + y * Math.sin(-botheading);
+            double rotY = x * Math.sin(-botheading) - y * Math.cos(-botheading);
+            double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+            double frontLeftPower = (rotY + rotX + rx) / denominator;
+            double backLeftPower = (rotY - rotX + rx) / denominator;
+            double frontRightPower = (rotY - rotX - rx) / denominator;
+            double backRightPower = (rotY + rotX - rx) / denominator;
             if (blue - green > 100 && blue - red > 100) {
                 telemetry.addLine("blue");
             }
@@ -125,19 +128,13 @@ public class FieldCentricBlue
             telemetryAprilTag();
             telemetry.update();
             //Rotate the movement direction counter to the bot's rotation.
-            double rotX = x * Math.cos(-botheading) + y * Math.sin(-botheading);
-            double rotY = x * Math.sin(-botheading) - y * Math.cos(-botheading);
+
 
             rotX = rotX * 1.1;
 
             // Denominator is the largest motor power (absolute value) or 1
             // This ensures all the powers maintain the same ratio,
             // but only if at least one is out of the range [-1, 1]
-            double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-            double frontLeftPower = (rotY + rotX + rx) / denominator;
-            double backLeftPower = (rotY - rotX + rx) / denominator;
-            double frontRightPower = (rotY - rotX - rx) / denominator;
-            double backRightPower = (rotY + rotX - rx) / denominator;
 
 
             hardware.frontLeft.setPower(frontLeftPower / 2);
@@ -165,31 +162,16 @@ public class FieldCentricBlue
                     .addData("pitch", "%s deg", formatAngle(angles.angleUnit, angles.thirdAngle));
             telemetry.update();
 */
-            handservo(1.0);
+         //   handservo(1.0);
             display(1);
-
+            blinkin(1);
             if(gamepad1.dpad_down)
                 crservo(90);
 
 
-            if (gamepad1.dpad_up) {
-                straightline(0.3, 24.0, 0.0);
-            }
-
-            if (gamepad1.b) {
-                turn2(90);
-
-            }
-            if (gamepad1.a) {
-                turn2(-90);
-            }
-
-            if (gamepad2.x){
-                blinkin(1);
-            }
 
 
-            //Rumble();
+
             //gamepad controls here.
             idle();
 
@@ -271,59 +253,59 @@ public class FieldCentricBlue
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void turn(double target) {
-        StraferHardware hardware = new StraferHardware(hardwareMap);
-        //DcMotor backRight = hardwareMap.get(DcMotor.class, "backRight");
-        //DcMotor backLeft = hardwareMap.get(DcMotor.class, "backLeft");
-        //DcMotor frontRight = hardwareMap.get(DcMotor.class, "frontRight");
-        //DcMotor frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
-        Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        double p = 0.7;
-        double power = 0;
-        double error = angles.firstAngle - target;
-        if (target < 0) {
-            while (error > 0) {
-
-                hardware.frontLeft.setPower(power);
-                hardware.backLeft.setPower(power);
-                hardware.frontRight.setPower(-power);
-                hardware.backRight.setPower(-power);
-
-                angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                error = angles.firstAngle - target;
-                power = error * (0.013) * p + 0.2;
-
-                telemetry.addData("errorccw", error);
-                telemetry.addData("headingccw", angles.firstAngle);
-                telemetry.addData("targetccw", target);
-                telemetry.update();
-            }
-        } else {
-            while (error < 0) {
-
-                hardware.frontLeft.setPower(-power);
-                hardware.backLeft.setPower(-power);
-                hardware.frontRight.setPower(power);
-                hardware.backRight.setPower(power);
-
-                angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                error = angles.firstAngle - target;
-                power = error * (-0.013) * p + 0.2;
-
-                telemetry.addData("errorcw", error);
-                telemetry.addData("headingcw", angles.firstAngle);
-                telemetry.addData("targetcw", target);
-                telemetry.update();
-
-            }
-            hardware.frontLeft.setPower(0);
-            hardware.backLeft.setPower(0);
-            hardware.frontRight.setPower(0);
-            hardware.backRight.setPower(0);
-
-
-        }
-    }
+//    public void turn(double target) {
+//        StraferHardware hardware = new StraferHardware(hardwareMap);
+//        //DcMotor backRight = hardwareMap.get(DcMotor.class, "backRight");
+//        //DcMotor backLeft = hardwareMap.get(DcMotor.class, "backLeft");
+//        //DcMotor frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+//        //DcMotor frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
+//        Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//        double p = 0.7;
+//        double power = 0;
+//        double error = angles.firstAngle - target;
+//        if (target < 0) {
+//            while (error > 0) {
+//
+//                hardware.frontLeft.setPower(power);
+//                hardware.backLeft.setPower(power);
+//                hardware.frontRight.setPower(-power);
+//                hardware.backRight.setPower(-power);
+//
+//                angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//                error = angles.firstAngle - target;
+//                power = error * (0.013) * p + 0.2;
+//
+//                telemetry.addData("errorccw", error);
+//                telemetry.addData("headingccw", angles.firstAngle);
+//                telemetry.addData("targetccw", target);
+//                telemetry.update();
+//            }
+//        } else {
+//            while (error < 0) {
+//
+//                hardware.frontLeft.setPower(-power);
+//                hardware.backLeft.setPower(-power);
+//                hardware.frontRight.setPower(power);
+//                hardware.backRight.setPower(power);
+//
+//                angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//                error = angles.firstAngle - target;
+//                power = error * (-0.013) * p + 0.2;
+//
+//                telemetry.addData("errorcw", error);
+//                telemetry.addData("headingcw", angles.firstAngle);
+//                telemetry.addData("targetcw", target);
+//                telemetry.update();
+//
+//            }
+//            hardware.frontLeft.setPower(0);
+//            hardware.backLeft.setPower(0);
+//            hardware.frontRight.setPower(0);
+//            hardware.backRight.setPower(0);
+//
+//
+//        }
+//    }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void crservo(double deltaAngle){
         con_servo=hardwareMap.crservo.get("intakeServo");
@@ -339,136 +321,139 @@ public class FieldCentricBlue
             if (gamepad1.atRest()){
                 con_servo.setPower(0);
             }
-            telemetry.update();
         }
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void turn2(double deltaAngle) {
-        //turn to an angle accurately.
-        ElapsedTime timer = new ElapsedTime();
-        StraferHardware hardware = new StraferHardware(hardwareMap);
-        Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        double target = angles.firstAngle + deltaAngle;
-        double allowedError = 5.0;
-        double maxPower = 1;
-        double minPower = 0.1;
-        double kp = 1.0 / 60.0;
-        double timeOutSeconds = 3;
-
-        while (timer.time() < timeOutSeconds) {
-            telemetry.addData("timer", timer.time());
-            telemetry.update();
-
-            angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            double error = target - angles.firstAngle;
-            if (error > 180) {
-                error -= 360;
-            }
-            if (error < -180) {
-                error += 360;
-            }
-            if (Math.abs(error) < allowedError) {
-                hardware.frontLeft.setPower(0);
-                hardware.backLeft.setPower(0);
-                hardware.frontRight.setPower(0);
-                hardware.backRight.setPower(0);
-                return;
-            }
-            double rampDown = kp * Math.abs(error);
-            double power = Math.min(maxPower, rampDown);
-            if (power < minPower) {
-                power = minPower;
-            }
-            if (error < 0.0) {
-                power = -power;
-            }
-            hardware.frontLeft.setPower(-power);
-            hardware.backLeft.setPower(-power);
-            hardware.frontRight.setPower(power);
-            hardware.backRight.setPower(power);
-
-        }
-    }
+//    public void turn2(double deltaAngle) {
+//        //turn to an angle accurately.
+//        ElapsedTime timer = new ElapsedTime();
+//        StraferHardware hardware = new StraferHardware(hardwareMap);
+//        Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//        double target = angles.firstAngle + deltaAngle;
+//        double allowedError = 5.0;
+//        double maxPower = 1;
+//        double minPower = 0.1;
+//        double kp = 1.0 / 60.0;
+//        double timeOutSeconds = 3;
+//
+//        while (timer.time() < timeOutSeconds) {
+//            telemetry.addData("timer", timer.time());
+//            telemetry.update();
+//
+//            angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//            double error = target - angles.firstAngle;
+//            if (error > 180) {
+//                error -= 360;
+//            }
+//            if (error < -180) {
+//                error += 360;
+//            }
+//            if (Math.abs(error) < allowedError) {
+//                hardware.frontLeft.setPower(0);
+//                hardware.backLeft.setPower(0);
+//                hardware.frontRight.setPower(0);
+//                hardware.backRight.setPower(0);
+//                return;
+//            }
+//            double rampDown = kp * Math.abs(error);
+//            double power = Math.min(maxPower, rampDown);
+//            if (power < minPower) {
+//                power = minPower;
+//            }
+//            if (error < 0.0) {
+//                power = -power;
+//            }
+//            hardware.frontLeft.setPower(-power);
+//            hardware.backLeft.setPower(-power);
+//            hardware.frontRight.setPower(power);
+//            hardware.backRight.setPower(power);
+//
+//        }
+//    }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void handservo(double deltaAngle) {
-        //hand teleop controls :}
-        StraferHardware hardware = new StraferHardware(hardwareMap);
-
-        if (gamepad1.left_bumper) {
-            hardware.hand.setPosition(0.0);
-        }
-        if (gamepad1.right_bumper) {
-            hardware.hand.setPosition(1.0);
-        }
-    }
+//    public void handservo(double deltaAngle) {
+//        //hand teleop controls :}
+//        //allows the claw/hand to open and close using left and right bumper
+//        StraferHardware hardware = new StraferHardware(hardwareMap);
+//
+//        if (gamepad1.left_bumper) {
+//            hardware.hand.setPosition(0.0);
+//        }
+//        if (gamepad1.right_bumper) {
+//            hardware.hand.setPosition(1.0);
+//        }
+//    }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void straightline(double power, double distance, double heading) {
-        //drives in a straight line from robots current orientation
-        ElapsedTime timer = new ElapsedTime();
-        StraferHardware hardware = new StraferHardware(hardwareMap);
-        Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        double target = angles.firstAngle;
-        double kp = 0.9 / 45;
-        double p = 0.7;
-        double error = angles.firstAngle - target;
-        double currentHeading = 0;
-        double delta = 0;
-
-        //537.7 is the count per rotation of the gobilda planetary motor.
-        //https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-19-2-1-ratio-24mm-length-8mm-rex-shaft-312-rpm-3-3-5v-encoder/?srsltid=AfmBOop1YfJqiOXEErvydFNjwvWoea8tDZOZ1Pz4a9llh_pNC8bSNKKy
-        double distancePerTicks = 4 * 3.14 / 537.7;
-        int current = hardware.frontLeft.getCurrentPosition();
-        while (current < distance / distancePerTicks) {
-
-
-            angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currentHeading = angles.firstAngle;
-            error = currentHeading - target;
-            delta = error * kp;
-            current = hardware.frontLeft.getCurrentPosition();
-
-            hardware.frontLeft.setPower(power + delta);
-            hardware.backLeft.setPower(power + delta);
-            hardware.frontRight.setPower(power - delta);
-            hardware.backRight.setPower(power - delta);
-
-            telemetry.addData("timer", timer.time());
-            telemetry.addData("headingcw", angles.firstAngle);
-            telemetry.addData("error", error);
-            telemetry.addData("distance", distancePerTicks);
-            telemetry.addData("current position", current);
-            telemetry.update();
-        }
-        hardware.frontRight.setPower(0.0);
-        hardware.frontLeft.setPower(0.0);
-        hardware.backRight.setPower(0.0);
-        hardware.backLeft.setPower(0.0);
-
-
-    }
+//    public void straightline(double power, double distance, double heading) {
+//        //drives in a straight line from robots current orientation
+//        ElapsedTime timer = new ElapsedTime();
+//        StraferHardware hardware = new StraferHardware(hardwareMap);
+//        Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//        double target = angles.firstAngle;
+//        double kp = 0.9 / 45;
+//        double p = 0.7;
+//        double error = angles.firstAngle - target;
+//        double currentHeading = 0;
+//        double delta = 0;
+//
+//        //537.7 is the count per rotation of the gobilda planetary motor.
+//        //https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-19-2-1-ratio-24mm-length-8mm-rex-shaft-312-rpm-3-3-5v-encoder/?srsltid=AfmBOop1YfJqiOXEErvydFNjwvWoea8tDZOZ1Pz4a9llh_pNC8bSNKKy
+//        double distancePerTicks = 4 * 3.14 / 537.7;
+//        int current = hardware.frontLeft.getCurrentPosition();
+//        while (current < distance / distancePerTicks) {
+//
+//
+//            angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//            currentHeading = angles.firstAngle;
+//            error = currentHeading - target;
+//            delta = error * kp;
+//            current = hardware.frontLeft.getCurrentPosition();
+//
+//            hardware.frontLeft.setPower(power + delta);
+//            hardware.backLeft.setPower(power + delta);
+//            hardware.frontRight.setPower(power - delta);
+//            hardware.backRight.setPower(power - delta);
+//
+//            telemetry.addData("timer", timer.time());
+//            telemetry.addData("headingcw", angles.firstAngle);
+//            telemetry.addData("error", error);
+//            telemetry.addData("distance", distancePerTicks);
+//            telemetry.addData("current position", current);
+//            telemetry.update();
+//        }
+//        hardware.frontRight.setPower(0.0);
+//        hardware.frontLeft.setPower(0.0);
+//        hardware.backRight.setPower(0.0);
+//        hardware.backLeft.setPower(0.0);
+//
+//
+//    }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void Rumble() {
-        StraferHardware hardware = new StraferHardware(hardwareMap);
-        ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "ribbit");
-        double red = ribbit.red();
-        double blue = ribbit.blue();
-        double green = ribbit.green();
-        boolean yellow = (green - blue > 100 && green - red > 100 && red >= 350);
-
-
-        if (yellow) {
-            gamepad1.rumble(1000);
-        } else {
-            gamepad1.rumbleBlips(1);
-        }
-
-
-    }
+//    public void Rumble() {
+//        //This code is supposed to make the gamepad rumble/shake when the color sensor
+//        //detects yellow could be used to tell drivers that they have the wrong color sample.
+//        StraferHardware hardware = new StraferHardware(hardwareMap);
+//        ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "ribbit");
+//        double red = ribbit.red();
+//        double blue = ribbit.blue();
+//        double green = ribbit.green();
+//        boolean yellow = (green - blue > 100 && green - red > 100 && red >= 350);
+//
+//
+//        if (yellow) {
+//            gamepad1.rumble(1000);
+//        } else {
+//            gamepad1.rumbleBlips(1);
+//        }
+//
+//
+//    }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void blinkin (double color){
+        //Allows the LED lights to hand from red to blue using the a nd b buttons on gamepad 2.
         StraferHardware hardware = new StraferHardware(hardwareMap);
         RevBlinkinLedDriver lights = hardwareMap.get(RevBlinkinLedDriver.class,"lights");
         if(gamepad2.a)
@@ -479,15 +464,16 @@ public class FieldCentricBlue
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void display (double color){
+        //This code tells the LED lights to light up to whatever color the color sensor is detecting.
         StraferHardware hardware = new StraferHardware(hardwareMap);
         RevBlinkinLedDriver lights = hardwareMap.get(RevBlinkinLedDriver.class,"lights");
         ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "ribbit");
         double red = ribbit.red();
         double blue = ribbit.blue();
         double green = ribbit.green();
+        //Equations taken from ColorSensorTeleOp
         boolean rred = ((red - blue > 100) && (red - green > 100));
         boolean bblue = ((blue - green > 100) && (blue - red > 100));
-        //boolean ggreen = green != 0;
         boolean yellow = ((green - blue) > 100) && ((green - red) > 100) && (red >= 350);
 
         if (rred){
@@ -512,6 +498,6 @@ public class FieldCentricBlue
 }
 
 
-//A
+
 
 //end class.
