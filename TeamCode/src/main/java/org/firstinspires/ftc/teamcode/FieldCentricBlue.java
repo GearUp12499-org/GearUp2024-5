@@ -183,7 +183,7 @@ public class FieldCentricBlue
         // Create the AprilTag processor.
         aprilTag = new AprilTagProcessor.Builder()
                 .setCameraPose(cameraPosition, cameraOrientation)
-                .setLensIntrinsics(403.13009118522405, 403.5656686207128, 607.1138266591205, 349.2411860514311)
+//                .setLensIntrinsics(403.13009118522405, 403.5656686207128, 607.1138266591205, 349.2411860514311)
                 .build();
 
         VisionPortal.Builder builder = new VisionPortal.Builder();
@@ -202,7 +202,7 @@ public class FieldCentricBlue
         builder.enableLiveView(true);
         // Set the stream format; MJPEG uses less bandwidth than default YUY2.
         builder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
-        builder.setCameraResolution(new Size(1280, 720));
+        builder.setCameraResolution(new Size(960, 720));
 
         builder.addProcessor(aprilTag);
         visionPortal = builder.build();
