@@ -46,7 +46,7 @@ public class FieldCentricBlue
         extends LinearOpMode {
     private static final boolean USE_WEBCAM = true;
     private final Position cameraPosition = new Position(DistanceUnit.INCH,
-            5, 7, 0, 0);
+            6.5, 7, 0, 0);
     private final YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES,
             0, -90, 0, 0);
     //this is all copy-pasted from AprilTagYummy
@@ -57,6 +57,7 @@ public class FieldCentricBlue
     IntegratingGyroscope gyro;
     NavxMicroNavigationSensor navxMicro;
     ElapsedTime timer = new ElapsedTime();
+
     // this is code is code you know what code it is i like coding yippee code epic epic epic epic for robot straferbot coiding code
     @Override
     public void runOpMode() throws InterruptedException {
@@ -165,8 +166,7 @@ public class FieldCentricBlue
          //   handservo(1.0);
             display(1);
             blinkin(1);
-            if(gamepad1.dpad_down)
-                crservo(90);
+            crservo(90);
 
 
 
@@ -178,6 +178,7 @@ public class FieldCentricBlue
         }
 
     }
+
     private void initAprilTag() {
 
         // Create the AprilTag processor.
@@ -208,6 +209,7 @@ public class FieldCentricBlue
         visionPortal = builder.build();
 
     }
+
     @SuppressLint("DefaultLocale")
     private void telemetryAprilTag() {
 
@@ -251,79 +253,73 @@ public class FieldCentricBlue
     String formatDegrees(double degrees) {
         return String.format("%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//    public void turn(double target) {
-//        StraferHardware hardware = new StraferHardware(hardwareMap);
-//        //DcMotor backRight = hardwareMap.get(DcMotor.class, "backRight");
-//        //DcMotor backLeft = hardwareMap.get(DcMotor.class, "backLeft");
-//        //DcMotor frontRight = hardwareMap.get(DcMotor.class, "frontRight");
-//        //DcMotor frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
-//        Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-//        double p = 0.7;
-//        double power = 0;
-//        double error = angles.firstAngle - target;
-//        if (target < 0) {
-//            while (error > 0) {
-//
-//                hardware.frontLeft.setPower(power);
-//                hardware.backLeft.setPower(power);
-//                hardware.frontRight.setPower(-power);
-//                hardware.backRight.setPower(-power);
-//
-//                angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-//                error = angles.firstAngle - target;
-//                power = error * (0.013) * p + 0.2;
-//
-//                telemetry.addData("errorccw", error);
-//                telemetry.addData("headingccw", angles.firstAngle);
-//                telemetry.addData("targetccw", target);
-//                telemetry.update();
-//            }
-//        } else {
-//            while (error < 0) {
-//
-//                hardware.frontLeft.setPower(-power);
-//                hardware.backLeft.setPower(-power);
-//                hardware.frontRight.setPower(power);
-//                hardware.backRight.setPower(power);
-//
-//                angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-//                error = angles.firstAngle - target;
-//                power = error * (-0.013) * p + 0.2;
-//
-//                telemetry.addData("errorcw", error);
-//                telemetry.addData("headingcw", angles.firstAngle);
-//                telemetry.addData("targetcw", target);
-//                telemetry.update();
-//
-//            }
-//            hardware.frontLeft.setPower(0);
-//            hardware.backLeft.setPower(0);
-//            hardware.frontRight.setPower(0);
-//            hardware.backRight.setPower(0);
-//
-//
-//        }
-//    }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void crservo(double deltaAngle){
-        con_servo=hardwareMap.crservo.get("intakeServo");
+    public void crservo(double deltaAngle) {
+        con_servo = hardwareMap.crservo.get("intakeServo");
         waitForStart();
-        while (opModeIsActive()){
+        while (opModeIsActive()) {
 
-            if (gamepad1.dpad_left){
+            if (gamepad1.dpad_left) {
                 con_servo.setPower(1);
             }
-            if (gamepad1.dpad_right){
+            if (gamepad1.dpad_right) {
                 con_servo.setPower(-1);
             }
-            if (gamepad1.atRest()){
+            //  if (gamepad1.atRest()){
+            //     con_servo.setPower(0);
+            // }
+            if (gamepad1.a) {
+                con_servo.setPower(1);
+            }
+            if (gamepad1.b) {
                 con_servo.setPower(0);
+            }
+
+        }
+    }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        public void blinkin ( double color){
+            //Allows the LED lights to hand from red to blue using the a nd b buttons on gamepad 2.
+            StraferHardware hardware = new StraferHardware(hardwareMap);
+            RevBlinkinLedDriver lights = hardwareMap.get(RevBlinkinLedDriver.class, "lights");
+            if (gamepad2.a)
+                lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+            if (gamepad2.b)
+                lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+
+        }
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        public void display ( double color){
+            //This code tells the LED lights to light up to whatever color the color sensor is detecting.
+            StraferHardware hardware = new StraferHardware(hardwareMap);
+            RevBlinkinLedDriver lights = hardwareMap.get(RevBlinkinLedDriver.class, "lights");
+            ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "ribbit");
+            double red = ribbit.red();
+            double blue = ribbit.blue();
+            double green = ribbit.green();
+            //Equations taken from ColorSensorTeleOp
+            boolean rred = ((red - blue > 100) && (red - green > 100));
+            boolean bblue = ((blue - green > 100) && (blue - red > 100));
+            boolean yellow = ((green - blue) > 100) && ((green - red) > 100) && (red >= 350);
+
+            if (rred) {
+                lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+                telemetry.addLine("VERYRED");
+            } else if (bblue) {
+                lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+                telemetry.addLine("VERYBLUE");
+            } else if (yellow) {
+                lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+            } else {
+                lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+
             }
         }
     }
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //    public void turn2(double deltaAngle) {
 //        //turn to an angle accurately.
 //        ElapsedTime timer = new ElapsedTime();
@@ -370,8 +366,7 @@ public class FieldCentricBlue
 //
 //        }
 //    }
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //    public void handservo(double deltaAngle) {
 //        //hand teleop controls :}
 //        //allows the claw/hand to open and close using left and right bumper
@@ -384,8 +379,7 @@ public class FieldCentricBlue
 //            hardware.hand.setPosition(1.0);
 //        }
 //    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //    public void straightline(double power, double distance, double heading) {
 //        //drives in a straight line from robots current orientation
 //        ElapsedTime timer = new ElapsedTime();
@@ -451,53 +445,60 @@ public class FieldCentricBlue
 //
 //
 //    }
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void blinkin (double color){
-        //Allows the LED lights to hand from red to blue using the a nd b buttons on gamepad 2.
-        StraferHardware hardware = new StraferHardware(hardwareMap);
-        RevBlinkinLedDriver lights = hardwareMap.get(RevBlinkinLedDriver.class,"lights");
-        if(gamepad2.a)
-            lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
-        if(gamepad2.b)
-            lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
-
-    }
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void display (double color){
-        //This code tells the LED lights to light up to whatever color the color sensor is detecting.
-        StraferHardware hardware = new StraferHardware(hardwareMap);
-        RevBlinkinLedDriver lights = hardwareMap.get(RevBlinkinLedDriver.class,"lights");
-        ColorSensor ribbit = hardwareMap.get(ColorSensor.class, "ribbit");
-        double red = ribbit.red();
-        double blue = ribbit.blue();
-        double green = ribbit.green();
-        //Equations taken from ColorSensorTeleOp
-        boolean rred = ((red - blue > 100) && (red - green > 100));
-        boolean bblue = ((blue - green > 100) && (blue - red > 100));
-        boolean yellow = ((green - blue) > 100) && ((green - red) > 100) && (red >= 350);
-
-        if (rred){
-            lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
-            telemetry.addLine("VERYRED");
-        }
-
-
-        else if(bblue) {
-            lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
-            telemetry.addLine("VERYBLUE");
-        }
-
-        else if(yellow){
-            lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
-        }
-        else {
-            lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
-
-        }
-    }
-}
-
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//    public void turn(double target) {
+//        StraferHardware hardware = new StraferHardware(hardwareMap);
+//        //DcMotor backRight = hardwareMap.get(DcMotor.class, "backRight");
+//        //DcMotor backLeft = hardwareMap.get(DcMotor.class, "backLeft");
+//        //DcMotor frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+//        //DcMotor frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
+//        Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//        double p = 0.7;
+//        double power = 0;
+//        double error = angles.firstAngle - target;
+//        if (target < 0) {
+//            while (error > 0) {
+//
+//                hardware.frontLeft.setPower(power);
+//                hardware.backLeft.setPower(power);
+//                hardware.frontRight.setPower(-power);
+//                hardware.backRight.setPower(-power);
+//
+//                angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//                error = angles.firstAngle - target;
+//                power = error * (0.013) * p + 0.2;
+//
+//                telemetry.addData("errorccw", error);
+//                telemetry.addData("headingccw", angles.firstAngle);
+//                telemetry.addData("targetccw", target);
+//                telemetry.update();
+//            }
+//        } else {
+//            while (error < 0) {
+//
+//                hardware.frontLeft.setPower(-power);
+//                hardware.backLeft.setPower(-power);
+//                hardware.frontRight.setPower(power);
+//                hardware.backRight.setPower(power);
+//
+//                angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//                error = angles.firstAngle - target;
+//                power = error * (-0.013) * p + 0.2;
+//
+//                telemetry.addData("errorcw", error);
+//                telemetry.addData("headingcw", angles.firstAngle);
+//                telemetry.addData("targetcw", target);
+//                telemetry.update();
+//
+//            }
+//            hardware.frontLeft.setPower(0);
+//            hardware.backLeft.setPower(0);
+//            hardware.frontRight.setPower(0);
+//            hardware.backRight.setPower(0);
+//
+//
+//        }
+//    }
 
 
 //end class.
