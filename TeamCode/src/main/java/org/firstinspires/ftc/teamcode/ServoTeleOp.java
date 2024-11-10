@@ -68,7 +68,7 @@ public class ServoTeleOp extends LinearOpMode {
 
         // Connect to servo (Assume Robot Left Hand)
         // Change the text in quotes to match any servo name on your robot.
-        servo = hardwareMap.get(Servo.class, "hand");
+        servo = hardwareMap.get(Servo.class, "testServo");
 
         // Wait for the start button
         telemetry.addData(">", "Press Start to scan Servo." );
@@ -79,7 +79,7 @@ public class ServoTeleOp extends LinearOpMode {
         // Scan servo till stop pressed.
         while(opModeIsActive()){
 
-            if (gamepad1.left_bumper){
+            if (gamepad1.dpad_down){
 
             }
 
@@ -87,7 +87,7 @@ public class ServoTeleOp extends LinearOpMode {
 
 
             // slew the servo, according to the rampUp (direction) variable.
-           /* if (rampUp) {
+           if (gamepad1.y) {
                 // Keep stepping up until we hit the max value.
                 position += INCREMENT ;
                 if (position >= MAX_POS ) {
@@ -95,7 +95,7 @@ public class ServoTeleOp extends LinearOpMode {
                     rampUp = !rampUp;   // Switch ramp direction
                 }
             }
-            else {
+            else if(gamepad1.a) {
                 // Keep stepping down until we hit the min value.
                 position -= INCREMENT ;
                 if (position <= MIN_POS ) {
@@ -103,21 +103,34 @@ public class ServoTeleOp extends LinearOpMode {
                     rampUp = !rampUp;  // Switch ramp direction
                 }
             }
-            */
+            //0.02 is open and 0.50 is closed.
+
             // Display the current value
             telemetry.addData("Servo Position", "%5.2f", position);
             telemetry.addData(">", "Press Stop to end test." );
             telemetry.update();
 
             // Set the servo to the new position and pause;
-            servo.setPosition(position);
+            servoMoves();
             sleep(CYCLE_MS);
             idle();
+
         }
 
         // Signal done;
         telemetry.addData(">", "Done");
         telemetry.update();
+    }
+    public void servoMoves(){
+        servo = hardwareMap.get(Servo.class, "testServo");
+        final double open= 0.02;
+        final double close = 0.55;
+        if (gamepad1.x){
+            servo.setPosition(0.02);
+        }
+        else if (gamepad1.b) {
+            servo.setPosition(0.55);
+        }
     }
 }
 //end class.
