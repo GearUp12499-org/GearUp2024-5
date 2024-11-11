@@ -65,11 +65,11 @@ public class ServoTeleOp extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        Hardware h = new Hardware(hardwareMap);
 
         // Connect to servo (Assume Robot Left Hand)
         // Change the text in quotes to match any servo name on your robot.
-        servo = hardwareMap.get(Servo.class, "testServo");
-servo = hardwareMap.get(Servo.class,"twist");
+        servo = h.wrist;
         // Wait for the start button
         telemetry.addData(">", "Press Start to scan Servo.");
         telemetry.update();
@@ -107,9 +107,10 @@ servo = hardwareMap.get(Servo.class,"twist");
             telemetry.addData(">", "Press Stop to end test.");
             telemetry.update();
 
+            servo.setPosition(position);
             // Set the servo to the new position and pause;
-            servoMoves();
-            wrist();
+//            servoMoves();
+//            wrist();
             sleep(CYCLE_MS);
             idle();
 //aa
