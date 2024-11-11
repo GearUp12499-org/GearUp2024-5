@@ -33,7 +33,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.RobotLog;
 
 /*
  * This OpMode scans a single servo back and forward until Stop is pressed.
@@ -80,9 +83,17 @@ public class ServoTeleOp extends LinearOpMode {
         double twist = 0.5;
         double claw = 0.5;
         int arm = 0;
+        RobotLog.i(h.arm.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION).toString());
+        RobotLog.i(h.arm.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER).toString());
         h.arm.setTargetPosition(arm);
         h.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        h.arm.setPower(0.7);
+        h.arm.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, new PIDFCoefficients(
+                40, 0, 0, 0
+        ));
+        h.arm.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
+                10, 3, 0, 0
+        ));
+        h.arm.setPower(1.0);
 
         // Scan servo till stop pressed.
         while (opModeIsActive()) {
@@ -120,7 +131,7 @@ public class ServoTeleOp extends LinearOpMode {
                 if (twist >= 1.0) {
                     twist = 1.0;
                 }
-            } else if (gamepad1.a) {
+            } else if (gamepad1.b) {
                 // Keep stepping down until we hit the min value.
                 twist -= INCREMENT;
                 if (twist <= 0) {
@@ -143,7 +154,8 @@ public class ServoTeleOp extends LinearOpMode {
             telemetry.addData("wrist", "%5.2f", wrist);
             telemetry.addData("twist", "%5.2f", twist);
             telemetry.addData("claw", "%5.2f", claw);
-            telemetry.addData("arm", "%5.2f", arm);
+            telemetry.addData("arm targ", "%5d", arm);
+            telemetry.addData("arm real", "%5d", h.arm.getCurrentPosition());
             telemetry.addData(">", "Press Stop to end test.");
             telemetry.update();
 

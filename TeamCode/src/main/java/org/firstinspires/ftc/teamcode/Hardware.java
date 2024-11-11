@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.hardware.AutoClearEncoder;
@@ -46,7 +47,7 @@ public class Hardware extends HardwareMapper {
     @HardwareName("arm")
     @ZeroPower(DcMotor.ZeroPowerBehavior.BRAKE)
     @AutoClearEncoder
-    public DcMotor arm;
+    public DcMotorEx arm;
 
     /*
         @HardwareName("frontLeft")
