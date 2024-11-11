@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
@@ -110,6 +111,9 @@ public class MecanumTeleOp extends LinearOpMode {
             telemetry.addData("bl power", backLeftPower);
             telemetry.addData("br power", backRightPower);
             telemetry.update();
+
+            servoMoves();
+           // wrist();
         }
 
     }
@@ -239,5 +243,28 @@ public class MecanumTeleOp extends LinearOpMode {
         arm.setTargetPosition(deg2arm(armTargetPosDeg));
         arm.setPower(emerg ? 1.0 : 0.3);
         telemetry.addData("arm deg", degrees);
+    }
+    public void servoMoves() {
+        Servo servo = hardwareMap.get(Servo.class, "claw");
+        final double open = 0.62;
+        final double close = 0.2;
+        if (gamepad2.left_bumper) {
+            servo.setPosition(0.62);
+        } else if (gamepad2.right_bumper) {
+            servo.setPosition(0.2);
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    public void wrist() {
+        Servo servo = hardwareMap.get(Servo.class,"twist");
+        Hardware hardware = new Hardware(hardwareMap);
+        final double Up = 1;     // Maximum rotational position
+        final double Down = 0.0;     // Minimum rotational position
+        if(gamepad2.right_stick_x>=0.5 && gamepad2.right_stick_y>=-0.25 && gamepad2.right_stick_y<=0.25){
+            hardware.twist.setPosition(Up);
+        } else if (gamepad2.right_stick_x<=-0.5 && gamepad2.right_stick_y>=-0.5 && gamepad2.right_stick_y<=0.5){
+            hardware.twist.setPosition(Down);
+        }
     }
 }
