@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 /*
@@ -75,39 +76,77 @@ public class ServoTeleOp extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
+        double wrist = 0.5;
+        double twist = 0.5;
+        double claw = 0.5;
+        int arm = 0;
+        h.arm.setTargetPosition(arm);
+        h.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        h.arm.setPower(0.7);
 
         // Scan servo till stop pressed.
         while (opModeIsActive()) {
 
-            if (gamepad1.dpad_down) {
-
-            }
-
-
             // slew the servo, according to the rampUp (direction) variable.
             if (gamepad1.y) {
                 // Keep stepping up until we hit the max value.
-                position += INCREMENT;
-                if (position >= MAX_POS) {
-                    position = MAX_POS;
-                    rampUp = !rampUp;   // Switch ramp direction
+                claw += INCREMENT;
+                if (claw >= 1.0) {
+                    claw = 1.0;
                 }
             } else if (gamepad1.a) {
                 // Keep stepping down until we hit the min value.
-                position -= INCREMENT;
-                if (position <= MIN_POS) {
-                    position = MIN_POS;
-                    rampUp = !rampUp;  // Switch ramp direction
+                claw -= INCREMENT;
+                if (claw <= 0) {
+                    claw = 0;
                 }
             }
+            if (gamepad1.dpad_up) {
+                // Keep stepping up until we hit the max value.
+                wrist += INCREMENT;
+                if (wrist >= 1.0) {
+                    wrist = 1.0;
+                }
+            } else if (gamepad1.dpad_down) {
+                // Keep stepping down until we hit the min value.
+                wrist -= INCREMENT;
+                if (wrist <= 0) {
+                    wrist = 0;
+                }
+            }
+            if (gamepad1.x) {
+                // Keep stepping up until we hit the max value.
+                twist += INCREMENT;
+                if (twist >= 1.0) {
+                    twist = 1.0;
+                }
+            } else if (gamepad1.a) {
+                // Keep stepping down until we hit the min value.
+                twist -= INCREMENT;
+                if (twist <= 0) {
+                    twist = 0;
+                }
+            }
+            double stick = -gamepad1.left_stick_y;
+            if (stick > 0.7) {
+                arm += 5;
+            } else if (stick < -0.7) {
+                arm -= 5;
+            }
+            h.wrist.setPosition(wrist);
+            h.twist.setPosition(twist);
+            h.claw.setPosition(claw);
+            h.arm.setTargetPosition(arm);
             //0.02 is open and 0.50 is closed.
 
             // Display the current value
-            telemetry.addData("Servo Position", "%5.2f", position);
+            telemetry.addData("wrist", "%5.2f", wrist);
+            telemetry.addData("twist", "%5.2f", twist);
+            telemetry.addData("claw", "%5.2f", claw);
+            telemetry.addData("arm", "%5.2f", arm);
             telemetry.addData(">", "Press Stop to end test.");
             telemetry.update();
 
-            servo.setPosition(position);
             // Set the servo to the new position and pause;
 //            servoMoves();
 //            wrist();
