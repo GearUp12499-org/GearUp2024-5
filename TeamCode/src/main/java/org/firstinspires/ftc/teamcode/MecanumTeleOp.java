@@ -28,6 +28,7 @@ public class MecanumTeleOp extends LinearOpMode {
         hardware.backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         hardware.frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        hardware.verticalSlide.setTargetPosition(0);
         hardware.arm.setTargetPosition(0);
         armTargetPosDeg = 0.0;
         hardware.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -172,7 +173,7 @@ public class MecanumTeleOp extends LinearOpMode {
         }
 
         if (gamepad2.dpad_down && verticalPosition > minVerticalLiftTicks) {
-            hardware.verticalSlide.setPower(-0.2);
+            hardware.verticalSlide.setPower(-0.5);
             hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             maintainHeightTicks = verticalPosition;
             return;
@@ -191,10 +192,14 @@ public class MecanumTeleOp extends LinearOpMode {
             targetLift(hardware, 0);
             maintainHeightTicks = 0;
         }
-        hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        hardware.verticalSlide.setPower(0.5);
-        hardware.verticalSlide.setTargetPosition(maintainHeightTicks);
-
+        if (verticalPosition < 47 && maintainHeightTicks < 47) {
+            hardware.verticalSlide.setPower(0);
+            hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        } else {
+            hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            hardware.verticalSlide.setPower(0.5);
+            hardware.verticalSlide.setTargetPosition(maintainHeightTicks);
+        }
     }
 
 
