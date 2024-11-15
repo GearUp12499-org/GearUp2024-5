@@ -156,31 +156,48 @@ public class MecanumTeleOp extends LinearOpMode {
         hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
+    int maintainHeightTicks = 0;
 
     private void lift(Hardware hardware) {
 
         //Hardware hardware = new Hardware(hardwareMap);
         int verticalPosition = hardware.encoderVerticalSlide.getCurrentPosition();
 
+
         if (gamepad2.dpad_up && verticalPosition < maxVerticalLiftTicks) {
             hardware.verticalSlide.setPower(0.5);
-        } else if (gamepad2.dpad_down && verticalPosition > minVerticalLiftTicks) {
-            hardware.verticalSlide.setPower(-0.5);
-        } else {
-            hardware.verticalSlide.setPower(0.0);
+            hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            maintainHeightTicks = verticalPosition;
+            return;
+        }
+
+        if (gamepad2.dpad_down && verticalPosition > minVerticalLiftTicks) {
+            hardware.verticalSlide.setPower(-0.2);
+            hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            maintainHeightTicks = verticalPosition;
+            return;
         }
 
         if (gamepad2.b) {
             targetLift(hardware, highChamberTicks);
+            maintainHeightTicks = highChamberTicks;
         }
 
         if (gamepad2.y) {
             targetLift(hardware, highBasketTicks);
+            maintainHeightTicks = highBasketTicks;
         }
         if (gamepad2.a) {
             targetLift(hardware, 0);
+            maintainHeightTicks = 0;
         }
+        hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        hardware.verticalSlide.setPower(0.5);
+        hardware.verticalSlide.setTargetPosition(maintainHeightTicks);
+
     }
+
+
 
     double armTargetPosDeg = 0.0;
     int liftMinClearanceTicks = 180;
