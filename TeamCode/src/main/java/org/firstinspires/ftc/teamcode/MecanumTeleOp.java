@@ -39,6 +39,7 @@ public class MecanumTeleOp extends LinearOpMode {
         hardware.arm.setPower(0.2);
         hardware.wrist.setPosition(0.28);
         hardware.twist.setPosition(Twistpos);
+        hardware.claw.setPosition(0.55);
         IntegratingGyroscope gyro;
         NavxMicroNavigationSensor navxMicro;
         ElapsedTime timer = new ElapsedTime();
@@ -103,6 +104,7 @@ public class MecanumTeleOp extends LinearOpMode {
             hardware.backLeft.setPower(backLeftPower * currentSpeed);
             hardware.frontRight.setPower(frontRightPower * currentSpeed);
             hardware.backRight.setPower(backRightPower * currentSpeed);
+
             wrist();
             servoMoves();
             twist();
@@ -111,7 +113,7 @@ public class MecanumTeleOp extends LinearOpMode {
                 ScoreHighBasket(hardware);
             }
             if(gamepad2.x){
-                PickUpYellow(hardware);
+                PickUpYellowTeleOp(hardware);
             }
             arm(hardware);
             int verticalPosition = hardware.encoderVerticalSlide.getCurrentPosition();
@@ -244,10 +246,10 @@ public class MecanumTeleOp extends LinearOpMode {
         if (hardware.encoderVerticalSlide.getCurrentPosition() <= liftMinClearanceTicks) {
             // get outta there
             if (stick_pos > 0.7 && (armTargetPosDeg <= 5 || (armTargetPosDeg >= 35 && armTargetPosDeg <= 110))) {
-                armTargetPosDeg += 1;
+                armTargetPosDeg += 0.5;
             }
             if (stick_pos < -0.7 && (armTargetPosDeg >= 35 || (armTargetPosDeg >= -110 && armTargetPosDeg <= 5))) {
-                armTargetPosDeg -= 1;
+                armTargetPosDeg -= 0.5;
             }
 
             if (armTargetPosDeg > 5 && armTargetPosDeg < 12.5) {
@@ -353,6 +355,22 @@ public class MecanumTeleOp extends LinearOpMode {
         sleep(500);
         hardware.arm.setTargetPosition(0);
         sleep(500);
+
+    }
+    public void PickUpYellowTeleOp(Hardware hardware){
+        hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        hardware.verticalSlide.setPower(VerticalSlideSpeed);
+        hardware.verticalSlide.setTargetPosition(deg2arm(107.2625));
+        armTargetPosDeg = 107.2625;
+        maintainHeightTicks = 224;
+        sleep(500);
+        hardware.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        hardware.arm.setPower(0.5);
+        hardware.arm.setTargetPosition(67);
+        sleep(500);
+        hardware.wrist.setPosition(0.94);
+        sleep(500);
+        hardware.claw.setPosition(0.02);
 
     }
 }
