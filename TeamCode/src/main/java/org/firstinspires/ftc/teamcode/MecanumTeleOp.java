@@ -360,8 +360,7 @@ public class MecanumTeleOp extends LinearOpMode {
     public void PickUpYellowTeleOp(Hardware hardware){
         hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         hardware.verticalSlide.setPower(VerticalSlideSpeed);
-        hardware.verticalSlide.setTargetPosition(deg2arm(107.2625));
-        armTargetPosDeg = 107.2625;
+        hardware.verticalSlide.setTargetPosition(224);
         maintainHeightTicks = 224;
         sleep(500);
         hardware.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -372,5 +371,13 @@ public class MecanumTeleOp extends LinearOpMode {
         sleep(500);
         hardware.claw.setPosition(0.02);
 
+       // hardware.arm.setTargetPosition(deg2arm(107.2625));
+         hardware.arm.setTargetPosition(deg2arm(12.5));
+
+        armTargetPosDeg = 12.5;
+        VerticalSlideSpeed=0;
+        hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        hardware.verticalSlide.setPower(VerticalSlideSpeed);
+        hardware.verticalSlide.setTargetPosition(0);
     }
 }
