@@ -23,6 +23,9 @@ public class MecanumTeleOp extends LinearOpMode {
     double Wristpos = 0.28;
     double Twistpos = 0.17;
     double VerticalSlideSpeed = 0.75;
+    double fClawClose = 0.46;
+    double fClawPos = 0;
+    double horizontalSlide = 0;
 
     @Override
     public void runOpMode() {
@@ -34,6 +37,7 @@ public class MecanumTeleOp extends LinearOpMode {
         hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         hardware.verticalSlide.setTargetPosition(0);
         hardware.arm.setTargetPosition(0);
+        hardware.clawFlip.setPosition(0);
         armTargetPosDeg = 0.0;
         hardware.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         hardware.arm.setPower(0.2);
@@ -106,6 +110,8 @@ public class MecanumTeleOp extends LinearOpMode {
             wrist();
             servoMoves();
             twist();
+            horizontalSLide(hardware);
+            fClawTest(hardware);
             lift(hardware);
             if (gamepad2.y) {
                 ScoreHighBasket(hardware);
@@ -353,6 +359,39 @@ public class MecanumTeleOp extends LinearOpMode {
         sleep(500);
         hardware.arm.setTargetPosition(0);
         sleep(500);
+
+/////////////////////////////////////////////////////////////////////////////////////
+    }
+    public void horizontalSLide(Hardware hardware) {
+
+        if(gamepad1.x){
+            horizontalSlide += 0.01;
+            hardware.horizontalSlide.setPosition(horizontalSlide);
+        }
+        if (gamepad1.b){
+            horizontalSlide += -0.01;
+            hardware.horizontalSlide.setPosition(horizontalSlide);
+        }
+
+        if(gamepad1.y){
+            fClawPos += .01;
+            hardware.clawFlip.setPosition(fClawPos);
+        }
+        if(gamepad1.a){
+            fClawPos += -.01;
+            hardware.clawFlip.setPosition(fClawPos);
+        }
+        telemetry.addData("horizontal slide", horizontalSlide);
+    }
+    ///////////////////////////////////////////////
+    public void fClawTest (Hardware hardware) {
+        if (gamepad1.right_bumper){
+            hardware.clawFront.setPosition(fClawClose);
+        }
+        if (gamepad1.left_bumper){
+            hardware.clawFront.setPosition(0);
+        }
+
 
     }
 }
