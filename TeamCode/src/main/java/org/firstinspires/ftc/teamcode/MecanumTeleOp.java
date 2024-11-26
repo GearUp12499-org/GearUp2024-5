@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.LLStatus;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import android.annotation.SuppressLint;
@@ -15,7 +19,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
+import java.util.List;
 
 @TeleOp
 public class MecanumTeleOp extends LinearOpMode {
@@ -23,6 +29,8 @@ public class MecanumTeleOp extends LinearOpMode {
     double Wristpos = 0.28;
     double Twistpos = 0.17;
     double VerticalSlideSpeed = 0.75;
+    private Limelight3A limelight;
+    double stopDist = 6.0; // stop 6 inches away from the sample on the wall
 
     @Override
     public void runOpMode() {
@@ -44,6 +52,11 @@ public class MecanumTeleOp extends LinearOpMode {
         ElapsedTime timer = new ElapsedTime();
         navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "gyro");
         gyro = (IntegratingGyroscope) navxMicro;
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        telemetry.setMsTransmissionInterval(11);
+        limelight.pipelineSwitch(0);
+        //Starts polling for data
+        limelight.start();
 
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
 
@@ -62,7 +75,36 @@ public class MecanumTeleOp extends LinearOpMode {
 
         double yaw_offset = 0.0;
         while (opModeIsActive()) {
+            LLResult result = limelight.getLatestResult();
+            LLStatus status = limelight.getStatus();
+            telemetry.addData("Name", "%s",
+                    status.getName());
+            telemetry.addData("LL", "Temp: %.1fC, CPU: %.1f%%, FPS: %d",
+                    status.getTemp(), status.getCpu(),(int)status.getFps());
+            telemetry.addData("Pipeline", "Index: %d, Type: %s",
+                    status.getPipelineIndex(), status.getPipelineType());
 
+            if(result != null) {
+                Pose3D botpose = result.getBotpose();
+                if (result.isValid()) {
+                    // Access detector results
+                    List<LLResultTypes.DetectorResult> detectorResults = result.getDetectorResults();
+                    for (LLResultTypes.DetectorResult dr : detectorResults) {
+                        telemetry.addData("Detector", "Class: %s, Area: %.2f", dr.getClassName(), dr.getTargetArea());
+                    }
+                    telemetry.addData("tx", result.getTx());
+                    telemetry.addData("ty", result.getTy());
+                    telemetry.addData("Avg Dist: ", result.getBotposeAvgDist());
+                    telemetry.addData("Avg Area: ", result.getTa());
+                    telemetry.addData("Botpose", botpose.toString());
+
+                    telemetry.update();
+                    sleep(5000);
+                } else {
+                    telemetry.addData("Limelight", "No data available");
+                }
+
+            }
             Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
             if (gamepad1.back) {
                 yaw_offset = angles.firstAngle;
@@ -205,6 +247,10 @@ public class MecanumTeleOp extends LinearOpMode {
             hardware.verticalSlide.setPower(VerticalSlideSpeed);
             hardware.verticalSlide.setTargetPosition(maintainHeightTicks);
         }
+        if(gamepad1.b){
+            BackOut(hardware);
+        }
+
     }
 
 
@@ -359,7 +405,15 @@ public class MecanumTeleOp extends LinearOpMode {
         hardware.arm.setTargetPosition(0);
         sleep(500);
     }
-
+    private void BackOut(Hardware hardware){ //Backs out after collecting specimen - still need to test
+        hardware.driveMotors.setAll(0.3);
+        sleep(1000);
+        hardware.verticalSlide.setTargetPosition(224);
+        sleep(1000);
+        hardware.driveMotors.setAll(-0.3);
+        sleep(500);
+        hardware.driveMotors.setAll(0);
+    }
     private void PickUpSpecimen(Hardware hardware) {
         // Lift --> arm out --> Lift to 0 --> move wrist --> open claw
         hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -381,5 +435,11 @@ public class MecanumTeleOp extends LinearOpMode {
         hardware.claw.setPosition(0.02); // TBD
 //        sleep(5000);
         armTargetPosDeg = 87.58;
+    }
+
+    private Double[] centerToTarget(double tx, double ta, double botheading){
+        Double[] driveDists = new Double[3]; // turn dist, strafe dist, drive forward dist
+        driveDists[0] = -botheading;
+        return driveDists;
     }
 }
