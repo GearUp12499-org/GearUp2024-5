@@ -368,7 +368,7 @@ public class MecanumTeleOp extends LinearOpMode {
             horizontalSlide += 0.01;
             hardware.horizontalSlide.setPosition(horizontalSlide);
         }
-        if (gamepad1.b){
+        if (gamepad1.b) {
             horizontalSlide += -0.01;
             hardware.horizontalSlide.setPosition(horizontalSlide);
         }
