@@ -226,7 +226,6 @@ public class MecanumTeleOp extends LinearOpMode {
                 armTargetPosDeg -= 1;
             }
 
-
             if (armTargetPosDeg > 5 && armTargetPosDeg < 12.5) {
                 emerg = true;
                 armTargetPosDeg = 5;
