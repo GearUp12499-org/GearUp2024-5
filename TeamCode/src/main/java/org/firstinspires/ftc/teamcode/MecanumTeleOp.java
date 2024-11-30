@@ -373,6 +373,7 @@ public class MecanumTeleOp extends LinearOpMode {
             hardware.horizontalSlide.setPosition(horizontalSlide);
         }
 
+
         if(gamepad1.y){
             fClawPos += .01;
             hardware.clawFlip.setPosition(fClawPos);
