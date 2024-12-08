@@ -91,6 +91,12 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     @HardwareName("wrist")
     public Servo wrist;
 
+    @HardwareName("clawFront")
+    public Servo clawFront;
+
+    @HardwareName("clawFlip")
+    public Servo clawFlip;
+
 
     @Override
     public Encoder getLeftEncoder() { return encoderLeft; }

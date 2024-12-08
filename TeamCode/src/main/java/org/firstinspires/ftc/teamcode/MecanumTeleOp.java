@@ -23,7 +23,8 @@ public class MecanumTeleOp extends LinearOpMode {
     double Wristpos = 0.28;
     double Twistpos = 0.17;
     double VerticalSlideSpeed = 0.75;
-
+    double ClawFrontPos = 0.5;
+    double ClawFlipPos = 0.5;
     @Override
     public void runOpMode() {
         hardware = new Hardware(hardwareMap);
@@ -106,6 +107,7 @@ public class MecanumTeleOp extends LinearOpMode {
             wrist();
             servoMoves();
             twist();
+            stepper(hardware);
             lift(hardware);
             if(gamepad1.x){
                 transfer(hardware);
@@ -335,6 +337,7 @@ public class MecanumTeleOp extends LinearOpMode {
         hardware.verticalSlide.setTargetPosition(0);
         maintainHeightTicks = 0;
     }
+   // /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
     public void PickUpYellow(Hardware hardware){
         hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         hardware.verticalSlide.setPower(VerticalSlideSpeed);
@@ -362,7 +365,7 @@ public class MecanumTeleOp extends LinearOpMode {
         hardware.arm.setTargetPosition(0);
         sleep(500);
     }
-
+///\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
     private void PickUpSpecimen(Hardware hardware) {
         // Lift --> arm out --> Lift to 0 --> move wrist --> open claw
         hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -397,6 +400,7 @@ public class MecanumTeleOp extends LinearOpMode {
         sleep(500);
         armTargetPosDeg = 0;
     }
+    ///\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
     private void transfer(Hardware hardware){
         //hardware.arm.setPower(-0.5);
         hardware.verticalSlide.setTargetPosition(900);
@@ -435,4 +439,26 @@ public class MecanumTeleOp extends LinearOpMode {
 
 
     }
-}
+    ///\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+    private void stepper(Hardware hardware){
+        if(gamepad1.dpad_left) {
+            ClawFrontPos += -0.01;
+        }
+        if(gamepad1.dpad_right){
+            ClawFrontPos += 0.01;
+        }
+        hardware.clawFront.setPosition(ClawFrontPos);
+        if(gamepad1.dpad_up) {
+            ClawFlipPos += -0.01;
+        }
+        if(gamepad1.dpad_down){
+            ClawFlipPos += 0.01;
+        }
+        hardware.clawFlip.setPosition(ClawFrontPos);
+
+        telemetry.addData("FrontClawPos", ClawFrontPos);
+        telemetry.addData("FlipClawPos", ClawFlipPos);
+        }
+
+
+    }
