@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static java.lang.Math.abs;
+
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
@@ -109,7 +111,7 @@ public class MecanumTeleOp extends LinearOpMode {
             if (gamepad1.back) {
                 yaw_offset = angles.firstAngle;
             }
-            double botheading = angles.firstAngle - yaw_offset;
+            double botheading = angles.firstAngle - yaw_offset; //sets 0 as the starting position of the robot
             telemetry.addData("Heading", formatAngle(angles.angleUnit, botheading));
 //                    .addData("heading", formatAngle(angles.angleUnit, angles.firstAngle))
 //                    .addData("roll", formatAngle(angles.angleUnit, angles.secondAngle))
@@ -129,7 +131,7 @@ public class MecanumTeleOp extends LinearOpMode {
             // Denominator is the largest motor power (absolute value) or 1
             // This ensures all the powers maintain the same ratio,
             // but only if at least one is out of the range [-1, 1]
-            double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+            double denominator = Math.max(abs(rotY) + abs(rotX) + abs(rx), 1);
             double frontLeftPower = (rotY + rotX + rx) / denominator;
             double backLeftPower = (rotY - rotX + rx) / denominator;
             double frontRightPower = (rotY - rotX - rx) / denominator;
@@ -197,7 +199,7 @@ public class MecanumTeleOp extends LinearOpMode {
         int allowedErrorTicks = 5;
         while (Timer.time() < timeoutSeconds) {
             int verticalPosition = hardware.encoderVerticalSlide.getCurrentPosition();
-            if (Math.abs(verticalPosition - targetPosition) < allowedErrorTicks) {
+            if (abs(verticalPosition - targetPosition) < allowedErrorTicks) {
                 hardware.verticalSlide.setPower(0);
                 break;
             }
@@ -437,9 +439,28 @@ public class MecanumTeleOp extends LinearOpMode {
         armTargetPosDeg = 87.58;
     }
 
-    private Double[] centerToTarget(double tx, double ta, double botheading){
-        Double[] driveDists = new Double[3]; // turn dist, strafe dist, drive forward dist
-        driveDists[0] = -botheading;
+    private Double[] moveToTargetMeasurements(double bot, double tx, double r, double x, double d){
+        /*
+        Compute the forward and strafe needed to get to a position x inches from the specimen given that
+        current position is:
+          - bot: bot heading
+          - tx: angle to specimen
+          - r: range to specimen
+         */
+        Double[] driveDists = new Double[2]; // strafe dist, drive forward dist
+        double q = Math.sqrt(r*r + x * x - 2 * r * x * Math.cos(bot + tx));
+        if (abs(q) < 0.0001){
+            driveDists[0] = 0.0;
+            driveDists[0] = 0.0;
+            return driveDists;
+        }
+        double psi1 = Math.asin(x * Math.sin(bot + tx) / q);
+        double psi2 = 1.5708 - (tx + psi1);
+        driveDists[0] = q * Math.cos(psi2); //strafe dist
+        driveDists[1] = q * Math.sin(psi2); //forward dist
+
+        driveDists[0] -= d*Math.cos(bot);
+        driveDists[1] -= d*Math.sin(bot);
         return driveDists;
     }
 }
