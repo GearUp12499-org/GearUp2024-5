@@ -56,7 +56,6 @@ public class MecanumTeleOp extends LinearOpMode {
         gyro = (IntegratingGyroscope) navxMicro;
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         telemetry.setMsTransmissionInterval(11);
-        limelight.pipelineSwitch(0);
         //Starts polling for data
         limelight.start();
 
@@ -77,6 +76,7 @@ public class MecanumTeleOp extends LinearOpMode {
 
         double yaw_offset = 0.0;
         while (opModeIsActive()) {
+            limelight.pipelineSwitch(1);
             LLResult result = limelight.getLatestResult();
             LLStatus status = limelight.getStatus();
             telemetry.addData("Name", "%s",
@@ -89,19 +89,11 @@ public class MecanumTeleOp extends LinearOpMode {
             if(result != null) {
                 Pose3D botpose = result.getBotpose();
                 if (result.isValid()) {
-                    // Access detector results
-                    List<LLResultTypes.DetectorResult> detectorResults = result.getDetectorResults();
-                    for (LLResultTypes.DetectorResult dr : detectorResults) {
-                        telemetry.addData("Detector", "Class: %s, Area: %.2f", dr.getClassName(), dr.getTargetArea());
-                    }
                     telemetry.addData("tx", result.getTx());
                     telemetry.addData("ty", result.getTy());
-                    telemetry.addData("Avg Dist: ", result.getBotposeAvgDist());
                     telemetry.addData("Avg Area: ", result.getTa());
-                    telemetry.addData("Botpose", botpose.toString());
-
-                    telemetry.update();
-                    sleep(5000);
+                   // telemetry.addData("Avg Dist: ", result.getBotposeAvgDist());
+                 //   telemetry.addData("Botpose", botpose.toString());
                 } else {
                     telemetry.addData("Limelight", "No data available");
                 }
