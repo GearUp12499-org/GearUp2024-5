@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @TeleOp
@@ -28,7 +29,7 @@ public class LimelightTestingTeleOp extends LinearOpMode {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100);
         telemetry.setMsTransmissionInterval(11);
-        limelight.pipelineSwitch(1);
+        limelight.pipelineSwitch(3);
         //Starts polling for data
         limelight.start();
 
@@ -66,8 +67,24 @@ public class LimelightTestingTeleOp extends LinearOpMode {
                 telemetry.addData("ty", result.getTy());
                 telemetry.addData("Avg Area: ", result.getTa());
 
-                    // telemetry.addData("Avg Dist: ", result.getBotposeAvgDist());
-                    //   telemetry.addData("Botpose", botpose.toString());
+                List<LLResultTypes.ColorResult> colorTargets = result.getColorResults();
+                int counter = 0;
+                for (LLResultTypes.ColorResult colorTarget : colorTargets) {
+                    ArrayList<Double> corners = new ArrayList<Double>();
+                    for(List<Double> eachCorner: colorTarget.getTargetCorners()){
+                        if(counter > 1){
+                            break;
+                        }
+                        corners.add(eachCorner.get(counter));
+                        counter++;
+                        
+                    }
+                    telemetry.addData("First Value of Corner" + corners.get(0), "SecondValue: " + corners.get(1));
+                }
+
+
+                //telemetry.addData("Avg Dist: ", result.getBotposeAvgDist());
+                //telemetry.addData("Botpose", botpose.toString());
 
             } else {
                 telemetry.addData("Limelight", "No data available");
