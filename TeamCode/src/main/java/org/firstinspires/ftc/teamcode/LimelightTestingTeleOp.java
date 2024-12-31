@@ -68,18 +68,11 @@ public class LimelightTestingTeleOp extends LinearOpMode {
                 telemetry.addData("Avg Area: ", result.getTa());
 
                 List<LLResultTypes.ColorResult> colorTargets = result.getColorResults();
-                int counter = 0;
                 for (LLResultTypes.ColorResult colorTarget : colorTargets) {
-                    ArrayList<Double> corners = new ArrayList<Double>();
                     for(List<Double> eachCorner: colorTarget.getTargetCorners()){
-                        if(counter > 1){
-                            break;
-                        }
-                        corners.add(eachCorner.get(counter));
-                        counter++;
-                        
+                        telemetry.addData("First Value of Corner" + eachCorner.get(0), "Second Value of Corner: " + eachCorner.get(1));
+                        sleep(1000);
                     }
-                    telemetry.addData("First Value of Corner" + corners.get(0), "SecondValue: " + corners.get(1));
                 }
 
 
