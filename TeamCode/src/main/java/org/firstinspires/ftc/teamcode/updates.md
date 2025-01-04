@@ -6,6 +6,10 @@
 - make actual slow mode / don't do that anyway
 - Play with the slopes on the ramping functions
 
+## Hardware changes
+- Integrate second lift motor
+- Retime autos for faster lift
+
 ## real actual splines
 > stretch goal
 
