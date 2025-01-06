@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -135,6 +136,9 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     @HardwareName("clawFront")
     public Servo clawFront;
 
+    @HardwareName("clawTwist")
+    public Servo clawFrontTwist;
+
     @HardwareName("clawFlip")
     public Servo clawFlip;
 
@@ -144,14 +148,38 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     @HardwareName("horizontalLeft")
     public Servo horizontalLeft;
 
+    @HardwareName("leftAscent")
+    public Servo leftAscent;
+
+    @HardwareName("rightAscent")
+    public Servo rightAscent;
+
     @HardwareName("lightLeft")
     public Servo lightLeft;
 
     @HardwareName("lightRight")
     public Servo lightRight;
 
+    @HardwareName("limelightLight")
+    public Servo limelightLight;
+
     @HardwareName("clawColor")
     public ColorSensor clawColor;
+
+    @HardwareName("distanceFrontLeft")
+    public Rev2mDistanceSensor distanceFrontLeft;
+
+    @HardwareName("distanceFrontRight")
+    public Rev2mDistanceSensor distanceFrontRight;
+
+    @HardwareName("distanceBackLeft")
+    public Rev2mDistanceSensor distanceBackLeft;
+
+    @HardwareName("distanceBackRight")
+    public Rev2mDistanceSensor distanceBackRight;
+
+    @HardwareName("clawColor")
+    public ColorSensor clawColorSensor;
 
     @Override
     public Encoder getLeftEncoder() {
