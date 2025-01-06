@@ -107,8 +107,8 @@ public class MecanumTeleOp2 extends LinearOpMode {
         hardware.frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         hardware.backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         hardware.frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        hardware.verticalSlide.setTargetPosition(0);
-        hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        hardware.verticalSlide1.setTargetPosition(0);
+        hardware.verticalSlide1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         hardware.clawFlip.setPosition(Hardware.FLIP_UP);
         hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
 
@@ -156,7 +156,7 @@ public class MecanumTeleOp2 extends LinearOpMode {
 
         // this is the scheduler that will be used during the main program
         scheduler = new MultitaskScheduler();
-        vLiftProxy = scheduler.add(new VLiftProxy(scheduler, hardware.verticalSlide));
+        vLiftProxy = scheduler.add(new VLiftProxy(scheduler, hardware.verticalSlide1));
         hSlideProxy = scheduler.add(new HSlideProxy(scheduler, hardware));
         hClawProxy = scheduler.add(new HClawProxy(scheduler, hardware));
 
@@ -452,7 +452,7 @@ public class MecanumTeleOp2 extends LinearOpMode {
 
     public void ScoreHighBasket2() {
         // prevent doing this by accident
-        if (hardware.verticalSlide.getCurrentPosition() < 1000) return;
+        if (hardware.verticalSlide1.getCurrentPosition() < 1000) return;
         if (hardware.arm.getCurrentPosition() < 190) return;
         abandonLock(Locks.ArmAssembly);
         abandonLock(vLiftProxy.CONTROL);

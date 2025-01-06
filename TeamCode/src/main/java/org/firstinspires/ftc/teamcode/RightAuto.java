@@ -140,8 +140,8 @@ public class RightAuto extends LinearOpMode {
         hardware.frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         hardware.backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         hardware.frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        hardware.verticalSlide.setTargetPosition(0);
-        hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        hardware.verticalSlide1.setTargetPosition(0);
+        hardware.verticalSlide1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         hardware.clawFlip.setPosition(Hardware.FLIP_UP);
         hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
 
@@ -171,16 +171,16 @@ public class RightAuto extends LinearOpMode {
                 .then(run(() -> hardware.claw.setPosition(CLAW_CLOSE)))
                 .then(wait(1.000))
                 .then(run(() -> {
-                    hardware.verticalSlide.setTargetPosition(300);
-                    hardware.verticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    hardware.verticalSlide.setPower(VERTICAL_SLIDE_SPEED);
+                    hardware.verticalSlide1.setTargetPosition(300);
+                    hardware.verticalSlide1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    hardware.verticalSlide1.setPower(VERTICAL_SLIDE_SPEED);
                 }))
                 .then(wait(1.000))
                 .then(run(() -> hardware.wrist.setPosition(WRIST_BACK)))
                 .then(wait(1.000))
                 .then(run(() -> hardware.arm.setTargetPosition(10)))
                 .then(wait(1.000))
-                .then(run(() -> hardware.verticalSlide.setTargetPosition(0)));
+                .then(run(() -> hardware.verticalSlide1.setTargetPosition(0)));
         return new Pair<>(first, last);
     }
 
@@ -329,7 +329,7 @@ public class RightAuto extends LinearOpMode {
 
         hardwareInit();
 
-        vLiftProxy = scheduler.add(new VLiftProxy(scheduler, hardware.verticalSlide));
+        vLiftProxy = scheduler.add(new VLiftProxy(scheduler, hardware.verticalSlide1));
         hSlideProxy = scheduler.add(new HSlideProxy(scheduler, hardware));
         hClawProxy = scheduler.add(new HClawProxy(scheduler, hardware));
 

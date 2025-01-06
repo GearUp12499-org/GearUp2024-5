@@ -159,7 +159,7 @@ class HWTest : LinearOpMode() {
                 testEncoderB(hw.arm, "encArm")
             }
             if (yesno("Test lift?")) {
-                testMotor(hw.verticalSlide, "verticalSlide")
+                testMotor(hw.verticalSlide1, "verticalSlide")
                 stopAll()
             }
         } catch (_: StopException) {}
