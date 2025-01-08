@@ -108,6 +108,7 @@ public class LimelightTestingTeleOp extends LinearOpMode {
                 telemetry.addData("tx", result.getTx());
                 telemetry.addData("ty", result.getTy());
                 telemetry.addData("Avg Area: ", result.getTa());
+                telemetry.addData("Pipeline Number: ", limelight.getStatus().getPipelineIndex());
 
                 List<LLResultTypes.ColorResult> colorTargets = result.getColorResults();
                 for (LLResultTypes.ColorResult colorTarget : colorTargets) {

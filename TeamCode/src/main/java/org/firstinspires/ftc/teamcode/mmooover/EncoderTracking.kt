@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.mmooover
 
-import org.apache.commons.math3.stat.regression.SimpleRegression
 import org.firstinspires.ftc.teamcode.hardware.Encoder
 import kotlin.math.cos
 import kotlin.math.sin
@@ -20,6 +19,8 @@ class EncoderTracking @JvmOverloads constructor(
         const val HIST_SIZE = 10
     }
 
+    var orientationProvider: (() -> Double)? = null
+
     private fun tick2inch(ticks: Int): Double {
         return (ticks / ticksPerRotation) * 2 * StrictMath.PI * radiusInches
     }
@@ -33,7 +34,7 @@ class EncoderTracking @JvmOverloads constructor(
     var heading: Double = origin.heading
     var x: Double = origin.x
     var y: Double = origin.y
-    val currentPose get() = Pose(x, y, heading)
+    private val currentPose get() = Pose(x, y, heading)
 
     var lastLeft: Double
     var lastCenter: Double
@@ -78,7 +79,12 @@ class EncoderTracking @JvmOverloads constructor(
         val deltaForward = (deltaLeft + deltaRight) / 2.0
         val deltaStrafe = deltaCenter - forwardOffset * deltaTurn
         // Predicts how much our robot turns so we know how much forward and strafe we now need - the heading changes enough in each loop that we need to predict it
-        val nextHeading = heading + deltaTurn
+        val nextHeading: Double
+        if (orientationProvider != null) {
+            nextHeading = orientationProvider!!.invoke()
+        } else {
+            nextHeading = heading + deltaTurn
+        }
         val avgHead = (heading + nextHeading) / 2.0
         val deltaX = deltaForward * cos(avgHead) - deltaStrafe * sin(avgHead)
         val deltaY = deltaForward * sin(avgHead) + deltaStrafe * cos(avgHead)
