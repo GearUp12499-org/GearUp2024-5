@@ -17,11 +17,53 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Arrays;
 
 @TeleOp
 public class LimelightTestingTeleOp extends LinearOpMode {
     private Hardware hardware;
     private Limelight3A limelight;
+
+    private static double distance(double x1, double y1, double x2, double y2) {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
+
+    private List<List<double[]>> distances = new ArrayList<>();
+
+    private List<List<double[]>> getDiagonalPairs(List<double[]> corners) {
+        double[] reference = corners.get(0);
+
+        for (int i = 1; i < corners.size(); i++) {
+            double[] corner = corners.get(i);
+            double d = distance(reference[0], reference[1], corner[0], corner[1]);
+            List<double[]> pair = new ArrayList<>();
+            pair.add(corner);
+            pair.add(reference);
+            distances.add(pair);
+        }
+
+        distances.sort((a, b) -> Double.compare(distance(b.get(0)[0], b.get(0)[1], b.get(1)[0], b.get(1)[1]),
+                distance(a.get(0)[0], a.get(0)[1], a.get(1)[0], a.get(1)[1])));
+
+        return distances;
+    }
+
+    public List<double[]> getLongPair() {
+        return distances.get(1);
+    }
+
+    public double getAngle(List<double[]> longPair) {
+        double P1x = longPair.get(0)[0];
+        double P1y = longPair.get(0)[1];
+        double P2x = longPair.get(1)[0];
+        double P2y = longPair.get(1)[1];
+
+        double angle = Math.atan2(Math.abs(P2y - P1y), P2x - P1x);
+        return Math.toDegrees(angle) - 90;
+    }
 
     @Override
     public void runOpMode() {
@@ -69,11 +111,19 @@ public class LimelightTestingTeleOp extends LinearOpMode {
 
                 List<LLResultTypes.ColorResult> colorTargets = result.getColorResults();
                 for (LLResultTypes.ColorResult colorTarget : colorTargets) {
+                    List<double[]> corners = new ArrayList<double[]>();
                     for(List<Double> eachCorner: colorTarget.getTargetCorners()){
-                        telemetry.addData("First Value of Corner" + eachCorner.get(0), "Second Value of Corner: " + eachCorner.get(1));
-                        sleep(1000);
+                        if (corners.size() >= 4) {
+                            break;
+                        }
+                        telemetry.addData("First Value of Corner", eachCorner);
+                        double[] eachCorner2 = eachCorner.stream().mapToDouble(Double::doubleValue).toArray();
+                        corners.add(eachCorner2);
                     }
+                    getDiagonalPairs(corners);
+                    telemetry.addData("Angle: ",getAngle(getLongPair()));
                 }
+                sleep(1000);
 
 
                 //telemetry.addData("Avg Dist: ", result.getBotposeAvgDist());
