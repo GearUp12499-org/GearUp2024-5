@@ -29,7 +29,7 @@ public class LimelightTestingTeleOp extends LinearOpMode {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100);
         telemetry.setMsTransmissionInterval(11);
-        limelight.pipelineSwitch(3);
+        limelight.pipelineSwitch(3); // Red = 3; Blue = 4; Yellow = 5
         //Starts polling for data
         limelight.start();
 
@@ -55,8 +55,6 @@ public class LimelightTestingTeleOp extends LinearOpMode {
             }
             */
 
-
-
             if (result == null) {
                 telemetry.addData("Limelight","result is null!");
             }
@@ -66,14 +64,20 @@ public class LimelightTestingTeleOp extends LinearOpMode {
                 telemetry.addData("tx", result.getTx());
                 telemetry.addData("ty", result.getTy());
                 telemetry.addData("Avg Area: ", result.getTa());
+                telemetry.addData("Pipeline Number: ", limelight.getStatus().getPipelineIndex());
 
                 List<LLResultTypes.ColorResult> colorTargets = result.getColorResults();
                 for (LLResultTypes.ColorResult colorTarget : colorTargets) {
                     for(List<Double> eachCorner: colorTarget.getTargetCorners()){
-                        telemetry.addData("First Value of Corner" + eachCorner.get(0), "Second Value of Corner: " + eachCorner.get(1));
-                        sleep(1000);
+                        telemetry.addData("Corners: ", eachCorner);
+                        //telemetry.addData("Corner 1: ", eachCorner.get(0));
+                        //telemetry.addData("Corner 2: ", eachCorner.get(1));
+                        //telemetry.addData("Corner 3: ", eachCorner.get(2));
+                        //telemetry.addData("Corner 4: ", eachCorner.get(3));
+
                     }
                 }
+                sleep(500);
 
 
                 //telemetry.addData("Avg Dist: ", result.getBotposeAvgDist());
