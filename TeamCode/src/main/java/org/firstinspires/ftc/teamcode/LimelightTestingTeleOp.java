@@ -25,6 +25,7 @@ import java.util.Arrays;
 @TeleOp
 public class LimelightTestingTeleOp extends LinearOpMode {
     private Hardware hardware;
+
     private Limelight3A limelight;
 
     private static double distance(double x1, double y1, double x2, double y2) {
@@ -63,6 +64,14 @@ public class LimelightTestingTeleOp extends LinearOpMode {
 
         double angle = Math.atan2(Math.abs(P2y - P1y), P2x - P1x);
         return Math.toDegrees(angle) - 90;
+    }
+
+    public double ServoAngle(double angle) {
+        hardwareMap.get(clawTwist);
+        if (clockwise) {
+            return 0.48+(angle/270);
+        }
+        return 0.48-(angle/270);
     }
 
     @Override
@@ -114,7 +123,7 @@ public class LimelightTestingTeleOp extends LinearOpMode {
                 for (LLResultTypes.ColorResult colorTarget : colorTargets) {
                     List<double[]> corners = new ArrayList<double[]>();
                     for(List<Double> eachCorner: colorTarget.getTargetCorners()){
-                        if (corners.size() >= 4) {
+                        if (corners.size() == 4) {
                             break;
                         }
                         telemetry.addData("First Value of Corner", eachCorner);
