@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
@@ -67,7 +68,12 @@ public class LimelightTestingTeleOp extends LinearOpMode {
     }
 
     public double ServoAngle(double angle) {
-        hardwareMap.get(clawTwist);
+        Servo servo = hardwareMap.get(Servo.class, "clawTwist");
+
+        // TODO for Ryan b/c nishk and i will not be here today
+        // Servo positioning, clockwise is positive
+        // change the clockwise code below and make sure it builds
+        // ServoAngle(getAngle(getLongPair()));
         if (clockwise) {
             return 0.48+(angle/270);
         }
