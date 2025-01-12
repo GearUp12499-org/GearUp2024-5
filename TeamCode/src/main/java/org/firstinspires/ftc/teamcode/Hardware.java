@@ -22,7 +22,7 @@ import dev.aether.collaborative_multitasking.SharedResource;
 
 public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double spinTickPerRev = 751.8;
-    public static final double RIGHT_SLIDE_OUT = 0.72;
+    public static final double RIGHT_SLIDE_OUT = 0.64;
     @Deprecated public static final double LEFT_SLIDE_OUT = 1 - RIGHT_SLIDE_OUT;
     public static final double RIGHT_SLIDE_IN = 0.45;
     @Deprecated public static final double LEFT_SLIDE_IN = 1 - RIGHT_SLIDE_IN;
@@ -43,6 +43,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double LAMP_ORANGE = 0.333;
     public static final double LAMP_YELLOW = 0.36;
     public static final double LAMP_PURPLE = 0.700;
+    public static final double LAMP_WHITE = 1.0;
 
     public static int deg2arm(double degrees) {
         return (int) (degrees / 360.0 * spinTickPerRev);
@@ -149,6 +150,9 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
 
     @HardwareName("lightRight")
     public Servo lightRight;
+
+    @HardwareName("limelightlight")
+    public Servo limelightlight;
 
     @HardwareName("clawColor")
     public ColorSensor clawColor;

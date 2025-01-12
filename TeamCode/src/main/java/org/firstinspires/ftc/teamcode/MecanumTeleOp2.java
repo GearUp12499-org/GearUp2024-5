@@ -4,11 +4,14 @@ import static androidx.core.math.MathUtils.clamp;
 import static java.lang.Math.abs;
 
 import android.annotation.SuppressLint;
+import android.database.AbstractCursor;
+import android.icu.util.IslamicCalendar;
 
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -125,7 +128,7 @@ public class MecanumTeleOp2 extends LinearOpMode {
 
         hardware.lightLeft.setPosition(Hardware.LAMP_PURPLE);
         hardware.lightRight.setPosition(Hardware.LAMP_PURPLE);
-
+        hardware.limelightlight.setPosition(Hardware.LAMP_WHITE);
         navxMicro = hardware.gyro;
     }
 
@@ -237,6 +240,7 @@ public class MecanumTeleOp2 extends LinearOpMode {
             stepper();
             lift();
             arm();
+            LimelightHeadlight();
 
             boolean shouldScoreHigh = gamepad2.left_trigger > 0.5;
             boolean shouldScoreHigh2 = gamepad2.right_trigger > 0.5;
@@ -656,4 +660,9 @@ public class MecanumTeleOp2 extends LinearOpMode {
         transferInternal();
     }
 
+    public void LimelightHeadlight(){
+        if(hardware.horizontalSlide.getPosition() == Hardware.RIGHT_SLIDE_OUT){
+            hardware.limelightlight.setPosition(Hardware.LAMP_WHITE);
+        }
+    }
 }
