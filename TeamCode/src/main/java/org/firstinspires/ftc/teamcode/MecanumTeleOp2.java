@@ -117,7 +117,7 @@ public class MecanumTeleOp2 extends LinearOpMode {
         hardware.arm.setPower(0.3);
         hardware.wrist.setPosition(0.28);
         hardware.claw.setPosition(Hardware.CLAW_CLOSE);
-
+        hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
         // we don't have the proxy object to handle this for us
         // so manually implement the inversion
         hardware.horizontalSlide.setPosition(Hardware.RIGHT_SLIDE_IN);
@@ -237,6 +237,7 @@ public class MecanumTeleOp2 extends LinearOpMode {
             stepper();
             lift();
             arm();
+            TwistStepper();
 
             boolean shouldScoreHigh = gamepad2.left_trigger > 0.5;
             boolean shouldScoreHigh2 = gamepad2.right_trigger > 0.5;
@@ -592,6 +593,8 @@ public class MecanumTeleOp2 extends LinearOpMode {
     }
 
     public void Flipout() {
+        double TwistPos = hardware.clawTwist.getPosition();
+        boolean FlipNotSafe = TwistPos != Hardware.CLAW_TWIST_INIT;
         abandonLock(hSlideProxy.CONTROL);
         abandonLock(hClawProxy.CONTROL_CLAW);
         abandonLock(hClawProxy.CONTROL_FLIP);
@@ -607,6 +610,8 @@ public class MecanumTeleOp2 extends LinearOpMode {
     }
 
     public void Flipin() {
+        double TwistPos = hardware.clawTwist.getPosition();
+        boolean FlipNotSafe = TwistPos != Hardware.CLAW_TWIST_INIT;
         abandonLock(hSlideProxy.CONTROL);
         abandonLock(hClawProxy.CONTROL_FLIP);
         double flipThird = 0.66;
@@ -654,6 +659,34 @@ public class MecanumTeleOp2 extends LinearOpMode {
         abandonLock(vLiftProxy.CONTROL);
         abandonLock(Locks.ArmAssembly);
         transferInternal();
+    }
+    private void TwistStepper() {
+        double Position = 0.5;
+        if (gamepad1.dpad_left) {
+            Position = Hardware.FRONT_OPEN;
+        }
+        if (gamepad1.dpad_right) {
+            Position = Hardware.FRONT_CLOSE;
+        }
+        if (gamepad1.dpad_down) {
+            Position -= 0.01;
+            if(Position<0){
+                Position = 0.0;
+            }
+        }
+        if (gamepad1.dpad_up) {
+            Position += 0.01;
+            if(Position>1){
+                Position = 1.0;
+            }
+        }
+        hardware.clawTwist.setPosition(Position);
+        hardware.clawFront.setPosition(Position);
+        // clawFront close is 0
+        //clawFront open is 0.27
+
+        telemetry.addData("Pos", Position);
+        telemetry.addData("Pos", Position);
     }
 
 }

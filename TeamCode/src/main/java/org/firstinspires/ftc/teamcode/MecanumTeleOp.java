@@ -24,6 +24,9 @@ public class MecanumTeleOp extends LinearOpMode {
     double VerticalSlideSpeed = 0.75;
     double ClawFrontPos = 0.5;
     double ClawFlipPos = 1.0;
+    double TwistINIT = 0.48;
+
+
 
     @Override
     public void runOpMode() {
@@ -39,6 +42,7 @@ public class MecanumTeleOp extends LinearOpMode {
         hardware.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         hardware.arm.setPower(Hardware.ARM_POWER);
         hardware.wrist.setPosition(0.28);
+        hardware.clawTwist.setPosition(TwistINIT);
         IntegratingGyroscope gyro;
         NavxMicroNavigationSensor navxMicro;
         ElapsedTime timer = new ElapsedTime();
@@ -62,6 +66,7 @@ public class MecanumTeleOp extends LinearOpMode {
 
         double yaw_offset = 0.0;
         while (opModeIsActive()) {
+
 
             Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
             if (gamepad1.back) {
@@ -155,6 +160,7 @@ public class MecanumTeleOp extends LinearOpMode {
     int minVerticalLiftTicks = 0;
     int highChamberTicks = 790;
     int highBasketTicks = 2180;
+
 
     // lifts the vertical slides to a target position in ticks
     private void targetLift(Hardware hardware, int targetPosition) {
@@ -362,7 +368,7 @@ public class MecanumTeleOp extends LinearOpMode {
                 ClawFlipPos = 1.0;
             }
         }
-        hardware.clawFlip.setPosition(ClawFlipPos);
+        hardware.clawTwist.setPosition(ClawFrontPos);
         hardware.clawFront.setPosition(ClawFrontPos);
         // clawFront close is 0
         //clawFront open is 0.27
@@ -445,6 +451,11 @@ public class MecanumTeleOp extends LinearOpMode {
     }
 
     public void Flipout(Hardware hardware) {
+        double TwistPos = hardware.clawTwist.getPosition();
+        boolean FlipNotSafe = TwistPos != TwistINIT;
+        if (FlipNotSafe){
+            hardware.clawTwist.setPosition(TwistINIT);
+        }
         hardware.horizontalSlide.setPosition(Hardware.RIGHT_SLIDE_OUT);
         hardware.horizontalLeft.setPosition(Hardware.LEFT_SLIDE_OUT);
         sleep(500);
@@ -454,6 +465,11 @@ public class MecanumTeleOp extends LinearOpMode {
     }
 
     public void Flipin(Hardware hardware) {
+        double TwistPos = hardware.clawTwist.getPosition();
+        boolean FlipNotSafe = TwistPos != TwistINIT;
+        if (FlipNotSafe){
+            hardware.clawTwist.setPosition(TwistINIT);
+        }
         double fliponethird = 0.66;
         hardware.clawFlip.setPosition(fliponethird);
         ClawFlipPos = fliponethird;
@@ -467,7 +483,7 @@ public class MecanumTeleOp extends LinearOpMode {
 
     boolean lastX = false;
 
-    public void trasfer(Hardware hardware){
+    public void trasfer(Hardware hardware) {
         boolean x = gamepad2.x;
         if (x && !lastX) {
             hardware.clawFront.setPosition(Hardware.FRONT_CLOSE);
@@ -484,7 +500,7 @@ public class MecanumTeleOp extends LinearOpMode {
             hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
             sleep(500);
             hardware.arm.setTargetPosition(0);
-            armTargetPosDeg=0;
+            armTargetPosDeg = 0;
             sleep(500);
             hardware.wrist.setPosition(0.28);
             ClawFrontPos = Hardware.FRONT_OPEN;
