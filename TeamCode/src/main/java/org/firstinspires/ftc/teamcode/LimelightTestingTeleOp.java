@@ -131,7 +131,7 @@ public class LimelightTestingTeleOp extends LinearOpMode {
                 for (LLResultTypes.ColorResult colorTarget : colorTargets) {
                     List<double[]> corners = new ArrayList<double[]>();
                     for(List<Double> eachCorner: colorTarget.getTargetCorners()){
-                        if (corners.size() == 4) {
+                        if (corners.size() >= 4) {
                             break;
                         }
                         telemetry.addData("First Value of Corner", eachCorner);
