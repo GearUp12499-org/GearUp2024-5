@@ -80,7 +80,7 @@ public class LimelightTestingTeleOp extends LinearOpMode {
         return 0.48+(angle*0.0036);
     }
 
-     @Override
+    @Override
     public void runOpMode() {
         Servo servo = hardwareMap.get(Servo.class, "clawTwist");
         hardware = new Hardware(hardwareMap);
@@ -95,7 +95,6 @@ public class LimelightTestingTeleOp extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
-            hardware.clawTwist.setPosition(ServoAngle(getAngle((getLongPair()))));
             LLResult result = limelight.getLatestResult();
             // List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
             /*
@@ -142,7 +141,7 @@ public class LimelightTestingTeleOp extends LinearOpMode {
                     telemetry.addData("Angle: ",getAngle(getLongPair()));
                 }
                 sleep(1000);
- //
+                //
 
                 //telemetry.addData("Avg Dist: ", result.getBotposeAvgDist());
                 //telemetry.addData("Botpose", botpose.toString());
@@ -153,6 +152,7 @@ public class LimelightTestingTeleOp extends LinearOpMode {
 
             telemetry.update();
 
+            hardware.clawTwist.setPosition(ServoAngle(getAngle(getLongPair())));
         }
     }
 }
