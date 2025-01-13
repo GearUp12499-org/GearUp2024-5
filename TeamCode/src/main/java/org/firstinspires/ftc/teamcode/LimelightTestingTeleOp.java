@@ -73,13 +73,14 @@ public class LimelightTestingTeleOp extends LinearOpMode {
         // Servo positioning, clockwise is positive
         // change the clockwise code below and make sure it builds
         // ServoAngle(getAngle(getLongPair()));
-        if (angle/270 > 0.48) {
+        /*if (angle/270 > 0.48) {
             return 0.48+(angle/270);
         }
-        return 0.48-(angle/270);
+        return 0.48-(angle/270);*/
+        return 0.48+(angle*0.0036);
     }
 
-    @Override
+     @Override
     public void runOpMode() {
         Servo servo = hardwareMap.get(Servo.class, "clawTwist");
         hardware = new Hardware(hardwareMap);
@@ -94,6 +95,7 @@ public class LimelightTestingTeleOp extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
+            hardware.clawTwist.setPosition(ServoAngle(getAngle((getLongPair()))));
             LLResult result = limelight.getLatestResult();
             // List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
             /*
