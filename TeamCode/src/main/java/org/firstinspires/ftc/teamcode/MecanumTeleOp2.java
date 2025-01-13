@@ -663,6 +663,8 @@ public class MecanumTeleOp2 extends LinearOpMode {
     public void LimelightHeadlight(){
         if(hardware.horizontalSlide.getPosition() == Hardware.RIGHT_SLIDE_OUT){
             hardware.limelightlight.setPosition(Hardware.LAMP_WHITE);
+        } else {
+            hardware.limelightlight.setPosition(0.0);
         }
     }
 }
