@@ -29,11 +29,12 @@ public class LimelightTestingTeleOp extends LinearOpMode {
 
     private Limelight3A limelight;
 
+
     private static double distance(double x1, double y1, double x2, double y2) {
         return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 
-    private List<List<double[]>> distances = new ArrayList<>();
+    private List<List<double[]>> distances = new ArrayList<>(); // [--[ [x, y], [], []... ]--]
 
     private List<List<double[]>> getDiagonalPairs(List<double[]> corners) {
         double[] reference = corners.get(0);
@@ -82,77 +83,81 @@ public class LimelightTestingTeleOp extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        Servo servo = hardwareMap.get(Servo.class, "clawTwist");
         hardware = new Hardware(hardwareMap);
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100);
         telemetry.setMsTransmissionInterval(11);
         limelight.pipelineSwitch(3);
-        //Starts polling for data
         limelight.start();
+        hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
 
         waitForStart();
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
-            LLResult result = limelight.getLatestResult();
-            // List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
-            /*
-            LLStatus status = limelight.getStatus();
-            telemetry.addData("Name", "%s",
-                    status.getName());
-            telemetry.addData("LL", "Temp: %.1fC, CPU: %.1f%%, FPS: %d",
-                    status.getTemp(), status.getCpu(), (int) status.getFps());
-            telemetry.addData("Pipeline", "Index: %d, Type: %s",
-                    status.getPipelineIndex(), status.getPipelineType());
-            */
-            /*
-            for(LLResultTypes.FiducialResult fiducial : fiducials){
-                int id = fiducial.getFiducialId();
-                telemetry.addData("ID: ", id);
-            }
-            */
+            // TO-DO: Start a timer
+            if(gamepad1.a){
+                hardware.limelightlight.setPosition(1);
+                sleep(500);
+                boolean foundAngle = false;
+                double angle;
+                double pickupPosition = Hardware.CLAW_TWIST_INIT;
+                while(!foundAngle) { //TO-DO: set a timer
+                    LLResult result = limelight.getLatestResult();
 
+                    if (result != null /* && result.isValid() */) {
+                        // Pose3D botpose = result.getBotpose();
+                        telemetry.addData("tx", result.getTx());
+                        telemetry.addData("ty", result.getTy());
+                        telemetry.addData("Avg Area: ", result.getTa());
+                        telemetry.addData("Pipeline Number: ", limelight.getStatus().getPipelineIndex());
 
+                        List<LLResultTypes.ColorResult> colorTargets = result.getColorResults();
+                        for (LLResultTypes.ColorResult colorTarget : colorTargets) {
+                            List<double[]> corners = new ArrayList<double[]>(); //Array of corner pairs
+                            for (List<Double> eachCorner : colorTarget.getTargetCorners()) {
+                                telemetry.addData("Pair of Corner: ", eachCorner);
+                                double[] eachCorner2 = eachCorner.stream().mapToDouble(Double::doubleValue).toArray();
+                                corners.add(eachCorner2);
 
-            if (result == null) {
-                telemetry.addData("Limelight","result is null!");
-            }
-
-            if (result != null /* && result.isValid() */) {
-                // Pose3D botpose = result.getBotpose();
-                telemetry.addData("tx", result.getTx());
-                telemetry.addData("ty", result.getTy());
-                telemetry.addData("Avg Area: ", result.getTa());
-                telemetry.addData("Pipeline Number: ", limelight.getStatus().getPipelineIndex());
-
-                List<LLResultTypes.ColorResult> colorTargets = result.getColorResults();
-                for (LLResultTypes.ColorResult colorTarget : colorTargets) {
-                    List<double[]> corners = new ArrayList<double[]>();
-                    for(List<Double> eachCorner: colorTarget.getTargetCorners()){
-                        if (corners.size() >= 4) {
+                                if (corners.size() >= 4) {
+                                    break;
+                                }
+                            }
+                            if(corners.size() < 3){
+                                continue;
+                            }
+                            getDiagonalPairs(corners);
+                            foundAngle = true;
+                            angle = getAngle(getLongPair());
+                            pickupPosition = (angle * 0.0037) + Hardware.CLAW_TWIST_INIT;
+                            telemetry.addData("Angle: ", angle);
+                            telemetry.addData("pickupPosition: ", pickupPosition);
                             break;
                         }
-                        telemetry.addData("First Value of Corner", eachCorner);
-                        double[] eachCorner2 = eachCorner.stream().mapToDouble(Double::doubleValue).toArray();
-                        corners.add(eachCorner2);
+
                     }
-                    getDiagonalPairs(corners);
-                    telemetry.addData("Angle: ",getAngle(getLongPair()));
                 }
-                sleep(1000);
-                //
-
-                //telemetry.addData("Avg Dist: ", result.getBotposeAvgDist());
-                //telemetry.addData("Botpose", botpose.toString());
-
-            } else {
-                telemetry.addData("Limelight", "No data available");
+                if(foundAngle) {
+                    hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
+                    sleep(500);
+                    hardware.clawFlip.setPosition(0);
+                    sleep(500);
+                    hardware.clawTwist.setPosition(pickupPosition);
+                    sleep(500);
+                    hardware.clawFront.setPosition(Hardware.FRONT_CLOSE);
+                    sleep(250);
+                    hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
+                    sleep(100);
+                    hardware.clawFlip.setPosition(Hardware.FLIP_UP);
+                    hardware.limelightlight.setPosition(0);
+                }
             }
+
 
             telemetry.update();
 
-            hardware.clawTwist.setPosition(ServoAngle(getAngle(getLongPair())));
+            //hardware.clawTwist.setPosition(ServoAngle(getAngle(getLongPair())));
         }
     }
 }
