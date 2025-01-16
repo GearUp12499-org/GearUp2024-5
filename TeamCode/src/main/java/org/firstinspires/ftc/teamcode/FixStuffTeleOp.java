@@ -56,9 +56,6 @@ public class FixStuffTeleOp extends LinearOpMode{
         hardware.clawFlip.setPosition(Hardware.FLIP_UP);
         hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
 
-        hardware.arm.setTargetPosition(0);
-        hardware.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        hardware.arm.setPower(0.3);
         hardware.wrist.setPosition(0.28);
         hardware.claw.setPosition(Hardware.CLAW_CLOSE);
         hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
@@ -91,7 +88,10 @@ public class FixStuffTeleOp extends LinearOpMode{
             if (gamepad1.x){
                 FourthSample();
             }
-
+            if (gamepad1.y){
+                Transfer();
+            }
+            telemetry.addData("Arm", hardware.arm.getCurrentPosition());
             telemetry.addData("slidePos", hardware.horizontalLeft.getPosition());
             telemetry.addData("slidePos2", hardware.horizontalSlide.getPosition());
             telemetry.update();
@@ -139,5 +139,22 @@ public class FixStuffTeleOp extends LinearOpMode{
         hardware.horizontalLeft.setPosition(1-Hardware.RIGHT_SLIDE_IN);
         sleep(500);
         hardware.clawFlip.setPosition(Hardware.FLIP_UP);
+    }
+    public void Transfer() {
+        hardware.claw.setPosition(Hardware.CLAW_OPEN);
+        hardware.arm.setTargetPosition(-30);
+        hardware.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        hardware.arm.setPower(0.5);
+        hardware.wrist.setPosition(0);
+        sleep(500);
+        hardware.claw.setPosition(Hardware.CLAW_CLOSE);
+        sleep(1000);
+        hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
+        sleep(500);
+        hardware.wrist.setPosition(Hardware.WRIST_UP);
+        hardware.arm.setTargetPosition(0);
+        hardware.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        hardware.arm.setPower(0.5);
+        sleep(1000);
     }
 }
