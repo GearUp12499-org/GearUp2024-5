@@ -38,6 +38,7 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
+            hardware.limelightlight.setPosition(1);
             LLResult result = limelight.getLatestResult();
 
             if (result == null) {
@@ -54,6 +55,10 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
                 if (pythonOutputs != null && pythonOutputs.length > 6) {
                     double angle = pythonOutputs[6];
                     telemetry.addData("angle", angle);
+                    telemetry.addData("x", pythonOutputs[1]);
+                    telemetry.addData("y", pythonOutputs[2]);
+                    telemetry.addData("w", pythonOutputs[3]);
+                    telemetry.addData("h", pythonOutputs[4]);
                 }
             } else {
                 telemetry.addData("Limelight", "No data available");
