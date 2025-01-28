@@ -31,7 +31,7 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
         limelight.updatePythonInputs(config);
         limelight.setPollRateHz(100);
         telemetry.setMsTransmissionInterval(11);
-        limelight.pipelineSwitch(3);
+        limelight.pipelineSwitch(6);
         limelight.start();
 
         waitForStart();
@@ -52,7 +52,7 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
 
                 double[] pythonOutputs = result.getPythonOutput();
                 if (pythonOutputs != null && pythonOutputs.length > 6) {
-                    double angle = pythonOutputs[0];
+                    double angle = pythonOutputs[6];
                     telemetry.addData("angle", angle);
                 }
             } else {
