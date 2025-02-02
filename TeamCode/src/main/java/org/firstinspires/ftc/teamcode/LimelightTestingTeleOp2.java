@@ -39,6 +39,10 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
         while (opModeIsActive()) {
             if (gamepad1.a) {
                 hardware.limelightlight.setPosition(1);
+                hardware.backRight.setPower(0.3);
+                hardware.backLeft.setPower(0.3);
+                hardware.frontRight.setPower(0.3);
+                hardware.frontLeft.setPower(0.3);
                 hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
                 hardware.horizontalLeft.setPosition(Hardware.LEFT_SLIDE_OUT);
                 hardware.horizontalSlide.setPosition(Hardware.RIGHT_SLIDE_OUT);
@@ -47,6 +51,10 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
                     LLResult result = limelight.getLatestResult();
                     if (gamepad1.b) {
                         foundTarget = true;
+                        hardware.backRight.setPower(0);
+                        hardware.backLeft.setPower(0);
+                        hardware.frontRight.setPower(0);
+                        hardware.frontLeft.setPower(0);
                         break;
                     }
                     if (result != null /* && result.isValid() */) {
@@ -77,6 +85,23 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
                                 if (x_coord > 235 && x_coord < 350) {
                                     if (y_coord > 100 && y_coord < 388) {
                                         foundTarget = true;
+                                        hardware.backRight.setPower(0);
+                                        hardware.backLeft.setPower(0);
+                                        hardware.frontRight.setPower(0);
+                                        hardware.frontLeft.setPower(0);
+                                        sleep(2000);
+                                        double up_y_coord = limelight.getLatestResult().getPythonOutput()[2];
+                                        double perfect_y = 160;
+                                        telemetry.addData("updated y coord: ", up_y_coord);
+                                        if (up_y_coord > perfect_y) {
+                                            double distance_mm = (up_y_coord-perfect_y)/2;
+                                            double servo_change = (distance_mm)*0.00089;
+                                            double right_servo = Hardware.RIGHT_SLIDE_OUT - servo_change;
+                                            double left_servo = 1.05 - right_servo;
+                                            hardware.horizontalLeft.setPosition(left_servo);
+                                            hardware.horizontalSlide.setPosition(right_servo);
+                                            sleep(100);
+                                        }
                                         hardware.clawFlip.setPosition(Hardware.FLIP_DOWN);
                                         sleep(400);
                                         double pickupPosition;
