@@ -40,6 +40,8 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
             if (gamepad1.a) {
                 hardware.limelightlight.setPosition(1);
                 hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
+                hardware.horizontalLeft.setPosition(Hardware.LEFT_SLIDE_OUT);
+                hardware.horizontalSlide.setPosition(Hardware.RIGHT_SLIDE_OUT);
                 boolean foundTarget = false;
                 while (!foundTarget) {
                     LLResult result = limelight.getLatestResult();
