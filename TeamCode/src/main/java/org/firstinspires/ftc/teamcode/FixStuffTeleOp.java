@@ -123,6 +123,10 @@ public class FixStuffTeleOp extends LinearOpMode {
                 transfer();
             }
 
+            if(gamepad2.y){
+                Vtransfer();
+            }
+
             if (gamepad1.right_bumper){
                 FourthSample();
             }
@@ -133,6 +137,7 @@ public class FixStuffTeleOp extends LinearOpMode {
 
             telemetry.addData("slidePos", hardware.horizontalLeft.getPosition());
             telemetry.addData("slidePos2", hardware.horizontalSlide.getPosition());
+            telemetry.addData("armPos", hardware.arm.getCurrentPosition());
             telemetry.update();
             scheduler.tick();
         }
@@ -247,5 +252,27 @@ public class FixStuffTeleOp extends LinearOpMode {
         hardware.horizontalLeft.setPosition(1.05 - Hardware.RIGHT_SLIDE_IN);
         sleep(500);
         hardware.clawFlip.setPosition(Hardware.FLIP_UP);
+    }
+
+        public void Vtransfer () {
+            hardware.clawFlip.setPosition(0.32);
+            sleep(500);
+            hardware.arm.setTargetPosition(-195);
+            sleep(500);
+            hardware.claw.setPosition(0.5);
+            sleep(500);
+            hardware.wrist.setPosition(0.6);
+            sleep(500);
+            hardware.clawFlip.setPosition(0.62);
+            sleep(500);
+            hardware.claw.setPosition(0.28);
+
+
+        }
+    public void motor (){
+        if (gamepad2.a) {
+            hardware.arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            hardware.arm.setPower(0.3);
+        }
     }
 }
