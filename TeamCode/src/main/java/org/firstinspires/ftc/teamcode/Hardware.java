@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.hardware.AutoClearEncoder;
@@ -173,6 +174,12 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
 
     @HardwareName("clawColor")
     public ColorSensor clawColor;
+
+    @HardwareName("distanceFrontLeft")
+    public DistanceSensor distanceFrontLeft;
+
+    @HardwareName("distanceFrontRight")
+    public DistanceSensor distanceFrontRight;
 
 
     @Override
