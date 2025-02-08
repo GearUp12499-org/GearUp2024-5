@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.Hardware.Locks;
 import org.firstinspires.ftc.teamcode.hardware.HClawProxy;
@@ -131,6 +132,13 @@ public class FixStuffTeleOp extends LinearOpMode {
                 FourthSample2();
             }
 
+            if (gamepad2.b) {
+                DriveToDistance(6, 0);
+            }
+            if (gamepad2.x){
+                scoreSpecimen(8);
+            }
+
             telemetry.addData("slidePos", hardware.horizontalLeft.getPosition());
             telemetry.addData("slidePos2", hardware.horizontalSlide.getPosition());
             telemetry.update();
@@ -247,5 +255,48 @@ public class FixStuffTeleOp extends LinearOpMode {
         hardware.horizontalLeft.setPosition(1.05 - Hardware.RIGHT_SLIDE_IN);
         sleep(500);
         hardware.clawFlip.setPosition(Hardware.FLIP_UP);
+    }
+    public void DriveToDistance (double target, double TurnTarget) {
+        ElapsedTime timer = new ElapsedTime();
+        double error = 100;
+        while (error > 0.5) {
+            // for drive straight
+            Orientation angles = hardware.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            double currentHeading = angles.firstAngle;
+            double TurnError = currentHeading - TurnTarget;
+            double TurnKp = 0.9 / 50;
+            double delta = TurnError * TurnKp;
+            //for drive to distance
+            double kp = 0.1;
+            double LeftDistance = hardware.distanceFrontLeft.getDistance(DistanceUnit.INCH);
+            double RightDistance = hardware.distanceFrontRight.getDistance(DistanceUnit.INCH);
+            double ADistance = (RightDistance+LeftDistance)/2;
+            error = ADistance - target;
+            double power = Math.min(0.3, error * kp);
+            hardware.frontRight.setPower(power - delta);
+            hardware.frontLeft.setPower(power + delta);
+            hardware.backRight.setPower(power - delta);
+            hardware.backLeft.setPower(power + delta);
+            telemetry.addData("distance", ADistance);
+            telemetry.addData("error", error);
+            telemetry.update();
+        }
+    }
+    public void scoreSpecimen (double target){
+        double error = -10;
+        while (error < -0.5){
+            double kp = 0.1;
+            double LeftDistance = hardware.distanceFrontLeft.getDistance(DistanceUnit.INCH);
+            double RightDistance = hardware.distanceFrontRight.getDistance(DistanceUnit.INCH);
+            double ADistance = (RightDistance+LeftDistance)/2;
+            error = ADistance - target;
+            double power = Math.max(-0.3, error * kp);
+            hardware.frontRight.setPower(power);
+            hardware.frontLeft.setPower(power);
+            hardware.backRight.setPower(power);
+            hardware.backLeft.setPower(power);
+        }
+
+
     }
 }
