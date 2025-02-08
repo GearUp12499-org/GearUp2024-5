@@ -22,6 +22,43 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
     private Hardware hardware;
     private Limelight3A limelight;
 
+    private static boolean sampleInRange(double x, double y, double r) {
+        if (r > 1.5 && r < 2.0) {
+            if (x > 235 && x < 350) {
+                if (y > 100 && y < 388) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void autoSamplePickup(double angle, Hardware hardware) {
+        hardware.lightLeft.setPosition(0);
+        hardware.lightRight.setPosition(0);
+        sleep(200);
+        hardware.clawFlip.setPosition(Hardware.FLIP_DOWN);
+        sleep(400);
+        double pickupPosition;
+        if (angle < 90) {
+            pickupPosition = Hardware.CLAW_TWIST_INIT - (angle * 0.0037);
+        } else {
+            angle = 180 - angle;
+            pickupPosition = Hardware.CLAW_TWIST_INIT + (angle * 0.0037);
+        }
+        double temp = Math.abs(pickupPosition - Hardware.CLAW_TWIST_INIT);
+        long twist_delay = (long) (100 + (500 / 0.33) * temp);
+        telemetry.addData("pickupPosition", pickupPosition);
+        hardware.clawTwist.setPosition(pickupPosition);
+        sleep(100);
+        hardware.clawFront.setPosition(Hardware.FRONT_CLOSE);
+        sleep(300);
+        hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
+        sleep(twist_delay);
+        hardware.clawFlip.setPosition(Hardware.FLIP_UP);
+        sleep(2000);
+    }
+
     @Override
     public void runOpMode() {
         hardware = new Hardware(hardwareMap);
@@ -37,12 +74,8 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
-            if (gamepad1.a) {
+            // if (gamepad1.a) {
                 hardware.limelightlight.setPosition(1);
-                hardware.backRight.setPower(0.3);
-                hardware.backLeft.setPower(0.3);
-                hardware.frontRight.setPower(0.3);
-                hardware.frontLeft.setPower(0.3);
                 hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
                 hardware.horizontalLeft.setPosition(Hardware.LEFT_SLIDE_OUT);
                 hardware.horizontalSlide.setPosition(Hardware.RIGHT_SLIDE_OUT);
@@ -51,10 +84,8 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
                     LLResult result = limelight.getLatestResult();
                     if (gamepad1.b) {
                         foundTarget = true;
-                        hardware.backRight.setPower(0);
-                        hardware.backLeft.setPower(0);
-                        hardware.frontRight.setPower(0);
-                        hardware.frontLeft.setPower(0);
+                        hardware.lightLeft.setPosition(0);
+                        hardware.lightRight.setPosition(0);
                         break;
                     }
                     if (result != null /* && result.isValid() */) {
@@ -81,48 +112,16 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
                             telemetry.addData("w", w_val);
                             telemetry.addData("h", h_val);
                             telemetry.addData("ratio", ratio);
-                            if (ratio > 1.5 && ratio < 2.0) {
-                                if (x_coord > 235 && x_coord < 350) {
-                                    if (y_coord > 100 && y_coord < 388) {
-                                        foundTarget = true;
-                                        hardware.backRight.setPower(0);
-                                        hardware.backLeft.setPower(0);
-                                        hardware.frontRight.setPower(0);
-                                        hardware.frontLeft.setPower(0);
-                                        sleep(2000);
-                                        double up_y_coord = limelight.getLatestResult().getPythonOutput()[2];
-                                        double perfect_y = 160;
-                                        telemetry.addData("updated y coord: ", up_y_coord);
-                                        if (up_y_coord > perfect_y) {
-                                            double distance_mm = (up_y_coord-perfect_y)/2;
-                                            double servo_change = (distance_mm)*0.00089;
-                                            double right_servo = Hardware.RIGHT_SLIDE_OUT - servo_change;
-                                            double left_servo = 1.05 - right_servo;
-                                            hardware.horizontalLeft.setPosition(left_servo);
-                                            hardware.horizontalSlide.setPosition(right_servo);
-                                            sleep(100);
-                                        }
-                                        hardware.clawFlip.setPosition(Hardware.FLIP_DOWN);
-                                        sleep(400);
-                                        double pickupPosition;
-                                        if (angle < 90) {
-                                            pickupPosition = Hardware.CLAW_TWIST_INIT - (angle * 0.0037);
-                                        } else {
-                                            angle = 180 - angle;
-                                            pickupPosition = Hardware.CLAW_TWIST_INIT + (angle * 0.0037);
-                                        }
-                                        double temp = Math.abs(pickupPosition - Hardware.CLAW_TWIST_INIT);
-                                        long twist_delay = (long) (100 + (500/0.33)*temp);
-                                        telemetry.addData("pickupPosition", pickupPosition);
-                                        hardware.clawTwist.setPosition(pickupPosition);
-                                        sleep(100);
-                                        hardware.clawFront.setPosition(Hardware.FRONT_CLOSE);
-                                        sleep(300);
-                                        hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
-                                        sleep(twist_delay);
-                                        hardware.clawFlip.setPosition(Hardware.FLIP_UP);
-                                    }
+                            if (sampleInRange(x_coord, y_coord, ratio)) {
+                                hardware.lightLeft.setPosition(Hardware.LAMP_ORANGE);
+                                hardware.lightRight.setPosition(Hardware.LAMP_ORANGE);
+                                if (gamepad1.x) {
+                                    foundTarget = true;
+                                    autoSamplePickup(angle, hardware);
                                 }
+                            } else {
+                                hardware.lightLeft.setPosition(0);
+                                hardware.lightRight.setPosition(0);
                             }
                         }
                     } else {
@@ -130,7 +129,9 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
                     }
                 }
                 hardware.limelightlight.setPosition(0);
-            }
+                hardware.lightLeft.setPosition(0);
+                hardware.lightRight.setPosition(0);
+            // }
             telemetry.update();
         }
     }
