@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.hardware.Ascent;
@@ -198,6 +199,12 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public CRServo rightAscent;
 
     public Ascent ascent;
+
+    @HardwareName("distanceFrontRight")
+    public DistanceSensor distanceFrontRight;
+
+    @HardwareName("distanceFrontLeft")
+    public DistanceSensor distanceFrontLeft;
 
     @Override
     public Encoder getLeftEncoder() {
