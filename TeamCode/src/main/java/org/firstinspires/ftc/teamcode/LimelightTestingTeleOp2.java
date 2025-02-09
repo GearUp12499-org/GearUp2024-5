@@ -14,11 +14,15 @@ import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @TeleOp
 public class LimelightTestingTeleOp2 extends LinearOpMode {
+    private static final Logger log = LoggerFactory.getLogger(LimelightTestingTeleOp2.class);
     private Hardware hardware;
     private Limelight3A limelight;
 
@@ -33,7 +37,7 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
         return false;
     }
 
-    private void autoSamplePickup(double angle, Hardware hardware) {
+    private void autoSamplePickup(double angle, Hardware hardware, double[] llrobot) {
         hardware.lightLeft.setPosition(0);
         hardware.lightRight.setPosition(0);
         sleep(200);
@@ -56,6 +60,30 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
         hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
         sleep(twist_delay);
         hardware.clawFlip.setPosition(Hardware.FLIP_UP);
+        sleep(100);
+
+        int red = hardware.clawColor.red();
+        int green = hardware.clawColor.green();
+        int blue = hardware.clawColor.blue();
+
+        telemetry.addData("Red", red);
+        telemetry.addData("Green", green);
+        telemetry.addData("Blue", blue);
+
+        if ((blue - green > 100 && blue - red > 100) && llrobot[2] > 0.5) {
+            hardware.lightRight.setPosition(Hardware.LAMP_BLUE);
+            hardware.lightLeft.setPosition(Hardware.LAMP_BLUE);
+        } else if ((red - blue > 100 && red - green > 100) && llrobot[0] > 0.5) {
+            hardware.lightRight.setPosition(Hardware.LAMP_RED);
+            hardware.lightLeft.setPosition(Hardware.LAMP_RED);
+        } else if (green - blue > 100 && green - red > 100 && red >= 350) {
+            hardware.lightRight.setPosition(Hardware.LAMP_YELLOW);
+            hardware.lightLeft.setPosition(Hardware.LAMP_YELLOW);
+        } else {
+            hardware.lightRight.setPosition(0);
+            hardware.lightLeft.setPosition(0);
+            hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
+        }
     }
 
     @Override
@@ -115,37 +143,7 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
                                 hardware.lightRight.setPosition(Hardware.LAMP_GREEN);
                                 if (gamepad1.x) {
                                     foundTarget = true;
-                                    autoSamplePickup(angle, hardware);
-
-                                    boolean red_pick = false;
-                                    boolean blue_pick = false;
-                                    int red = hardware.clawColor.red();
-                                    int green = hardware.clawColor.green();
-                                    int blue = hardware.clawColor.blue();
-
-                                    if (blue - green > 100 && blue - red > 100) {
-                                        hardware.lightRight.setPosition(Hardware.LAMP_BLUE);
-                                        hardware.lightLeft.setPosition(Hardware.LAMP_BLUE);
-                                        blue_pick = true;
-                                    } else if (red - blue > 100 && red - green > 100) {
-                                        hardware.lightRight.setPosition(Hardware.LAMP_RED);
-                                        hardware.lightLeft.setPosition(Hardware.LAMP_RED);
-                                        red_pick = true;
-                                    } else if (green - blue > 100 && green - red > 100 && red >= 350) {
-                                        hardware.lightRight.setPosition(Hardware.LAMP_YELLOW);
-                                        hardware.lightLeft.setPosition(Hardware.LAMP_YELLOW);
-                                    } else {
-                                        hardware.lightRight.setPosition(0);
-                                        hardware.lightLeft.setPosition(0);
-                                    }
-
-                                    if (llrobot[0] > 0.5 && blue_pick) {
-                                        hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
-                                        sleep(100);
-                                    } else if (llrobot[2] > 0.5 && red_pick) {
-                                        hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
-                                        sleep(100);
-                                    }
+                                    autoSamplePickup(angle, hardware, llrobot);
                                 }
                             } else {
                                 hardware.lightLeft.setPosition(0);
