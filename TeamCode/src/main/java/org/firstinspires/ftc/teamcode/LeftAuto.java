@@ -39,7 +39,7 @@ public class LeftAuto extends LinearOpMode {
     // power biases
     public static final Motion.Calibrate CALIBRATION = new Motion.Calibrate(1.0, 1.0, 1.0); // Calibration factors for strafe, forward, and turn.
     private static final RuntimeException NOT_IMPLEMENTED = new RuntimeException("This operation is not implemented");
-    final Pose SCORE_HIGH_BASKET = new Pose(10.6286797, 17.3713203, Math.toRadians(-45));
+    final Pose SCORE_HIGH_BASKET = new Pose(9.9216797, 18.0783203, Math.toRadians(-45));
     final Pose PARK_BAD = new Pose(10.6286797, 17.3713203, Math.toRadians(0));
     final Pose PARK1 = new Pose(57.5, 0, Math.toRadians(0));
     final Pose PARK2 = new Pose(55.5, -11, Math.toRadians(0));
@@ -161,8 +161,8 @@ public class LeftAuto extends LinearOpMode {
         loopTimer = new LoopStopwatch();
         speed2Power = new Speed2Power(0.20); // Set a speed2Power corresponding to a speed of 0.20 seconds
         ramps = new Ramps(
-                Ramps.linear(5.0),
-                Ramps.linear(1 / 12.0),
+                Ramps.linear(5.0), // s = 5t; t in seconds
+                Ramps.linear(1 / 4.0), // s = (1/12)x; x in inches
 //                Easing.power(3.0, 12.0),
                 Ramps.LimitMode.SCALE
         );

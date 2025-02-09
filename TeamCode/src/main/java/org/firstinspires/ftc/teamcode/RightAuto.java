@@ -119,7 +119,7 @@ public class RightAuto extends LinearOpMode {
         loopTimer = new LoopStopwatch();
         speed2Power = new Speed2Power(0.20); // Set a speed2Power corresponding to a speed of 0.20 seconds
         ramps = new Ramps(
-                Ramps.linear(2.0),
+                Ramps.linear(5.0),
                 Ramps.linear(1 / 12.0),
 //                Easing.power(3.0, 12.0),
                 Ramps.LimitMode.SCALE
