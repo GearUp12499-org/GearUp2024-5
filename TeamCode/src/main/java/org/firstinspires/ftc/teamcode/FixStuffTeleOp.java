@@ -264,7 +264,7 @@ public class FixStuffTeleOp extends LinearOpMode {
             Orientation angles = hardware.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             double currentHeading = angles.firstAngle;
             double TurnError = currentHeading - TurnTarget;
-            double TurnKp = 0.9 / 50;
+            double TurnKp = 0.9 / 60;
             double delta = TurnError * TurnKp;
             //for drive to distance
             double kp = 0.1;
@@ -280,6 +280,11 @@ public class FixStuffTeleOp extends LinearOpMode {
             telemetry.addData("distance", ADistance);
             telemetry.addData("error", error);
             telemetry.update();
+            if (error < 0.6){
+                sleep(1000);
+                scoreSpecimen(8);
+                return;
+            }
         }
     }
     public void scoreSpecimen (double target){
