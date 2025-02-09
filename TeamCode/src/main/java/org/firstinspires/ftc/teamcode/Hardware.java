@@ -48,6 +48,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double LAMP_ORANGE = 0.333;
     public static final double LAMP_YELLOW = 0.36;
     public static final double LAMP_PURPLE = 0.700;
+    public static final double LAMP_GREEN = 0.440;
     public static final int VLIFT_MAX_HEIGHT = 825;
     public static final int VLIFT_SCORE_HIGH = 790;
     public static final int VLIFT_SCORE_SPECIMEN = 283;
