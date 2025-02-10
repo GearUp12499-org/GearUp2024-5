@@ -97,7 +97,7 @@ abstract class TaskTemplate(override var scheduler: Scheduler) : TaskWithChainin
         private set
     override var isStartRequested = false
 
-    override fun transition(newState: State) {
+    final override fun transition(newState: State) {
 //        println("$this: transition: ${state.name} -> ${newState.name}")
         if (state.order > newState.order) {
             throw IllegalStateException("cannot move from ${state.name} to ${newState.name}")

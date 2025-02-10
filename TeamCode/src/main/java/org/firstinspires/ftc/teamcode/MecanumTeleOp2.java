@@ -25,6 +25,7 @@ import org.firstinspires.ftc.teamcode.mmooover.Pose;
 import org.firstinspires.ftc.teamcode.mmooover.Ramps;
 import org.firstinspires.ftc.teamcode.mmooover.Speed2Power;
 import org.firstinspires.ftc.teamcode.mmooover.tasks.MoveRelTask;
+import org.firstinspires.ftc.teamcode.mmooover.tasks.WallApproachTask;
 import org.firstinspires.ftc.teamcode.utilities.LoopStopwatch;
 
 import java.util.function.Consumer;
@@ -93,11 +94,17 @@ public class MecanumTeleOp2 extends LinearOpMode {
         );
     }
 
+    private WallApproachTask approachWall(double dist, double angle) {
+        return new WallApproachTask(
+                scheduler, hardware, dist, angle, speed2Power
+        );
+    }
+
     private void hardwareInit() {
         tracker = new EncoderTracking(hardware);
         tracker.setOrientationProvider(() -> heading);
         loopTimer = new LoopStopwatch();
-        speed2Power = new Speed2Power(0.20); // Set a speed2Power corresponding to a speed of 0.20 seconds
+        speed2Power = new Speed2Power(0.20);
         ramps = new Ramps(
                 Ramps.linear(2.0),
                 Ramps.linear(1 / 12.0),
@@ -233,7 +240,7 @@ public class MecanumTeleOp2 extends LinearOpMode {
             }
             boolean shouldScoreSpecimen = gamepad2.dpad_left;
             if (shouldScoreSpecimen && !isScoreSpecimen) {
-                score();
+                scoreSpecimen();
             }
             boolean shouldTx = gamepad2.x;
             if (shouldTx && !isTx) {
@@ -517,16 +524,16 @@ public class MecanumTeleOp2 extends LinearOpMode {
         );
     }
 
-    private void score() {
+    private void scoreSpecimen() {
         double clawclose = 0.02;
         abandonLock(vLiftProxy.CONTROL);
         abandonLock(Locks.ArmAssembly);
         abandonLock(Locks.DriveMotors);
 
-
         // if something else takes the locks between these it's the driver's fault smh
         scheduler.add(
-                groupOf(it -> it.add(run(() -> hardware.claw.setPosition(clawclose)))
+                groupOf(it -> it.add(approachWall(6, 0))
+                        .then(run(() -> hardware.claw.setPosition(clawclose)))
                         .then(vLiftProxy.moveTo(Hardware.VLIFT_SCORE_SPECIMEN, 5, 1.0))
                         .then(run(() -> hardware.arm.setTargetPosition(Hardware.deg2arm(-99))))
                         .then(await(500))
@@ -537,29 +544,6 @@ public class MecanumTeleOp2 extends LinearOpMode {
                 )
         );
     }
-
-    /* // might need for Left Auto
-    public void Horizontalpick() {
-        double hslideout = 0.35;
-        double flipdown = 0.04;
-        double frontopen = 0.33;
-        double frontclose = 0.07;
-        double flipup = 0.98;
-        double hslidein = 0.1;
-        hardware.horizontalSlide.setPosition(hslideout);
-        sleep(500);
-        hardware.clawFlip.setPosition(flipdown);
-        sleep(500);
-        hardware.clawFront.setPosition(frontopen);
-        sleep(500);
-        hardware.clawFront.setPosition(frontclose);
-        sleep(500);
-        hardware.clawFlip.setPosition(flipup);
-        sleep(500);
-        hardware.horizontalSlide.setPosition(hslidein);
-        sleep(500);
-    }
-    */
 
     // TODO: Reject while running
     public void transferAndDrop() {
