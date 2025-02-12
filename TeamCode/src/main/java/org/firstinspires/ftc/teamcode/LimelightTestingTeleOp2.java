@@ -26,17 +26,6 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
     private Hardware hardware;
     private Limelight3A limelight;
 
-    private static boolean sampleInRange(double x, double y, double r) {
-        if (r > 1.5 && r < 2.5) {
-            if (x > 235 && x < 375) {
-                if (y > 170 && y < 330) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     private void autoSamplePickup(double angle, Hardware hardware, double[] llrobot) {
         hardware.lightLeft.setPosition(0);
         hardware.lightRight.setPosition(0);
@@ -86,6 +75,61 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
         }
     }
 
+    public void limelightSearch(Limelight3A limelight, Hardware hardware, double[] llrobot) {
+        if (gamepad1.a) {
+            limelight.start();
+            hardware.limelightlight.setPosition(1);
+            hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
+            hardware.horizontalLeft.setPosition(Hardware.LEFT_SLIDE_OUT);
+            hardware.horizontalSlide.setPosition(Hardware.RIGHT_SLIDE_OUT);
+            boolean foundTarget = false;
+            while (!foundTarget) {
+                LLResult result = limelight.getLatestResult();
+                if (result != null) {
+                    telemetry.addData("Pipeline Number: ", limelight.getStatus().getPipelineIndex());
+                    double[] pythonOutputs = result.getPythonOutput();
+                    telemetry.addData("==========", "==========");
+                    for (double output : pythonOutputs) {
+                        telemetry.addData("Python output:", output);
+                    }
+                    telemetry.update();
+                    if (pythonOutputs != null && pythonOutputs.length > 8) {
+                        double angle = pythonOutputs[6];
+                        double x_coord = pythonOutputs[1];
+                        double y_coord = pythonOutputs[2];
+                        double w_val = pythonOutputs[3];
+                        double h_val = pythonOutputs[4];
+                        double ratio = h_val / w_val;
+                        double inside = pythonOutputs[8];
+                        telemetry.addData("angle", angle);
+                        telemetry.addData("x", x_coord);
+                        telemetry.addData("y", y_coord);
+                        telemetry.addData("w", w_val);
+                        telemetry.addData("h", h_val);
+                        telemetry.addData("ratio", ratio);
+                        if (inside > 0.5) {
+                            hardware.lightLeft.setPosition(Hardware.LAMP_GREEN);
+                            hardware.lightRight.setPosition(Hardware.LAMP_GREEN);
+                            if (gamepad1.x) {
+                                foundTarget = true;
+                                autoSamplePickup(angle, hardware, llrobot); // <- auto sample pickup is called here
+                            }
+                        } else {
+                            hardware.lightLeft.setPosition(0);
+                            hardware.lightRight.setPosition(0);
+                        }
+                    }
+                } else {
+                    telemetry.addData("Limelight", "Result is null");
+                }
+            }
+            hardware.limelightlight.setPosition(0);
+            hardware.lightLeft.setPosition(0);
+            hardware.lightRight.setPosition(0);
+            limelight.stop();
+        }
+    }
+
     @Override
     public void runOpMode() {
         hardware = new Hardware(hardwareMap);
@@ -100,66 +144,7 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
-            if (gamepad1.a) {
-                limelight.start();
-                hardware.limelightlight.setPosition(1);
-                hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
-                hardware.horizontalLeft.setPosition(Hardware.LEFT_SLIDE_OUT);
-                hardware.horizontalSlide.setPosition(Hardware.RIGHT_SLIDE_OUT);
-                boolean foundTarget = false;
-                while (!foundTarget) {
-                    LLResult result = limelight.getLatestResult();
-                    if (gamepad1.b) { // Cancel button impl
-                        foundTarget = true;
-                        hardware.lightLeft.setPosition(0);
-                        hardware.lightRight.setPosition(0);
-                        hardware.limelightlight.setPosition(0);
-                        limelight.stop();
-                        break;
-                    }
-                    if (result != null) {
-                        telemetry.addData("Pipeline Number: ", limelight.getStatus().getPipelineIndex());
-                        double[] pythonOutputs = result.getPythonOutput();
-                        telemetry.addData("==========","==========");
-                        for (double output : pythonOutputs) {
-                            telemetry.addData("Python output:", output);
-                        }
-                        telemetry.update();
-                        if (pythonOutputs != null && pythonOutputs.length > 8) {
-                            double angle = pythonOutputs[6];
-                            double x_coord = pythonOutputs[1];
-                            double y_coord = pythonOutputs[2];
-                            double w_val = pythonOutputs[3];
-                            double h_val = pythonOutputs[4];
-                            double ratio = h_val/w_val;
-                            double inside = pythonOutputs[8];
-                            telemetry.addData("angle", angle);
-                            telemetry.addData("x", x_coord);
-                            telemetry.addData("y", y_coord);
-                            telemetry.addData("w", w_val);
-                            telemetry.addData("h", h_val);
-                            telemetry.addData("ratio", ratio);
-                            if (inside > 0.5) {
-                                hardware.lightLeft.setPosition(Hardware.LAMP_GREEN);
-                                hardware.lightRight.setPosition(Hardware.LAMP_GREEN);
-                                if (gamepad1.x) {
-                                    foundTarget = true;
-                                    autoSamplePickup(angle, hardware, llrobot);
-                                }
-                            } else {
-                                hardware.lightLeft.setPosition(0);
-                                hardware.lightRight.setPosition(0);
-                            }
-                        }
-                    } else {
-                        telemetry.addData("Limelight", "Result is null");
-                    }
-                }
-                hardware.limelightlight.setPosition(0);
-                hardware.lightLeft.setPosition(0);
-                hardware.lightRight.setPosition(0);
-                limelight.stop();
-            }
+            limelightSearch(limelight, hardware, llrobot);
             telemetry.update();
         }
     }
