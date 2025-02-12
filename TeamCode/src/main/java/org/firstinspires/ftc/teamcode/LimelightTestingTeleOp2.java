@@ -27,9 +27,9 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
     private Limelight3A limelight;
 
     private static boolean sampleInRange(double x, double y, double r) {
-        if (r > 1.5 && r < 2.0) {
-            if (x > 235 && x < 350) {
-                if (y > 100 && y < 388) {
+        if (r > 1.5 && r < 2.5) {
+            if (x > 235 && x < 375) {
+                if (y > 170 && y < 330) {
                     return true;
                 }
             }
@@ -125,20 +125,21 @@ public class LimelightTestingTeleOp2 extends LinearOpMode {
                             telemetry.addData("Python output:", output);
                         }
                         telemetry.update();
-                        if (pythonOutputs != null && pythonOutputs.length > 6) {
+                        if (pythonOutputs != null && pythonOutputs.length > 8) {
                             double angle = pythonOutputs[6];
                             double x_coord = pythonOutputs[1];
                             double y_coord = pythonOutputs[2];
                             double w_val = pythonOutputs[3];
                             double h_val = pythonOutputs[4];
                             double ratio = h_val/w_val;
+                            double inside = pythonOutputs[8];
                             telemetry.addData("angle", angle);
                             telemetry.addData("x", x_coord);
                             telemetry.addData("y", y_coord);
                             telemetry.addData("w", w_val);
                             telemetry.addData("h", h_val);
                             telemetry.addData("ratio", ratio);
-                            if (sampleInRange(x_coord, y_coord, ratio)) {
+                            if (inside > 0.5) {
                                 hardware.lightLeft.setPosition(Hardware.LAMP_GREEN);
                                 hardware.lightRight.setPosition(Hardware.LAMP_GREEN);
                                 if (gamepad1.x) {
