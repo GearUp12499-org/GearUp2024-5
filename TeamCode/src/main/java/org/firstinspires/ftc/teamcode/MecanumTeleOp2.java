@@ -434,7 +434,8 @@ public class MecanumTeleOp2 extends LinearOpMode {
         scheduler.add(
                 groupOf(inner -> {
                             inner.add(vLiftProxy.moveTo(Hardware.VLIFT_SCORE_HIGH, 5, 2.0));
-                            inner.add(run(() -> hardware.arm.setTargetPosition(222)));
+                            inner.add(run(() -> hardware.arm.setTargetPosition(-390)));
+                            inner.add(run(() -> hardware.wrist.setPosition(0)));
                         }
                 ).extraDepends(
                         Locks.ArmAssembly,
@@ -445,13 +446,11 @@ public class MecanumTeleOp2 extends LinearOpMode {
 
     public void ScoreHighBasket2() {
         // prevent doing this by accident
-        if (hardware.verticalLift.getCurrentPosition() < 700) return;
-        if (hardware.arm.getCurrentPosition() < 190) return;
+        if (hardware.verticalLift.getCurrentPosition() < 600) return;
+        if (hardware.arm.getCurrentPosition() > -200) return;
         abandonLock(Locks.ArmAssembly);
         abandonLock(vLiftProxy.CONTROL);
-        scheduler.add(groupOf(inner -> inner.add(run(() -> hardware.wrist.setPosition(0.94)))
-                .then(await(200))
-                .then(run(() -> hardware.claw.setPosition(Hardware.CLAW_OPEN)))
+        scheduler.add(groupOf(inner -> inner.add(run(() -> hardware.claw.setPosition(Hardware.CLAW_OPEN)))
                 .then(await(100))
                 .then(run(() -> hardware.wrist.setPosition(0.28)))
                 .then(await(500))
@@ -528,7 +527,7 @@ public class MecanumTeleOp2 extends LinearOpMode {
         scheduler.add(
                 groupOf(it -> it.add(run(() -> hardware.claw.setPosition(clawclose)))
                         .then(vLiftProxy.moveTo(Hardware.VLIFT_SCORE_SPECIMEN, 5, 1.0))
-                        .then(run(() -> hardware.arm.setTargetPosition(Hardware.deg2arm(-99))))
+                        .then(run(() -> hardware.arm.setTargetPosition(Hardware.deg2arm(Hardware.SCORE_SPECIMEN_ARM_DEG))))
                         .then(await(500))
                         .then(run(() -> hardware.wrist.setPosition(1)))
                 ).extraDepends(
