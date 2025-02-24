@@ -61,7 +61,10 @@ public class Ramps {
             case CLIP:
                 return Math.min(begin.apply(beginVal), Math.min(end.apply(endVal), limit));
             case SCALE:
-                return Math.min(begin.apply(beginVal), end.apply(endVal)) * limit;
+                return Math.min(
+                        begin.apply(beginVal),
+                        end.apply(endVal)
+                ) * limit;
         }
         throw new IllegalStateException("bad limit mode");
     }

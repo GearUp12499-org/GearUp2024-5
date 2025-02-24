@@ -73,37 +73,37 @@ public class MoveToTask extends TaskTemplate {
         if (linear > RightAuto.ACCEPT_DIST || abs(angular) > RightAuto.ACCEPT_TURN) {
             targetTime.reset();
         }
-        // Waits at the target for one second
+        // Waits at the target for 0.5 seconds
         if (targetTime.time() > .5) {
             finished = true;
             return;
         }
         // figure out how to get to the target position
         Motion action = tracker.getMotionToTarget(target, hardware);
-        double dToTarget = sqrt(
+        double distanceToTarget = sqrt(
                 action.forward() * action.forward()
                         + action.right() * action.right()
                         + action.turn() * action.turn());
-        double now = runTime.time();
-        double speed = ramps.ease(
-                now,
-                dToTarget,
+        double timeNow = runTime.time();
+        double rampingSpeed = ramps.ease(
+                timeNow,
+                distanceToTarget,
                 1.0
         );
-        action.apply(hardware.driveMotors, RightAuto.CALIBRATION, speed, speed2Power);
+        action.apply(hardware.driveMotors, RightAuto.CALIBRATION, rampingSpeed, speed2Power);
         telemetry.addData("forward", action.forward());
         telemetry.addData("right", action.right());
         telemetry.addData("turn (deg)", Math.toDegrees(action.turn()));
         String message = String.format(
-                "##%.3f##{\"pose\":[%.6f,%.6f,%.6f],\"motion\":[%.6f,%.6f,%.6f],\"speed\":%.6f," +
+                "##%.3f##{\"pose\":[%.6f,%.6f,%.6f],\"motion\":[%.6f,%.6f,%.6f],\"rampingSpeed\":%.6f," +
                         "\"frontLeft\":%.6f,\"frontRight\":%.6f,\"backLeft\":%.6f,\"backRight\":%.6f," +
-                        "\"dToTarget\":%.6f,\"timer\":%.4f,\"avgTickTime\":%.6f}##",
+                        "\"distanceToTarget\":%.6f,\"timer\":%.4f,\"avgTickTime\":%.6f}##",
                 System.currentTimeMillis() / 1000.0,
                 current.x(), current.y(), current.heading(),
                 action.forward(), action.right(), action.turn(),
-                speed,
+                rampingSpeed,
                 action.getLastFL(), action.getLastFR(), action.getLastBL(), action.getLastBR(),
-                dToTarget, now,
+                distanceToTarget, timeNow,
                 loopTimer.getAvg() * 1000
         );
         Log.d("DataDump", message);
