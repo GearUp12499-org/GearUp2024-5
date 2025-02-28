@@ -1,4 +1,5 @@
 
+
 package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH;
@@ -11,9 +12,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
-
-@TeleOp
 @Disabled
+@TeleOp
+
 public class ColorSensorTeleOp
         extends LinearOpMode {
 
@@ -79,8 +80,8 @@ public class ColorSensorTeleOp
                 lightLeft.setPosition(Hardware.LAMP_YELLOW);
             }
             else{
-            lightLeft.setPosition(0);
-            lightRight.setPosition(0);
+                lightLeft.setPosition(0);
+                lightRight.setPosition(0);
             }
 
 

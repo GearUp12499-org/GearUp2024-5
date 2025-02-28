@@ -189,8 +189,8 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     @HardwareName("limelightlight")
     public Servo limelightLight;
 
-    @HardwareName("clawColor")
-    public ColorSensor clawColor;
+  //  @HardwareName("clawColor")
+  //  public ColorSensor clawColor;
 
     @EncoderFor("backLeft")
     @Reversed

@@ -363,7 +363,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
 //        int red = (color >> 16) & 0xff;
 //        int green = (color >> 8) & 0xff;
 //        int blue = color & 0xff;
-        int red = hardware.clawColor.red();
+      /*  int red = hardware.clawColor.red();
         int green = hardware.clawColor.green();
         int blue = hardware.clawColor.blue();
 
@@ -382,7 +382,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         } else {
             hardware.lightRight.setPosition(0);
             hardware.lightLeft.setPosition(0);
-        }
+        }*/
     }
 
     private double getArmPosDeg() {

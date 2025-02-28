@@ -1,3 +1,4 @@
+
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
@@ -48,47 +49,47 @@ public class DumbledoreHardware extends HardwareMapper {
     @AutoClearEncoder
     public Encoder encoderRight;
 
-   /* @HardwareName("gyro")
-    public NavxMicroNavigationSensor gyro;
+    /* @HardwareName("gyro")
+     public NavxMicroNavigationSensor gyro;
 
-    @Override
-    public Encoder getLeftEncoder() {
-        return encoderLeft;
-    }
- @EncoderFor("intake")
-    @AutoClearEncoder
-    public Encoder encoderCenter;
+     @Override
+     public Encoder getLeftEncoder() {
+         return encoderLeft;
+     }
+  @EncoderFor("intake")
+     @AutoClearEncoder
+     public Encoder encoderCenter;
 
-    @Override
-    public Encoder getRightEncoder() {
-        return encoderRight;
-    }
+     @Override
+     public Encoder getRightEncoder() {
+         return encoderRight;
+     }
 
-    @Override
-    public Encoder getCenterEncoder() {
-        return encoderCenter;
-    }
+     @Override
+     public Encoder getCenterEncoder() {
+         return encoderCenter;
+     }
 
-    @Override
-    public double getTrackWidth() {
-        return 14 + 7 / 16.;
-    }
+     @Override
+     public double getTrackWidth() {
+         return 14 + 7 / 16.;
+     }
 
-    @Override
-    public double getForwardOffset() {
-        return -(6 + 3 / 4.);
-    }
+     @Override
+     public double getForwardOffset() {
+         return -(6 + 3 / 4.);
+     }
 
-    @Override
-    public int getEncoderTicksPerRevolution() {
-        return 8192;
-    }
+     @Override
+     public int getEncoderTicksPerRevolution() {
+         return 8192;
+     }
 
-    @Override
-    public double getEncoderWheelRadius() {
-        return 0.70;
-    }
-*/
+     @Override
+     public double getEncoderWheelRadius() {
+         return 0.70;
+     }
+ */
     public MotorSet driveMotors;
 
     public DumbledoreHardware(HardwareMap hwMap) {
