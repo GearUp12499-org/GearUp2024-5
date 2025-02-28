@@ -87,6 +87,6 @@ class PoseFromToProcessor(origin: Pose) {
         val estHeading = last.heading + (.5 * deltaHeading)
         val forward = cos(estHeading) * dx + sin(estHeading) * dy
         val strafe = sin(estHeading) * dx - cos(estHeading) * dy
-        return Motion(forward, strafe, dh * robot.forwardOffset)
+        return Motion(forward, strafe, -dh * robot.forwardOffset)
     }
 }

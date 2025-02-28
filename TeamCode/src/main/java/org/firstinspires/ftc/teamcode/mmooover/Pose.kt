@@ -115,7 +115,7 @@ data class Motion(
         var fr = forward * fwBias - right * rtBias + turn * turnBias
         var bl = forward * fwBias - right * rtBias - turn * turnBias
         var br = forward * fwBias + right * rtBias + turn * turnBias
-        val div = max(1.0, max(abs(fl), max(abs(fr), max(abs(bl), abs(br)))))
+        val div = max(0.1, max(abs(fl), max(abs(fr), max(abs(bl), abs(br)))))
         fl /= div
         fr /= div
         bl /= div

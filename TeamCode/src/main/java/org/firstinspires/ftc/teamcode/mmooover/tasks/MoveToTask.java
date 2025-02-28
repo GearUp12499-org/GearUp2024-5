@@ -74,7 +74,7 @@ public class MoveToTask extends TaskTemplate {
             targetTime.reset();
         }
         // Waits at the target for 0.5 seconds
-        if (targetTime.time() > .5) {
+        if (targetTime.time() > .25) {
             finished = true;
             return;
         }
