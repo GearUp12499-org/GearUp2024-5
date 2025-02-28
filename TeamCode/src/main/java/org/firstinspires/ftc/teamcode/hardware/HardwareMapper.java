@@ -128,16 +128,31 @@ public abstract class HardwareMapper {
         }
     }
 
-    private void matchHardwareName(@NotNull Field field, @NotNull Class<?> targetType, @NotNull HardwareName annotation) {
+    final boolean isEntireClassOptional;
+
+    private void fieldAccessFail(@NotNull Field field, Object result) throws RuntimeException {
+        if (result == null)
+            throw new RuntimeException("Field " + field.getName() + " assign failed: null to " + field.getType().getName());
+        throw new RuntimeException("Field " + field.getName() + " assign failed: " + result.getClass().getName() + " to " + field.getType().getName());
+    }
+
+    private void matchHardwareName(@NotNull Field field, @NotNull Class<?> targetType, @NotNull HardwareName annotation, boolean optional) {
         Object result = thisMap.tryGet(targetType, annotation.value());
 
         if (result == null) {
-            throw new RuntimeException("Hardware: '" + annotation.value() + "' not found, expected type " + targetType.getName() + " for field " + field.getName() + " in " + this.getClass().getSimpleName());
+            if (!optional)
+                throw new RuntimeException("Hardware: '" + annotation.value() + "' not found, expected type " + targetType.getName() + " for field " + field.getName() + " in " + this.getClass().getSimpleName());
+            try {
+                field.set(this, null);
+            } catch (IllegalAccessException | IllegalArgumentException e) {
+                fieldAccessFail(field, null);
+            }
+            return;
         }
         try {
             field.set(this, result);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Field " + field.getName() + " assign failed: " + result.getClass().getName() + " to " + field.getType().getName());
+        } catch (IllegalAccessException | IllegalArgumentException e) {
+            fieldAccessFail(field, result);
         }
 
         reversed.use(field, result);
@@ -145,7 +160,7 @@ public abstract class HardwareMapper {
         autoClearEncoder.use(field, result);
     }
 
-    private void matchEncoderFor(@NotNull Field field, @NotNull Class<?> targetType, @NotNull EncoderFor annotation) {
+    private void matchEncoderFor(@NotNull Field field, @NotNull Class<?> targetType, @NotNull EncoderFor annotation, boolean optional) {
         DcMotor result = thisMap.tryGet(DcMotor.class, annotation.value());
         if (!targetType.isAssignableFrom(Encoder.class)) throw new ClassCastException(String.format(
                 "Hardware: cannot assign Encoder to field '%s' with type %s, in class %s",
@@ -153,14 +168,21 @@ public abstract class HardwareMapper {
         ));
 
         if (result == null) {
-            throw new RuntimeException("Hardware: '" + annotation.value() + "' not found, expecting a DcMotor to drive a Encoder for field " + field.getName() + " in " + this.getClass().getSimpleName());
+            if (!optional)
+                throw new RuntimeException("Hardware: '" + annotation.value() + "' not found, expecting a DcMotor to drive a Encoder for field " + field.getName() + " in " + this.getClass().getSimpleName());
+            try {
+                field.set(this, null);
+            } catch (IllegalAccessException | IllegalArgumentException e) {
+                fieldAccessFail(field, null);
+            }
+            return;
         }
 
         Encoder wrapper = new MotorEncoder(result);
         try {
             field.set(this, wrapper);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Field " + field.getName() + " assign failed: " + result.getClass().getName() + " to " + field.getType().getName());
+        } catch (IllegalAccessException | IllegalArgumentException e) {
+            fieldAccessFail(field, result);
         }
 
         reversedEncoder.use(field, wrapper);
@@ -169,6 +191,7 @@ public abstract class HardwareMapper {
     }
 
     public HardwareMapper(HardwareMap map) {
+        isEntireClassOptional = this.getClass().getAnnotation(HWOptional.class) != null;
         thisMap = map;
         Field[] fields = this.getClass().getDeclaredFields();
         for (Field field : fields) {
@@ -176,16 +199,17 @@ public abstract class HardwareMapper {
             if (!accessible) field.setAccessible(true);
             try {
                 Class<?> targetType = field.getType();
+                boolean isOptional = isEntireClassOptional || field.getAnnotation(HWOptional.class) != null;
                 HardwareName hardwareNameAnn = field.getAnnotation(HardwareName.class);
                 if (hardwareNameAnn != null) {
                     assertNotAnnotated(field, EncoderFor.class, HardwareName.class);
-                    matchHardwareName(field, targetType, hardwareNameAnn);
+                    matchHardwareName(field, targetType, hardwareNameAnn, isOptional);
                     continue;
                 }
                 EncoderFor encoderForAnn = field.getAnnotation(EncoderFor.class);
                 if (encoderForAnn != null) {
                     assertNotAnnotated(field, HardwareName.class, EncoderFor.class);
-                    matchEncoderFor(field, targetType, encoderForAnn);
+                    matchEncoderFor(field, targetType, encoderForAnn, isOptional);
                     continue;
                 }
 

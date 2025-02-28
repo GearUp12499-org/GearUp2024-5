@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.hardware.Ascent;
 import org.firstinspires.ftc.teamcode.hardware.AutoClearEncoder;
 import org.firstinspires.ftc.teamcode.hardware.Encoder;
 import org.firstinspires.ftc.teamcode.hardware.EncoderFor;
+import org.firstinspires.ftc.teamcode.hardware.HWOptional;
 import org.firstinspires.ftc.teamcode.hardware.HardwareMapper;
 import org.firstinspires.ftc.teamcode.hardware.HardwareName;
 import org.firstinspires.ftc.teamcode.hardware.Lift;
@@ -24,6 +25,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import dev.aether.collaborative_multitasking.SharedResource;
 
 
+@HWOptional
 public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final int ARM_TRANSFER_POS = -40;
     public static final double SCORE_SPECIMEN_ARM_DEG =-100;
