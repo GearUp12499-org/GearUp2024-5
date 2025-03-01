@@ -221,16 +221,9 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     @AutoClearEncoder
     public Encoder leftAscentEnc;
 
-    //@HardwareName("leftAscent")
-    //public CRServo leftAscent;
-
     @EncoderFor("verticalSlide2")
     @AutoClearEncoder
     public Encoder rightAscentEnc;
-
-    //@HardwareName("rightAscent")
-    //@Reversed
-    //public CRServo rightAscent;
 
     public Ascent ascent;
 
