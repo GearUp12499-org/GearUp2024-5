@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -25,7 +24,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import dev.aether.collaborative_multitasking.SharedResource;
 
 
-@HWOptional
 public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final int ARM_TRANSFER_POS = -40;
     public static final double SCORE_SPECIMEN_ARM_DEG =-100;
@@ -209,18 +207,8 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     @HardwareName("leftFlip")
     public Servo leftFlip;
 
-
     @HardwareName("clawColor")
     public ColorSensor clawColor;
-
-    @EncoderFor("backLeft")
-    @Reversed
-    @AutoClearEncoder
-    public Encoder leftAscentEnc;
-
-    @EncoderFor("verticalSlide2")
-    @AutoClearEncoder
-    public Encoder rightAscentEnc;
 
     public Ascent ascent;
 
@@ -271,21 +259,17 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        if (clawFlip != null) clawFlip.setPosition(Hardware.FLIP_UP);
+        if (rightFlip != null) rightFlip.setPosition(Hardware.FLIP_UP);
+        if (leftFlip != null) leftFlip.setPosition(1 - Hardware.FLIP_UP);
         if (clawFront != null) clawFront.setPosition(Hardware.FRONT_OPEN);
         if (clawTwist != null) clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
 
-        if (arm != null) {
-            arm.setTargetPosition(0);
-            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            arm.setPower(0.3);
-        }
         if (wrist != null) wrist.setPosition(0.28);
         if (claw != null) claw.setPosition(Hardware.CLAW_CLOSE);
 
         // we don't have the proxy object to handle this for us
         // so manually implement the inversion
-        if (horizontalSlide != null) horizontalSlide.setPosition(Hardware.RIGHT_SLIDE_IN);
+        if (horizontalRight != null) horizontalRight.setPosition(Hardware.RIGHT_SLIDE_IN);
         if (horizontalLeft != null) horizontalLeft.setPosition(1.05 - Hardware.RIGHT_SLIDE_IN);
 
         if (lightLeft != null) lightLeft.setPosition(Hardware.LAMP_PURPLE);
@@ -303,15 +287,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
                 backRight
         );
         verticalLift = new Lift(verticalSlide, verticalSlide2);
-        if (
-                leftAscent == null
-                || leftAscentEnc == null
-                || rightAscent == null
-                || rightAscentEnc == null
-        )
-            ascent = null;
-        else
-            ascent = new Ascent(leftAscent, leftAscentEnc, rightAscent, rightAscentEnc);
+        ascent = null;
     }
 
 }
