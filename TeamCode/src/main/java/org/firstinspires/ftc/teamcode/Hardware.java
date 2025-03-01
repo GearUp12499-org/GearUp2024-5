@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.hardware.Ascent;
 import org.firstinspires.ftc.teamcode.hardware.AutoClearEncoder;
 import org.firstinspires.ftc.teamcode.hardware.Encoder;
 import org.firstinspires.ftc.teamcode.hardware.EncoderFor;
+import org.firstinspires.ftc.teamcode.hardware.HWOptional;
 import org.firstinspires.ftc.teamcode.hardware.HardwareMapper;
 import org.firstinspires.ftc.teamcode.hardware.HardwareName;
 import org.firstinspires.ftc.teamcode.hardware.Lift;
@@ -24,6 +25,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import dev.aether.collaborative_multitasking.SharedResource;
 
 
+@HWOptional
 public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final int ARM_TRANSFER_POS = -40;
     public static final double SCORE_SPECIMEN_ARM_DEG =-100;
@@ -107,7 +109,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     }
 
     public static final double TRACK_WIDTH = 11.375;
-    public static final double FORWARD_OFFSET = 3.062500;
+    public static final double FORWARD_OFFSET = -4.125;
     public static final double ENC_WHEEL_RADIUS = 1.25984 / 2.0;
     public static final int ENC_TICKS_PER_REV = 2000;
 
@@ -148,18 +150,13 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     @AutoClearEncoder
     public Encoder encoderVerticalSlide;
 
-//    @HardwareName("arm")
-//    @ZeroPower(DcMotor.ZeroPowerBehavior.BRAKE)
-//    @AutoClearEncoder
-//    public DcMotor arm;
 
     @EncoderFor("frontLeft")
     @AutoClearEncoder
     public Encoder encoderLeft;
 
-    @EncoderFor("backRight")
+    @EncoderFor("backLeft")
     @AutoClearEncoder
-    @Reversed
     public Encoder encoderCenter;
 
     @EncoderFor("frontRight")
@@ -274,25 +271,27 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightFlip.setPosition(Hardware.FLIP_UP);
-        clawFront.setPosition(Hardware.FRONT_OPEN);
-        clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
+        if (clawFlip != null) clawFlip.setPosition(Hardware.FLIP_UP);
+        if (clawFront != null) clawFront.setPosition(Hardware.FRONT_OPEN);
+        if (clawTwist != null) clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
 
-//        arm.setTargetPosition(0);
-//        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//        arm.setPower(0.3);
-        //wrist.setPosition(0.28);
-        claw.setPosition(Hardware.CLAW_CLOSE);
+        if (arm != null) {
+            arm.setTargetPosition(0);
+            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            arm.setPower(0.3);
+        }
+        if (wrist != null) wrist.setPosition(0.28);
+        if (claw != null) claw.setPosition(Hardware.CLAW_CLOSE);
 
         // we don't have the proxy object to handle this for us
         // so manually implement the inversion
-        horizontalRight.setPosition(Hardware.RIGHT_SLIDE_IN);
-        horizontalLeft.setPosition(1.05 - Hardware.RIGHT_SLIDE_IN);
+        if (horizontalSlide != null) horizontalSlide.setPosition(Hardware.RIGHT_SLIDE_IN);
+        if (horizontalLeft != null) horizontalLeft.setPosition(1.05 - Hardware.RIGHT_SLIDE_IN);
 
-        colorLeft.setPosition(Hardware.LAMP_PURPLE);
-        colorRight.setPosition(Hardware.LAMP_PURPLE);
+        if (lightLeft != null) lightLeft.setPosition(Hardware.LAMP_PURPLE);
+        if (lightRight != null) lightRight.setPosition(Hardware.LAMP_PURPLE);
 
-        limelight.stop();
+        if (limelight != null) limelight.stop();
     }
 
     public Hardware(HardwareMap hwMap) {
@@ -304,8 +303,15 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
                 backRight
         );
         verticalLift = new Lift(verticalSlide, verticalSlide2);
-//        ascent = new Ascent(leftAscent, leftAscentEnc, rightAscent, rightAscentEnc);
-        ascent = null;
+        if (
+                leftAscent == null
+                || leftAscentEnc == null
+                || rightAscent == null
+                || rightAscentEnc == null
+        )
+            ascent = null;
+        else
+            ascent = new Ascent(leftAscent, leftAscentEnc, rightAscent, rightAscentEnc);
     }
 
 }

@@ -7,6 +7,7 @@ import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.sin
 
+// FIXME: 4pi -> :(
 fun wrapAngle(angle: Double): Double {
     return when {
         angle > Math.PI -> angle - 2 * Math.PI
@@ -103,10 +104,10 @@ data class Motion(
      * Apply this Motion to a MotorSet.
      * @param motors target set of motors
      * @param calibration motor bias calibration. configures how much power is used for e.g. strafing vs forwarding
-     * @param factor overall speed factor. applied after all other calculations.
+     * @param speed overall speed factor. applied after all other calculations.
      */
     @JvmOverloads
-    fun apply(motors: MotorSet, calibration: Calibrate, factor: Number = 1.0, s2p: Speed2Power) {
+    fun apply(motors: MotorSet, calibration: Calibrate, speed: Number = 1.0, s2p: Speed2Power) {
         val fwBias = calibration.preferForward
         val rtBias = calibration.preferStrafe
         val turnBias = calibration.preferTurn
@@ -114,21 +115,21 @@ data class Motion(
         var fr = forward * fwBias - right * rtBias + turn * turnBias
         var bl = forward * fwBias - right * rtBias - turn * turnBias
         var br = forward * fwBias + right * rtBias + turn * turnBias
-        val div = max(1.0, max(abs(fl), max(abs(fr), max(abs(bl), abs(br)))))
+        val div = max(0.1, max(abs(fl), max(abs(fr), max(abs(bl), abs(br)))))
         fl /= div
         fr /= div
         bl /= div
         br /= div
-        val factorD = factor.toDouble()
-        fl *= factorD
-        fr *= factorD
-        bl *= factorD
-        br *= factorD
+        val speedD = speed.toDouble()
+        fl *= speedD
+        fr *= speedD
+        bl *= speedD
+        br *= speedD
         fl = s2p.speed2power(fl)
         fr = s2p.speed2power(fr)
         bl = s2p.speed2power(bl)
         br = s2p.speed2power(br)
         lastFL = fl; lastFR = fr; lastBL = bl; lastBR = br
-        motors.set(fl, fr, bl, br);
+        motors.set(fl, fr, bl, br)
     }
 }
