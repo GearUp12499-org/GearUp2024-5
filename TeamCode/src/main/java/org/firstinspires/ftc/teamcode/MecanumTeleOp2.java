@@ -58,7 +58,6 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
     private NavxMicroNavigationSensor navxMicro;
     private HSlideProxy hSlideProxy;
     private HClawProxy hClawProxy;
-    private AscentProxy ascentProxy;
     private EncoderTracking tracker;
     private Ramps ramps;
     private LoopStopwatch loopTimer;
@@ -148,9 +147,6 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         vLiftProxy = scheduler.add(new VLiftProxy(scheduler, hardware.verticalLift));
         hSlideProxy = scheduler.add(new HSlideProxy(scheduler, hardware));
         hClawProxy = scheduler.add(new HClawProxy(scheduler, hardware));
-        ascentProxy = scheduler.add(new AscentProxy(scheduler, hardware.ascent));
-        hardware.ascent.calibrate(Hardware.ASCENT_UP_POS);
-        hardware.ascent.setTargetPosition(Hardware.ASCENT_UP_POS);
 
         telemetry.log().clear();
         telemetry.log().add("Set and ready to roll!");
@@ -269,12 +265,12 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
                 if (untwist90) hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
             }
 
-            if (gamepad1.b) {
-                hardware.ascent.setTargetPosition(Hardware.ASCENT_PREPARE_POS);
-            }
-            if (gamepad1.right_bumper) {
-                hardware.ascent.setTargetPosition(Hardware.ASCENT_FINISH_POS);
-            }
+//            if (gamepad1.b) {
+//                hardware.ascent.setTargetPosition(Hardware.ASCENT_PREPARE_POS);
+//            }
+//            if (gamepad1.right_bumper) {
+//                hardware.ascent.setTargetPosition(Hardware.ASCENT_FINISH_POS);
+//            }
 
             boolean shouldFlipIn = gamepad1.right_trigger > 0.5;
             if (shouldFlipIn && !isFlipIn) Flipin();
@@ -310,9 +306,9 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
             telemetry.addData("Claw Position", hardware.claw.getPosition());
             telemetry.addData("Vertical position", verticalPosition);
             telemetry.addData("Est pose", tracker.getPose());
-            telemetry.addData("ascLeft calib", hardware.ascent.getLeftPosition());
-            telemetry.addData("ascRight calib", hardware.ascent.getRightPosition());
-            telemetry.addData("asc target", hardware.ascent.getTargetPosition());
+//            telemetry.addData("ascLeft calib", hardware.ascent.getLeftPosition());
+//            telemetry.addData("ascRight calib", hardware.ascent.getRightPosition());
+//            telemetry.addData("asc target", hardware.ascent.getTargetPosition());
             scheduler.displayStatus(false, true, (str) -> {
                 telemetry.addLine(str);
                 return Unit.INSTANCE;

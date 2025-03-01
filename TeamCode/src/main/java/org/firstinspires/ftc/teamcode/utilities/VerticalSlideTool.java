@@ -6,11 +6,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.Hardware;
 import org.firstinspires.ftc.teamcode.hardware.VLiftProxy;
-import org.firstinspires.ftc.teamcode.mmooover.EncoderTracking;
-import org.firstinspires.ftc.teamcode.mmooover.Pose;
-import org.firstinspires.ftc.teamcode.mmooover.Ramps;
-import org.firstinspires.ftc.teamcode.mmooover.Speed2Power;
-import org.firstinspires.ftc.teamcode.mmooover.tasks.MoveToTask;
 
 import java.util.function.Consumer;
 
@@ -19,9 +14,7 @@ import dev.aether.collaborative_multitasking.MultitaskScheduler;
 import dev.aether.collaborative_multitasking.OneShot;
 import dev.aether.collaborative_multitasking.Scheduler;
 import dev.aether.collaborative_multitasking.TaskGroup;
-import dev.aether.collaborative_multitasking.TaskTemplate;
 import dev.aether.collaborative_multitasking.ext.Pause;
-import dev.aether.collaborative_multitasking.ext.While;
 import kotlin.Unit;
 
 @TeleOp(name = "util: Vertical Slide", group = "Utilities")
@@ -66,7 +59,7 @@ public class VerticalSlideTool extends LinearOpMode {
         h.frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         h.backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         h.frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        h.rightFlip.setPosition(Hardware.FLIP_UP);
+        h.flip.setPosition(Hardware.FLIP_UP);
         h.clawFront.setPosition(Hardware.FRONT_OPEN);
 
         //h.arm.setTargetPosition(0);

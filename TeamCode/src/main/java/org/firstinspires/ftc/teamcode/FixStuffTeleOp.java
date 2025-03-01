@@ -2,45 +2,21 @@ package org.firstinspires.ftc.teamcode;
 
 import static java.lang.Math.abs;
 
-import android.annotation.SuppressLint;
-
-import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.Hardware.Locks;
 import org.firstinspires.ftc.teamcode.hardware.HClawProxy;
 import org.firstinspires.ftc.teamcode.hardware.HSlideProxy;
 import org.firstinspires.ftc.teamcode.hardware.VLiftProxy;
-import org.firstinspires.ftc.teamcode.mmooover.EncoderTracking;
-import org.firstinspires.ftc.teamcode.mmooover.Pose;
-import org.firstinspires.ftc.teamcode.mmooover.Ramps;
-import org.firstinspires.ftc.teamcode.mmooover.Speed2Power;
-import org.firstinspires.ftc.teamcode.mmooover.tasks.MoveRelTask;
-import org.firstinspires.ftc.teamcode.utilities.LoopStopwatch;
 
 import java.util.function.Consumer;
 
 import dev.aether.collaborative_multitasking.ITask;
-import dev.aether.collaborative_multitasking.ITaskWithResult;
 import dev.aether.collaborative_multitasking.MultitaskScheduler;
 import dev.aether.collaborative_multitasking.OneShot;
 import dev.aether.collaborative_multitasking.Scheduler;
-import dev.aether.collaborative_multitasking.SharedResource;
 import dev.aether.collaborative_multitasking.TaskGroup;
 import dev.aether.collaborative_multitasking.ext.Pause;
-import dev.aether.collaborative_multitasking.ext.While;
-import kotlin.Unit;
-import kotlin.jvm.functions.Function0;
-
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
 public class FixStuffTeleOp extends LinearOpMode {
@@ -140,8 +116,7 @@ public class FixStuffTeleOp extends LinearOpMode {
             }
             telemetry.addData("slidePos", hardware.horizontalLeft.getPosition());
             telemetry.addData("slidePos2", hardware.horizontalRight.getPosition());
-            telemetry.addData("leftFlip",hardware.leftFlip.getPosition());
-            telemetry.addData("rightFlip",hardware.rightFlip.getPosition());
+            telemetry.addData("rightFlip",hardware.flip.getPosition());
 
             telemetry.update();
             scheduler.tick();
@@ -180,21 +155,21 @@ public class FixStuffTeleOp extends LinearOpMode {
     public void SlideIn() {
         hardware.clawFront.setPosition(Hardware.FRONT_CLOSE);
         sleep(500);
-        hardware.rightFlip.setPosition(Hardware.FLIP_ONE_THIRD);
+        hardware.flip.setPosition(Hardware.FLIP_ONE_THIRD);
         sleep(500);
         hardware.horizontalRight.setPosition(Hardware.SLIDE_OVERSHOOT);
         hardware.horizontalLeft.setPosition(1.05 - Hardware.SLIDE_OVERSHOOT);
         sleep(500);
         hardware.horizontalRight.setPosition(Hardware.RIGHT_SLIDE_IN);
         hardware.horizontalLeft.setPosition(1.05 - Hardware.RIGHT_SLIDE_IN);
-        hardware.rightFlip.setPosition(Hardware.FLIP_UP);
+        hardware.flip.setPosition(Hardware.FLIP_UP);
     }
 
     public void FourthSample() {
         hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
         sleep(500);
         double PartialFlip = 0.167;
-        hardware.rightFlip.setPosition(PartialFlip);
+        hardware.flip.setPosition(PartialFlip);
         sleep(500);
         hardware.clawTwist.setPosition(0.26);
         sleep(500);
@@ -213,7 +188,7 @@ public class FixStuffTeleOp extends LinearOpMode {
         hardware.horizontalRight.setPosition(Hardware.RIGHT_SLIDE_IN);
         hardware.horizontalLeft.setPosition(1.05 - Hardware.RIGHT_SLIDE_IN);
         sleep(500);
-        hardware.rightFlip.setPosition(Hardware.FLIP_UP);
+        hardware.flip.setPosition(Hardware.FLIP_UP);
     }
 
     public void transfer() {
@@ -223,8 +198,7 @@ public class FixStuffTeleOp extends LinearOpMode {
         hardware.claw.setPosition(Hardware.CLAW_OPEN);
         hardware.wrist.setPosition(Hardware.WRIST_TRANSFER);
         sleep(500);
-        hardware.rightFlip.setPosition(Hardware.FLIP_UP);
-        hardware.leftFlip.setPosition(1-Hardware.FLIP_UP);
+        hardware.flip.setPosition(Hardware.FLIP_UP);
         sleep(500);
         hardware.horizontalRight.setPosition(Hardware.RIGHT_SLIDE_TRANSFER);
         hardware.horizontalLeft.setPosition(Hardware.LEFT_SLIDE_TRANSFER);
@@ -257,7 +231,7 @@ public class FixStuffTeleOp extends LinearOpMode {
         hardware.horizontalRight.setPosition(Hardware.RIGHT_SLIDE_IN);
         hardware.horizontalLeft.setPosition(1.05 - Hardware.RIGHT_SLIDE_IN);
         sleep(500);
-        hardware.rightFlip.setPosition(Hardware.FLIP_UP);
+        hardware.flip.setPosition(Hardware.FLIP_UP);
     }
 
     public void DriveToDistance (double target) {
@@ -300,16 +274,13 @@ public class FixStuffTeleOp extends LinearOpMode {
         hardware.horizontalRight.setPosition(Hardware.RIGHT_SLIDE_OUT);
         hardware.horizontalLeft.setPosition(1.05 - Hardware.RIGHT_SLIDE_OUT);
         sleep(100);
-        hardware.rightFlip.setPosition(Hardware.FLIP_DOWN);
-        hardware.leftFlip.setPosition(1-Hardware.FLIP_DOWN);
+        hardware.flip.setPosition(Hardware.FLIP_DOWN);
     }
     public void flipUp(){
-        hardware.rightFlip.setPosition(Hardware.FLIP_ONE_THIRD);
-        hardware.leftFlip.setPosition(1-Hardware.FLIP_ONE_THIRD);
+        hardware.flip.setPosition(Hardware.FLIP_ONE_THIRD);
         sleep(350);
         hardware.clawFront.setPosition(Hardware.FRONT_CLOSE-0.07);
-        hardware.rightFlip.setPosition(Hardware.FLIP_UP);
-        hardware.leftFlip.setPosition(1-Hardware.FLIP_UP);
+        hardware.flip.setPosition(Hardware.FLIP_UP);
     }
     public void close(){
         hardware.clawFront.setPosition(Hardware.FRONT_CLOSE);

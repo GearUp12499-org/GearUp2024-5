@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.hardware.Ascent;
 import org.firstinspires.ftc.teamcode.hardware.AutoClearEncoder;
 import org.firstinspires.ftc.teamcode.hardware.Encoder;
 import org.firstinspires.ftc.teamcode.hardware.EncoderFor;
-import org.firstinspires.ftc.teamcode.hardware.HWOptional;
+import org.firstinspires.ftc.teamcode.hardware.FrontFlip;
 import org.firstinspires.ftc.teamcode.hardware.HardwareMapper;
 import org.firstinspires.ftc.teamcode.hardware.HardwareName;
 import org.firstinspires.ftc.teamcode.hardware.Lift;
@@ -63,7 +63,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double LAMP_PURPLE = 0.700;
     public static final double LAMP_GREEN = 0.440;
     public static final int VLIFT_MAX_HEIGHT = 825;
-    public static final int VLIFT_SCORE_HIGH = 790;
+    public static final int VLIFT_SCORE_HIGH = 690;
     public static final int VLIFT_SCORE_SPECIMEN = 283;
     public static final double VLIFT_CLOSENESS = 50.0;
     public static final int VLIFT_POWEROFF_HEIGHT = 30;
@@ -174,8 +174,13 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     @HardwareName("clawFront")
     public Servo clawFront;
 
+    public FrontFlip flip;
+
     @HardwareName("rightFlip")
-    public Servo rightFlip;
+    private Servo rightFlip;
+
+    @HardwareName("leftFlip")
+    private Servo leftFlip;
 
     @HardwareName("armLeft")
     public Servo armLeft;
@@ -203,9 +208,6 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
 
     @HardwareName("lightRight")
     public Servo lightRight;
-
-    @HardwareName("leftFlip")
-    public Servo leftFlip;
 
     @HardwareName("clawColor")
     public ColorSensor clawColor;
@@ -259,8 +261,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        if (rightFlip != null) rightFlip.setPosition(Hardware.FLIP_UP);
-        if (leftFlip != null) leftFlip.setPosition(1 - Hardware.FLIP_UP);
+        if (flip != null) flip.setPosition(Hardware.FLIP_UP);
         if (clawFront != null) clawFront.setPosition(Hardware.FRONT_OPEN);
         if (clawTwist != null) clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
 
@@ -288,6 +289,9 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
         );
         verticalLift = new Lift(verticalSlide, verticalSlide2);
         ascent = null;
+        if (leftFlip != null && rightFlip != null) {
+            flip = new FrontFlip(leftFlip, rightFlip);
+        } else flip = null;
     }
 
 }
