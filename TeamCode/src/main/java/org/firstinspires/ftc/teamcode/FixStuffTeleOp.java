@@ -2,45 +2,24 @@ package org.firstinspires.ftc.teamcode;
 
 import static java.lang.Math.abs;
 
-import android.annotation.SuppressLint;
-
-import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.Hardware.Locks;
 import org.firstinspires.ftc.teamcode.hardware.HClawProxy;
 import org.firstinspires.ftc.teamcode.hardware.HSlideProxy;
 import org.firstinspires.ftc.teamcode.hardware.VLiftProxy;
-import org.firstinspires.ftc.teamcode.mmooover.EncoderTracking;
-import org.firstinspires.ftc.teamcode.mmooover.Pose;
-import org.firstinspires.ftc.teamcode.mmooover.Ramps;
-import org.firstinspires.ftc.teamcode.mmooover.Speed2Power;
-import org.firstinspires.ftc.teamcode.mmooover.tasks.MoveRelTask;
-import org.firstinspires.ftc.teamcode.utilities.LoopStopwatch;
+import org.firstinspires.ftc.teamcode.Hardware.Locks;
 
 import java.util.function.Consumer;
 
 import dev.aether.collaborative_multitasking.ITask;
-import dev.aether.collaborative_multitasking.ITaskWithResult;
 import dev.aether.collaborative_multitasking.MultitaskScheduler;
 import dev.aether.collaborative_multitasking.OneShot;
 import dev.aether.collaborative_multitasking.Scheduler;
 import dev.aether.collaborative_multitasking.SharedResource;
 import dev.aether.collaborative_multitasking.TaskGroup;
 import dev.aether.collaborative_multitasking.ext.Pause;
-import dev.aether.collaborative_multitasking.ext.While;
-import kotlin.Unit;
-import kotlin.jvm.functions.Function0;
-
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import dev.aether.collaborative_multitasking.ITaskWithResult;
 
 @TeleOp
 public class FixStuffTeleOp extends LinearOpMode {
@@ -66,6 +45,11 @@ public class FixStuffTeleOp extends LinearOpMode {
     private TaskGroup groupOf(Consumer<Scheduler> contents) {
         return new TaskGroup(scheduler).with(contents);
     }
+
+    private void abandonLock(SharedResource theLockInQuestion) {
+        scheduler.filteredStop(it -> it.requirements().contains(theLockInQuestion), true, true);
+    }
+
     private void hardwareInit() {
 
 //        hardware.backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -97,6 +81,11 @@ public class FixStuffTeleOp extends LinearOpMode {
         hardwareInit();
 
 //        vLiftProxy = scheduler.add(new VLiftProxy(scheduler, hardware.verticalLift));
+        hSlideProxy = scheduler.add(new HSlideProxy(scheduler, hardware));
+        hClawProxy = scheduler.add(new HClawProxy(scheduler, hardware));
+
+        scheduler = new MultitaskScheduler();
+        vLiftProxy = scheduler.add(new VLiftProxy(scheduler, hardware.verticalLift));
         hSlideProxy = scheduler.add(new HSlideProxy(scheduler, hardware));
         hClawProxy = scheduler.add(new HClawProxy(scheduler, hardware));
 
@@ -137,6 +126,12 @@ public class FixStuffTeleOp extends LinearOpMode {
             }
             if (gamepad2.b){
                 SlideOut();
+            }
+            if (gamepad2.x){
+                pickOffWall();
+            }
+            if (gamepad2.y){
+                scoreSpecimen();
             }
             telemetry.addData("slidePos", hardware.horizontalLeft.getPosition());
             telemetry.addData("slidePos2", hardware.horizontalRight.getPosition());
@@ -312,6 +307,28 @@ public class FixStuffTeleOp extends LinearOpMode {
         hardware.leftFlip.setPosition(1-Hardware.FLIP_UP);
     }
     public void close(){
-        hardware.clawFront.setPosition(Hardware.FRONT_CLOSE);
+        hardware.claw.setPosition(Hardware.CLAW_CLOSE);
+    }
+    public void pickOffWall(){
+        hardware.armLeft.setPosition(1);
+        hardware.armRight.setPosition(0);
+        sleep(100);
+        hardware.wrist.setPosition(0.05);
+    }
+
+    public void scoreSpecimen() {
+        abandonLock(vLiftProxy.CONTROL);
+        abandonLock(Locks.ArmAssembly);
+        abandonLock(Locks.DriveMotors);
+        scheduler.add(
+                groupOf(it -> it.add(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)))
+                .then(vLiftProxy.moveTo(Hardware.VLIFT_SCORE_SPECIMEN, 5, 1.0))
+
+        ).extraDepends(
+                vLiftProxy.CONTROL,
+                Locks.ArmAssembly
+                )
+        );
     }
 }
+
