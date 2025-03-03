@@ -106,10 +106,6 @@ public class FixStuffTeleOp extends LinearOpMode {
             if (gamepad1.right_bumper){
                 FourthSample();
             }
-
-            if (gamepad1.left_bumper){
-                FourthSample2();
-            }
             if (gamepad2.dpad_down){
                 flipDown();
             }
@@ -195,32 +191,6 @@ public class FixStuffTeleOp extends LinearOpMode {
         hardware.rightFlip.setPosition(Hardware.FLIP_UP);
     }
 
-    public void FourthSample() {
-        hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
-        sleep(500);
-        double PartialFlip = 0.167;
-        hardware.rightFlip.setPosition(PartialFlip);
-        sleep(500);
-        hardware.clawTwist.setPosition(0.26);
-        sleep(500);
-        hardware.horizontalRight.setPosition(Hardware.RIGHT_SLIDE_OUT);
-        hardware.horizontalLeft.setPosition(1.05 - Hardware.RIGHT_SLIDE_OUT);
-        sleep(500);
-//        hardware.rightFlip.setPosition(Hardware.FLIP_DOWN);
-//        sleep(500);
-        hardware.clawFront.setPosition(Hardware.FRONT_CLOSE);
-        sleep(500);
-        hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
-        sleep(500);
-        hardware.horizontalRight.setPosition(Hardware.SLIDE_OVERSHOOT);
-        hardware.horizontalLeft.setPosition(1.05 - Hardware.SLIDE_OVERSHOOT);
-        sleep(500);
-        hardware.horizontalRight.setPosition(Hardware.RIGHT_SLIDE_IN);
-        hardware.horizontalLeft.setPosition(1.05 - Hardware.RIGHT_SLIDE_IN);
-        sleep(500);
-        hardware.rightFlip.setPosition(Hardware.FLIP_UP);
-    }
-
     public void transfer() {
         hardware.armLeft.setPosition(Hardware.LEFT_ARM_TRANSFER);
         hardware.armRight.setPosition(Hardware.RIGHT_ARM_TRANSFER);
@@ -242,27 +212,29 @@ public class FixStuffTeleOp extends LinearOpMode {
         hardware.armRight.setPosition(Hardware.RIGHT_ARM_SCORE);
     }
 
-    public void FourthSample2() {
+    public void FourthSample() {
         hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
         sleep(500);
-//        hardware.rightFlip.setPosition(Hardware.FLIP_DOWN);
-//        sleep(500);
-        //clawTwist at 90 degrees
-        hardware.clawTwist.setPosition(0.8133);
         hardware.horizontalRight.setPosition(Hardware.RIGHT_SLIDE_OUT);
         hardware.horizontalLeft.setPosition(1.05 - Hardware.RIGHT_SLIDE_OUT);
-        sleep(600);
+        sleep(500);
+        hardware.rightFlip.setPosition(Hardware.FLIP_DOWN);
+        hardware.leftFlip.setPosition(1-Hardware.FLIP_DOWN);
+        sleep(200);
+        hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_MIN);
+        sleep(200);
         hardware.clawFront.setPosition(Hardware.FRONT_CLOSE);
-        sleep(500);
+        sleep(200);
+        hardware.horizontalRight.setPosition(Hardware.RIGHT_SLIDE_TRANSFER);
+        hardware.horizontalLeft.setPosition(Hardware.LEFT_SLIDE_TRANSFER);
+        sleep(100);
         hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
-        sleep(500);
-        hardware.horizontalRight.setPosition(Hardware.SLIDE_OVERSHOOT);
-        hardware.horizontalLeft.setPosition(1.05 - Hardware.SLIDE_OVERSHOOT);
-        sleep(500);
-        hardware.horizontalRight.setPosition(Hardware.RIGHT_SLIDE_IN);
-        hardware.horizontalLeft.setPosition(1.05 - Hardware.RIGHT_SLIDE_IN);
-        sleep(500);
+        hardware.rightFlip.setPosition(Hardware.FLIP_ONE_THIRD);
+        hardware.leftFlip.setPosition(1-Hardware.FLIP_ONE_THIRD);
+        sleep(350);
+        hardware.clawFront.setPosition(Hardware.FRONT_CLOSE-0.07);
         hardware.rightFlip.setPosition(Hardware.FLIP_UP);
+        hardware.leftFlip.setPosition(1-Hardware.FLIP_UP);
     }
 
     public void DriveToDistance (double target) {
@@ -283,22 +255,6 @@ public class FixStuffTeleOp extends LinearOpMode {
             telemetry.update();
         }
     }
-
-//        public void Vtransfer () {
-//            hardware.rightFlip.setPosition(0.32);
-//            sleep(500);
-//            hardware.arm.setTargetPosition(-195);
-//            sleep(500);
-//            hardware.claw.setPosition(0.5);
-//            sleep(500);
-//            hardware.wrist.setPosition(0.6);
-//            sleep(500);
-//            hardware.rightFlip.setPosition(0.62);
-//            sleep(500);
-//            hardware.claw.setPosition(0.28);
-//
-//
-//        }
 
 
     public void flipDown(){
