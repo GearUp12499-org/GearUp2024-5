@@ -71,14 +71,15 @@ public class ServoSteper extends LinearOpMode {
             // Display the current value
             telemetry.addData("Servo Position", "%5.2f", position);
             telemetry.addData(">", "Press Stop to end test.");
+            telemetry.addData("slidePos", hardware.verticalLift.getCurrentPosition());
             telemetry.update();
 
             // Set the servo to the new position and pause;
             sleep(CYCLE_MS);
             idle();
 
-            hardware.armLeft.setPosition(position);
-            hardware.armRight.setPosition(1-position);
+            hardware.wrist.setPosition(position);
+            //hardware.armRight.setPosition(1-position);
             //hardware.horizontalLeft.setPosition(1.05-position);
 
         }
