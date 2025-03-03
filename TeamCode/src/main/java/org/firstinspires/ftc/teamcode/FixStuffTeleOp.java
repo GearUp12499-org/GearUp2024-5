@@ -63,7 +63,7 @@ public class FixStuffTeleOp extends LinearOpMode {
 //        hardware.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //        hardware.arm.setPower(0.3);
 //       // hardware.wrist.setPosition(Hardware.WRIST_BACK);
-//        hardware.claw.setPosition(Hardware.CLAW_CLOSE);
+       hardware.claw.setPosition(Hardware.CLAW_CLOSE);
         hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
         // we don't have the proxy object to handle this for us
         // so manually implement the inversion
@@ -132,6 +132,12 @@ public class FixStuffTeleOp extends LinearOpMode {
             }
             if (gamepad2.y){
                 scoreSpecimen();
+            }
+            if (gamepad2.right_trigger>0.5){
+                scoreHigh1();
+            }
+            if (gamepad2.left_trigger > 0.5){
+                scoreHigh2();
             }
             telemetry.addData("slidePos", hardware.horizontalLeft.getPosition());
             telemetry.addData("slidePos2", hardware.horizontalRight.getPosition());
@@ -307,13 +313,31 @@ public class FixStuffTeleOp extends LinearOpMode {
         hardware.leftFlip.setPosition(1-Hardware.FLIP_UP);
     }
     public void close(){
-        hardware.claw.setPosition(Hardware.CLAW_CLOSE);
+        hardware.clawFront.setPosition(Hardware.FRONT_CLOSE);
     }
     public void pickOffWall(){
-        hardware.armLeft.setPosition(1);
-        hardware.armRight.setPosition(0);
-        sleep(100);
-        hardware.wrist.setPosition(0.05);
+        abandonLock(vLiftProxy.CONTROL);
+        abandonLock(Locks.ArmAssembly);
+        abandonLock(Locks.DriveMotors);
+
+        scheduler.add(
+                groupOf(it -> it.add(run(() -> hardware.claw.setPosition(Hardware.CLAW_OPEN)))
+                        .then(run(() -> hardware.armLeft.setPosition(1)))
+                        .then(run(() -> hardware.armRight.setPosition(0)))
+                        .then(await(100))
+                        .then(run(() -> hardware.wrist.setPosition(0)))
+                        .then(await(300))
+                        .then(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)))
+                        .then(await(200))
+                        .then(vLiftProxy.moveTo(50, 5, 1.0))
+                        .then(await(500))
+                        .then(vLiftProxy.moveTo(0,5,1))
+
+                ).extraDepends(
+                        vLiftProxy.CONTROL,
+                        Locks.ArmAssembly
+                )
+        );
     }
 
     public void scoreSpecimen() {
@@ -329,6 +353,51 @@ public class FixStuffTeleOp extends LinearOpMode {
                 Locks.ArmAssembly
                 )
         );
+    }
+    public void scoreHigh1() {
+        abandonLock(vLiftProxy.CONTROL);
+        abandonLock(Locks.ArmAssembly);
+        abandonLock(Locks.DriveMotors);
+
+        scheduler.add(
+                groupOf(it -> it.add(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)))
+                        .then(vLiftProxy.moveTo(Hardware.VLIFT_SCORE_HIGH, 5, 2.0))
+                        .then(await(500))
+                        .then(run(() -> hardware.armLeft.setPosition(Hardware.LEFT_ARM_SCORE)))
+                        .then(run(() -> hardware.armRight.setPosition(Hardware.RIGHT_ARM_SCORE)))
+                        .then(await(300))
+                        .then(run(() -> hardware.wrist.setPosition(1)))
+                ).extraDepends(
+                        vLiftProxy.CONTROL,
+                        Locks.ArmAssembly
+                )
+        );
+
+    }
+    public void scoreHigh2() {
+        abandonLock(vLiftProxy.CONTROL);
+        abandonLock(Locks.ArmAssembly);
+        abandonLock(Locks.DriveMotors);
+
+        scheduler.add(
+                groupOf(it -> it.add(run(() -> hardware.claw.setPosition(Hardware.CLAW_OPEN)))
+                        .then(await(500))
+                        .then(run(() -> hardware.armLeft.setPosition(Hardware.LEFT_ARM_UP)))
+                        .then(run(() -> hardware.armRight.setPosition(Hardware.RIGHT_ARM_UP)))
+                        .then(run(() -> hardware.wrist.setPosition(Hardware.WRIST_UP)))
+                        .then(await(400))
+                        .then(vLiftProxy.moveTo(0, 5, 2.0))
+                        .then(await(300))
+                        .then(run(() -> hardware.armLeft.setPosition(Hardware.LEFT_ARM_TRANSFER)))
+                        .then(run(() -> hardware.armRight.setPosition(Hardware.RIGHT_ARM_TRANSFER)))
+                        .then(await(300))
+                        .then(run(() -> hardware.wrist.setPosition(Hardware.WRIST_TRANSFER)))
+                ).extraDepends(
+                        vLiftProxy.CONTROL,
+                        Locks.ArmAssembly
+                )
+        );
+
     }
 }
 

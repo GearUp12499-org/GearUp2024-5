@@ -27,8 +27,10 @@ import dev.aether.collaborative_multitasking.SharedResource;
 public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final int ARM_TRANSFER_POS = -40;
     public static final double SCORE_SPECIMEN_ARM_DEG =-100;
-    public static final double LEFT_ARM_SCORE = 0.44;
+    public static final double LEFT_ARM_SCORE = 0.5;
     public static final double RIGHT_ARM_SCORE = 1 - LEFT_ARM_SCORE;
+    public static final double LEFT_ARM_UP = 0.47;
+    public static final double RIGHT_ARM_UP = 1 - LEFT_ARM_UP;
     public static final double LEFT_ARM_TRANSFER = 0.05;
     public static final double RIGHT_ARM_TRANSFER = 1 - LEFT_ARM_TRANSFER;
     public static final double spinTickPerRev = 751.8;
@@ -52,7 +54,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double CLAW_CLOSE = 0.8;
     public static final double CLAW_OPEN = 0.46;
     public static final double WRIST_BACK = 0.3;
-    public static final double WRIST_UP = 0.36;
+    public static final double WRIST_UP = 0.66;
     public static final double WRIST_SCORE = 0.89;
     public static final double WRIST_TRANSFER = 0.37;
     public static final double ARM_POWER = 0.2;
@@ -63,7 +65,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double LAMP_PURPLE = 0.700;
     public static final double LAMP_GREEN = 0.440;
     public static final int VLIFT_MAX_HEIGHT = 825;
-    public static final int VLIFT_SCORE_HIGH = 790;
+    public static final int VLIFT_SCORE_HIGH = 700;
     public static final int VLIFT_SCORE_SPECIMEN = 283;
     public static final double VLIFT_CLOSENESS = 50.0;
     public static final int VLIFT_POWEROFF_HEIGHT = 30;
