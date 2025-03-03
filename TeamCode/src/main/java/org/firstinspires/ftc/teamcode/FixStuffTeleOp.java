@@ -98,11 +98,9 @@ public class FixStuffTeleOp extends LinearOpMode {
             if (gamepad1.b) {
                 SlideIn();
             }
-            boolean isX = gamepad1.x;
 //            if (isX && !wasX) {
 //                scheduler.add(GetSpec());
 //            }
-            wasX = isX;
 
 
             if (gamepad1.right_bumper){
@@ -127,11 +125,17 @@ public class FixStuffTeleOp extends LinearOpMode {
             if (gamepad2.b){
                 SlideOut();
             }
-            if (gamepad2.x){
+            if (gamepad1.x){
                 pickOffWall();
             }
-            if (gamepad2.y){
-                scoreSpecimen();
+            if (gamepad1.right_trigger > 0.5){
+                spec1();
+            }
+            if (gamepad1.left_trigger > 0.5){
+                spec2();
+            }
+            if (gamepad1.a) {
+                hardware.claw.setPosition(Hardware.CLAW_OPEN);
             }
             if (gamepad2.right_trigger>0.5){
                 scoreHigh1();
@@ -340,20 +344,6 @@ public class FixStuffTeleOp extends LinearOpMode {
         );
     }
 
-    public void scoreSpecimen() {
-        abandonLock(vLiftProxy.CONTROL);
-        abandonLock(Locks.ArmAssembly);
-        abandonLock(Locks.DriveMotors);
-        scheduler.add(
-                groupOf(it -> it.add(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)))
-                .then(vLiftProxy.moveTo(Hardware.VLIFT_SCORE_SPECIMEN, 5, 1.0))
-
-        ).extraDepends(
-                vLiftProxy.CONTROL,
-                Locks.ArmAssembly
-                )
-        );
-    }
     public void scoreHigh1() {
         abandonLock(vLiftProxy.CONTROL);
         abandonLock(Locks.ArmAssembly);
@@ -388,16 +378,34 @@ public class FixStuffTeleOp extends LinearOpMode {
                         .then(await(400))
                         .then(vLiftProxy.moveTo(0, 5, 2.0))
                         .then(await(300))
+                        .then(run(() -> hardware.wrist.setPosition(Hardware.WRIST_TRANSFER)))
                         .then(run(() -> hardware.armLeft.setPosition(Hardware.LEFT_ARM_TRANSFER)))
                         .then(run(() -> hardware.armRight.setPosition(Hardware.RIGHT_ARM_TRANSFER)))
-                        .then(await(300))
-                        .then(run(() -> hardware.wrist.setPosition(Hardware.WRIST_TRANSFER)))
                 ).extraDepends(
                         vLiftProxy.CONTROL,
                         Locks.ArmAssembly
                 )
         );
 
+    }
+    public void spec1 (){
+        scheduler.add(
+                groupOf(it -> it.add(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)))
+                        .then(run(() -> hardware.armLeft.setPosition(Hardware.LEFT_ARM_HALF_SPEC)))
+                        .then(run(() -> hardware.armRight.setPosition(Hardware.RIGHT_ARM_HALF_SPEC)))
+                        .then(await(200))
+                        .then(run(()-> hardware.wrist.setPosition(Hardware.WRIST_UP)))
+                )
+        );
+
+    }
+    public void spec2 () {
+        scheduler.add(
+                groupOf(it -> it.add(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)))
+                        .then(run(() -> hardware.armLeft.setPosition(Hardware.LEFT_ARM_SPEC)))
+                        .then(run(() -> hardware.armRight.setPosition(Hardware.RIGHT_ARM_SPEC)))
+                )
+        );
     }
 }
 

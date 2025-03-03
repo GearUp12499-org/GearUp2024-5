@@ -78,8 +78,8 @@ public class ServoSteper extends LinearOpMode {
             sleep(CYCLE_MS);
             idle();
 
-            hardware.wrist.setPosition(position);
-            //hardware.armRight.setPosition(1-position);
+            hardware.armLeft.setPosition(position);
+            hardware.armRight.setPosition(1-position);
             //hardware.horizontalLeft.setPosition(1.05-position);
 
         }

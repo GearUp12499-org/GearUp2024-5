@@ -29,6 +29,10 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double SCORE_SPECIMEN_ARM_DEG =-100;
     public static final double LEFT_ARM_SCORE = 0.5;
     public static final double RIGHT_ARM_SCORE = 1 - LEFT_ARM_SCORE;
+    public static final double LEFT_ARM_HALF_SPEC = 0.2;
+    public static final double RIGHT_ARM_HALF_SPEC = 1 - LEFT_ARM_HALF_SPEC;
+    public static final double LEFT_ARM_SPEC = 0.31;
+    public static final double RIGHT_ARM_SPEC = 1 - LEFT_ARM_SPEC;
     public static final double LEFT_ARM_UP = 0.47;
     public static final double RIGHT_ARM_UP = 1 - LEFT_ARM_UP;
     public static final double LEFT_ARM_TRANSFER = 0.05;
