@@ -28,13 +28,9 @@ public class ServoSteper extends LinearOpMode {
     static final double MIN_POS = 0.0;     // Minimum rotational position
 
     // Define class members
-    Servo pivot;
-
-
+    Servo servo;
     double position = (MAX_POS - MIN_POS) / 2; // Start at halfway position
     boolean rampUp = true;
-
-
 
 
     @Override
@@ -52,6 +48,7 @@ public class ServoSteper extends LinearOpMode {
         // Scan servo till stop pressed.
         while (opModeIsActive()) {
             hardware.lightLeft.setPosition(1);
+            hardware.lightRight.setPosition(1);
 
 
             if (gamepad1.y) {
@@ -74,12 +71,15 @@ public class ServoSteper extends LinearOpMode {
             // Display the current value
             telemetry.addData("Servo Position", "%5.2f", position);
             telemetry.addData(">", "Press Stop to end test.");
+            telemetry.addData("slidePos", hardware.verticalLift.getCurrentPosition());
             telemetry.update();
 
             // Set the servo to the new position and pause;
             sleep(CYCLE_MS);
             idle();
-            pivot.setPosition(position);
+
+            hardware.wrist.setPosition(position);
+            //hardware.armRight.setPosition(1-position);
             //hardware.horizontalLeft.setPosition(1.05-position);
 
         }
