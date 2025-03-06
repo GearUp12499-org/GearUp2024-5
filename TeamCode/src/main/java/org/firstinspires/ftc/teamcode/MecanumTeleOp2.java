@@ -7,8 +7,6 @@ import android.annotation.SuppressLint;
 
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -16,7 +14,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.Hardware.Locks;
-import org.firstinspires.ftc.teamcode.hardware.AscentProxy;
 import org.firstinspires.ftc.teamcode.hardware.HClawProxy;
 import org.firstinspires.ftc.teamcode.hardware.HSlideProxy;
 import org.firstinspires.ftc.teamcode.hardware.VLiftProxy;
@@ -614,11 +611,14 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
     public void Flipin() {
         abandonLock(hSlideProxy.CONTROL);
         abandonLock(hClawProxy.CONTROL_FLIP);
-        double flipThird = 0.66;
         scheduler.add(groupOf(
-                it -> it.add(hClawProxy.aSetFlip(flipThird))
+                it -> it.add(hClawProxy.aSetFlip(Hardware.FLIP_ONE_THIRD))
                         .then(run(() -> hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT)))
-                        .then(hSlideProxy.moveIn())
+                        .then(groupOf(a -> {
+                            a.add(hSlideProxy.moveTransfer());
+                            a.add(await(350))
+                                    .then(hClawProxy.aSetClaw(Hardware.FRONT_CLOSE_HARD));
+                        }))
                         .then(hClawProxy.aSetFlip(Hardware.FLIP_UP))
         ).extraDepends(
                 hSlideProxy.CONTROL,

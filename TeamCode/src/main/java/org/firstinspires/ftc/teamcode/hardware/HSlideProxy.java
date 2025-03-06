@@ -13,12 +13,18 @@ import dev.aether.collaborative_multitasking.SharedResource;
 import dev.aether.collaborative_multitasking.TaskTemplate;
 
 public class HSlideProxy extends TaskTemplate {
+    public enum Position {
+        IN,
+        OUT,
+        TRANSFER;
+    }
+
     private static final Set<SharedResource> requires = Set.of(Hardware.Locks.horizontalRight);
     private static int INSTANCE_COUNT = 0;
     public final SharedResource CONTROL = new SharedResource("HSlideProxy" + (++INSTANCE_COUNT));
     private final Hardware hardware;
     private final Scheduler scheduler = getScheduler();
-    boolean isOut = false; // isOut?
+    public Position positionEn = Position.IN;
     private double position = Hardware.RIGHT_SLIDE_IN;
     private ITask activeTask = null;
 
@@ -28,7 +34,7 @@ public class HSlideProxy extends TaskTemplate {
     }
 
     public boolean isOut() {
-        return isOut;
+        return positionEn == Position.OUT;
     }
 
     @Override
@@ -59,7 +65,30 @@ public class HSlideProxy extends TaskTemplate {
 
     public void moveInSync() {
         moveTo(Hardware.RIGHT_SLIDE_IN);
-        isOut = false;
+        positionEn = Position.IN;
+    }
+
+    public ITask moveTransfer() {
+        return new TaskTemplate(scheduler) {
+            ElapsedTime timer;
+
+            @Override
+            public void invokeOnStart() {
+                if (positionEn == Position.TRANSFER) requestStop();
+                if (activeTask != null) activeTask.requestStop();
+                activeTask = this;
+                moveTo(Hardware.RIGHT_SLIDE_TRANSFER);
+                positionEn = Position.TRANSFER;
+                timer = new ElapsedTime();
+                timer.reset();
+            }
+
+            @Override
+            public boolean invokeIsCompleted() {
+                // FIXME: multiple starting locations et al
+                return timer.time() >= Hardware.SLIDE_INWARD_TIME;
+            }
+        };
     }
 
     public ITask moveIn() {
@@ -68,10 +97,10 @@ public class HSlideProxy extends TaskTemplate {
 
             @Override
             public void invokeOnStart() {
-                if (!isOut) requestStop();
+                if (positionEn == Position.IN) requestStop();
                 if (activeTask != null) activeTask.requestStop();
                 activeTask = this;
-                isOut = false;
+                positionEn = Position.IN;
                 moveInSync();
                 timer = new ElapsedTime();
                 timer.reset();
@@ -84,6 +113,7 @@ public class HSlideProxy extends TaskTemplate {
 
             @Override
             public boolean invokeIsCompleted() {
+                // FIXME: multiple starting locations et al
                 return timer.time() >= Hardware.SLIDE_INWARD_TIME;
             }
         };
@@ -91,7 +121,7 @@ public class HSlideProxy extends TaskTemplate {
 
     public void moveOutSync() {
         moveTo(Hardware.RIGHT_SLIDE_OUT);
-        isOut = true;
+        positionEn = Position.OUT;
     }
 
     public ITask moveOut() {
@@ -100,11 +130,11 @@ public class HSlideProxy extends TaskTemplate {
 
             @Override
             public void invokeOnStart() {
-                if (isOut) requestStop();
+                if (positionEn == Position.OUT) requestStop();
                 if (activeTask != null) activeTask.requestStop();
                 activeTask = this;
                 moveOutSync();
-                isOut = true;
+                positionEn = Position.OUT;
                 timer = new ElapsedTime();
                 timer.reset();
             }
