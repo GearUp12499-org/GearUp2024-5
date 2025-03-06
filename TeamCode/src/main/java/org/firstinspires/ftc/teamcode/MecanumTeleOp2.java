@@ -482,7 +482,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         }
         if (gamepad1.dpad_right) {
             abandonLock(hClawProxy.CONTROL_CLAW);
-            hClawProxy.setClaw(Hardware.FRONT_CLOSE);
+            hClawProxy.setClaw(Hardware.FRONT_CLOSE_HARD);
         }
         if (gamepad1.dpad_up) {
             abandonLock(hClawProxy.CONTROL_FLIP);
@@ -613,7 +613,10 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         abandonLock(hClawProxy.CONTROL_FLIP);
         scheduler.add(groupOf(
                 it -> it.add(hClawProxy.aSetFlip(Hardware.FLIP_ONE_THIRD))
-                        .then(run(() -> hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT)))
+                        .then(run(() -> {
+                            hClawProxy.setClaw(Hardware.FRONT_CLOSE);
+                            hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
+                        }))
                         .then(groupOf(a -> {
                             a.add(hSlideProxy.moveTransfer());
                             a.add(await(350))
