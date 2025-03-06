@@ -62,6 +62,19 @@ public class dumbledore extends LinearOpMode {
             backLeft.setPower(backLeftPower * powerfactor);
             frontRight.setPower(frontRightPower * powerfactor);
             backRight.setPower(backRightPower * powerfactor);
+
+            if (gamepad1.right_trigger>0.5) {
+                pivot.setPosition(0.1);
+            }
+            if (gamepad1.left_trigger>0.5) {
+                pivot.setPosition(0.5);
+            }
+            if (gamepad1.right_bumper){
+                claw.setPosition(0.2);
+            }
+            if (gamepad1.left_bumper  ){
+                claw.setPosition(0.5);
+            }
         }
     }
 }

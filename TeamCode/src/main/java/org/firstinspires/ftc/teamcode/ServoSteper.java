@@ -21,6 +21,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 @TeleOp(name = "ServoSteper", group = "Concept")
 public class ServoSteper extends LinearOpMode {
+    Servo pivot = hardwareMap.servo.get("pivot");
+    Servo claw = hardwareMap.servo.get("claw");
 
     static final double INCREMENT = 0.01;     // amount to slew servo each CYCLE_MS cycle
     static final int CYCLE_MS = 50;     // period of each cycle
@@ -35,7 +37,7 @@ public class ServoSteper extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        Hardware hardware = new Hardware(hardwareMap);
+
 
 
         // Connect to servo (Assume Robot Left Hand)
@@ -47,8 +49,6 @@ public class ServoSteper extends LinearOpMode {
 
         // Scan servo till stop pressed.
         while (opModeIsActive()) {
-            hardware.lightLeft.setPosition(1);
-            hardware.lightRight.setPosition(1);
 
 
             if (gamepad1.y) {
@@ -71,16 +71,13 @@ public class ServoSteper extends LinearOpMode {
             // Display the current value
             telemetry.addData("Servo Position", "%5.2f", position);
             telemetry.addData(">", "Press Stop to end test.");
-            telemetry.addData("slidePos", hardware.verticalLift.getCurrentPosition());
             telemetry.update();
 
             // Set the servo to the new position and pause;
             sleep(CYCLE_MS);
             idle();
 
-            hardware.wrist.setPosition(position);
-            //hardware.armRight.setPosition(1-position);
-            //hardware.horizontalLeft.setPosition(1.05-position);
+            pivot.setPosition(position);
 
         }
 
