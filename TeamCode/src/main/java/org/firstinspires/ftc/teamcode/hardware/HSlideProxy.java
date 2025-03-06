@@ -74,7 +74,7 @@ public class HSlideProxy extends TaskTemplate {
 
             @Override
             public void invokeOnStart() {
-                if (positionEn == Position.TRANSFER) requestStop();
+                if (positionEn == Position.TRANSFER) finishEarly();
                 if (activeTask != null) activeTask.requestStop();
                 activeTask = this;
                 moveTo(Hardware.RIGHT_SLIDE_TRANSFER);
@@ -97,7 +97,7 @@ public class HSlideProxy extends TaskTemplate {
 
             @Override
             public void invokeOnStart() {
-                if (positionEn == Position.IN) requestStop();
+                if (positionEn == Position.IN) finishEarly();
                 if (activeTask != null) activeTask.requestStop();
                 activeTask = this;
                 positionEn = Position.IN;
@@ -130,7 +130,7 @@ public class HSlideProxy extends TaskTemplate {
 
             @Override
             public void invokeOnStart() {
-                if (positionEn == Position.OUT) requestStop();
+                if (positionEn == Position.OUT) finishEarly();
                 if (activeTask != null) activeTask.requestStop();
                 activeTask = this;
                 moveOutSync();

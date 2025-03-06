@@ -604,39 +604,28 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
 
     private TaskGroup transferInternal() {
         return scheduler.add(groupOf(
-                it -> it.add(vLiftProxy.moveTo(0, 5, 1.0))
-                        .then(run(() -> {
-                            hClawProxy.setClaw(Hardware.FRONT_CLOSE);
+                it -> it.add(run(() -> {
                             hardware.claw.setPosition(Hardware.CLAW_OPEN);
-                            hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
-                            hardware.wrist.setPosition(0);
-                            //hardware.arm.setTargetPosition(Hardware.ARM_TRANSFER_POS);
+                            hardware.wrist.setPosition(Hardware.WRIST_TRANSFER);
+                            hardware.arm.setPosition(Hardware.ARM_TRANSFER);
                         }))
-//                        .then(await(250))
-//                        .then(run(() -> {
-//
-//                        }))
-                        .then(await(400))
+                        .then(await(700))
+                        .then(run(() -> hardware.flip.setPosition(Hardware.FLIP_UP)))
+                        .then(await(500))
+                        .then(hSlideProxy.moveTransfer())
                         .then(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)))
-                        .then(await(150))
-                        .then(run(() -> {
-                            //hardware.arm.setTargetPosition(0);
-                            hClawProxy.setClaw(Hardware.FRONT_OPEN);
-                        }))
-                        .then(await(100))
-                        .then(run(() -> hardware.clawFront.setPosition(0.6)))
-                        .then(await(250))
-                        .then(run(() -> hardware.wrist.setPosition(Hardware.WRIST_BACK)))
+                        .then(await(200))
+                        .then(hClawProxy.aSetClaw(Hardware.FRONT_OPEN))
+                        .then(await(500))
+                        .then(run(() -> hardware.arm.setPosition(Hardware.ARM_SCORE)))
         ).extraDepends(
                 hClawProxy.CONTROL_CLAW,
-                vLiftProxy.CONTROL,
                 Locks.ArmAssembly
         ));
     }
 
     public void transfer() {
         abandonLock(hClawProxy.CONTROL_CLAW);
-        abandonLock(vLiftProxy.CONTROL);
         abandonLock(Locks.ArmAssembly);
         transferInternal();
     }

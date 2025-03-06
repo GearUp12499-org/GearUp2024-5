@@ -41,6 +41,7 @@ interface ITask {
     }
 
     fun requestStop() = requestStop(true)
+    fun finishEarly() = requestStop(false)
 
     fun then(configure: Task.() -> Unit): Task {
         val task = Task(scheduler)

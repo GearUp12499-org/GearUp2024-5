@@ -192,7 +192,7 @@ public class FixStuffTeleOp extends LinearOpMode {
     }
 
     public void transfer() {
-        hardware.arm.setPosition(Hardware.LEFT_ARM_TRANSFER);
+        hardware.arm.setPosition(Hardware.ARM_TRANSFER);
         sleep(700);
         hardware.claw.setPosition(Hardware.CLAW_OPEN);
         hardware.wrist.setPosition(Hardware.WRIST_TRANSFER);
@@ -206,7 +206,7 @@ public class FixStuffTeleOp extends LinearOpMode {
         sleep(200);
         hardware.clawFront.setPosition(Hardware.FRONT_OPEN);
         sleep(500);
-        hardware.arm.setPosition(Hardware.LEFT_ARM_SCORE);
+        hardware.arm.setPosition(Hardware.ARM_SCORE);
     }
 
     public void FourthSample2() {
