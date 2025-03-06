@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.hardware
 
 import com.qualcomm.robotcore.hardware.Servo
 
-class FrontFlip(val primary: Servo, val secondary: Servo) : Servo {
+class MultiServo(val primary: Servo, val secondary: Servo, val basis: Double) : Servo {
     override fun getController() = primary.controller
 
     override fun getPortNumber() = primary.portNumber
@@ -20,7 +20,7 @@ class FrontFlip(val primary: Servo, val secondary: Servo) : Servo {
 
     override fun setPosition(position: Double) {
         primary.position = position
-        secondary.position = 1.00 - position
+        secondary.position = basis - position
     }
 
     override fun getPosition() = primary.position

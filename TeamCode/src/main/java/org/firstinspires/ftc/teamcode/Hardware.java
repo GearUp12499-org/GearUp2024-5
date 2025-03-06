@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.hardware.Ascent;
 import org.firstinspires.ftc.teamcode.hardware.AutoClearEncoder;
 import org.firstinspires.ftc.teamcode.hardware.Encoder;
 import org.firstinspires.ftc.teamcode.hardware.EncoderFor;
-import org.firstinspires.ftc.teamcode.hardware.FrontFlip;
+import org.firstinspires.ftc.teamcode.hardware.MultiServo;
 import org.firstinspires.ftc.teamcode.hardware.HardwareMapper;
 import org.firstinspires.ftc.teamcode.hardware.HardwareName;
 import org.firstinspires.ftc.teamcode.hardware.Lift;
@@ -181,7 +181,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     @HardwareName("clawFront")
     public Servo clawFront;
 
-    public FrontFlip flip;
+    public MultiServo flip;
 
     @HardwareName("rightFlip")
     private Servo rightFlip;
@@ -189,11 +189,13 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     @HardwareName("leftFlip")
     private Servo leftFlip;
 
+    public MultiServo arm;
+
     @HardwareName("armLeft")
-    public Servo armLeft;
+    private Servo armLeft;
 
     @HardwareName("armRight")
-    public Servo armRight;
+    private Servo armRight;
 
     @HardwareName("clawTwist")
     public Servo clawTwist;
@@ -297,8 +299,11 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
         verticalLift = new Lift(verticalSlide, verticalSlide2);
         ascent = null;
         if (leftFlip != null && rightFlip != null) {
-            flip = new FrontFlip(rightFlip, leftFlip);
+            flip = new MultiServo(rightFlip, leftFlip, 1.0);
         } else flip = null;
+        if (armLeft != null && armRight != null) {
+            arm = new MultiServo(armLeft, armRight, 1.0);
+        } else arm = null;
     }
 
 }
