@@ -30,7 +30,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double ARM_HALF_SPEC = 0.2;
     public static final double ARM_SPEC = 0.31;
     public static final double ARM_UP = 0.47;
-    public static final double ARM_WAIT = 0.15;
+    public static final double ARM_WAIT = 0.10;
     public static final double ARM_TRANSFER = 0.05;
     public static final double spinTickPerRev = 751.8;
     public static final double RIGHT_SLIDE_OUT = 0.65;
@@ -69,7 +69,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final int VLIFT_MAX_HEIGHT = 825;
     public static final int VLIFT_SCORE_HIGH = 700;
     public static final int VLIFT_SCORE_SPECIMEN = 283;
-    public static final double VLIFT_CLOSENESS = 100.0;
+    public static final double VLIFT_CLOSENESS = 60.0;
     public static final int VLIFT_POWEROFF_HEIGHT = 30;
     public static final int ASCENT_INIT_POS = -500;
     public static final int ASCENT_UP_POS = -1742;
