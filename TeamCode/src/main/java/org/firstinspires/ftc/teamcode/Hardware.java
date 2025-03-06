@@ -296,7 +296,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
         verticalLift = new Lift(verticalSlide, verticalSlide2);
         ascent = null;
         if (leftFlip != null && rightFlip != null) {
-            flip = new FrontFlip(leftFlip, rightFlip);
+            flip = new FrontFlip(rightFlip, leftFlip);
         } else flip = null;
     }
 

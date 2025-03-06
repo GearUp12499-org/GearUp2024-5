@@ -44,7 +44,6 @@ import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
 
 
-@TeleOp
 public abstract class MecanumTeleOp2 extends LinearOpMode {
     /**
      * How much you need to push the joysticks to stop autonomous code.
