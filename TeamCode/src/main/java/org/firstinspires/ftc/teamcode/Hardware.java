@@ -69,7 +69,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final int VLIFT_MAX_HEIGHT = 825;
     public static final int VLIFT_SCORE_HIGH = 700;
     public static final int VLIFT_SCORE_SPECIMEN = 283;
-    public static final double VLIFT_CLOSENESS = 50.0;
+    public static final double VLIFT_CLOSENESS = 100.0;
     public static final int VLIFT_POWEROFF_HEIGHT = 30;
     public static final int ASCENT_INIT_POS = -500;
     public static final int ASCENT_UP_POS = -1742;
