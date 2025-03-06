@@ -25,13 +25,13 @@ import dev.aether.collaborative_multitasking.SharedResource;
 
 
 public class Hardware extends HardwareMapper implements TriOdoProvider {
-    public static final int ARM_TRANSFER_POS = -40;
     public static final double SCORE_SPECIMEN_ARM_DEG =-100;
     public static final double ARM_SCORE = 0.5;
     public static final double ARM_HALF_SPEC = 0.2;
     public static final double ARM_SPEC = 0.31;
     public static final double ARM_UP = 0.47;
-    public static final double ARM_TRANSFER = 0;
+    public static final double ARM_WAIT = 0.15;
+    public static final double ARM_TRANSFER = 0.05;
     public static final double spinTickPerRev = 751.8;
     public static final double RIGHT_SLIDE_OUT = 0.65;
     @Deprecated public static final double LEFT_SLIDE_OUT = 1.05 - RIGHT_SLIDE_OUT;
@@ -39,6 +39,8 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     @Deprecated public static final double LEFT_SLIDE_IN = 1.05 - RIGHT_SLIDE_IN;
     public static final double RIGHT_SLIDE_TRANSFER = 0.4;
     public static final double LEFT_SLIDE_TRANSFER = 1.05 - RIGHT_SLIDE_TRANSFER;
+    public static final double RIGHT_SLIDE_KEEP_CLEAR = 0.45;
+    @Deprecated public static final double LEFT_SLIDE_KEEP_CLEAR = 1.05 - RIGHT_SLIDE_KEEP_CLEAR;
     public static final double CLAW_TWIST_INIT = 0.48;
     public static final double CLAW_TWIST_MAX = 0.82;
     public static final double CLAW_TWIST_MIN = 0.13;
@@ -266,6 +268,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         if (flip != null) flip.setPosition(Hardware.FLIP_UP);
+        if (arm != null) arm.setPosition(Hardware.ARM_WAIT);
         if (clawFront != null) clawFront.setPosition(Hardware.FRONT_OPEN);
         if (clawTwist != null) clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
 

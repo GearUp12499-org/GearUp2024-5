@@ -73,7 +73,7 @@ public class FixStuffTeleOp extends LinearOpMode {
         hardwareInit();
 
 //        vLiftProxy = scheduler.add(new VLiftProxy(scheduler, hardware.verticalLift));
-        hSlideProxy = scheduler.add(new HSlideProxy(scheduler, hardware));
+        hSlideProxy = scheduler.add(new HSlideProxy(scheduler, hardware, HSlideProxy.Position.TRANSFER));
         hClawProxy = scheduler.add(new HClawProxy(scheduler, hardware));
 
         waitForStart();

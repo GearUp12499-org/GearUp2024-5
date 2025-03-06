@@ -179,7 +179,7 @@ public class LeftAuto extends LinearOpMode {
         hardwareInit();
 
         vLiftProxy = scheduler.add(new VLiftProxy(scheduler, hardware.verticalLift));
-        hSlideProxy = scheduler.add(new HSlideProxy(scheduler, hardware));
+        hSlideProxy = scheduler.add(new HSlideProxy(scheduler, hardware, HSlideProxy.Position.IN));
         hClawProxy = scheduler.add(new HClawProxy(scheduler, hardware));
         ascentProxy = scheduler.add(new AscentProxy(scheduler, hardware.ascent));
 

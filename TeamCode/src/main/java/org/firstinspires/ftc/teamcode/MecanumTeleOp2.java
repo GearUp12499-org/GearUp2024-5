@@ -105,6 +105,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         );
 
         hardware.sharedHardwareInit();
+        hardware.claw.setPosition(Hardware.CLAW_OPEN);
         hardware.limelight.setPollRateHz(100);
         hardware.limelight.pipelineSwitch(6);
 
@@ -120,6 +121,12 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
 
         hardware = new Hardware(hardwareMap);
         hardwareInit();
+
+        // this scheduler will be used for the rest
+        MultitaskScheduler mainScheduler = new MultitaskScheduler();
+        vLiftProxy = mainScheduler.add(new VLiftProxy(mainScheduler, hardware.verticalLift));
+        hSlideProxy = mainScheduler.add(new HSlideProxy(mainScheduler, hardware, HSlideProxy.Position.TRANSFER));
+        hClawProxy = mainScheduler.add(new HClawProxy(mainScheduler, hardware));
 
         ElapsedTime timer = new ElapsedTime();
 
@@ -139,10 +146,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         scheduler.runToCompletion(() -> !isStopRequested());
 
         // this is the scheduler that will be used during the main program
-        scheduler = new MultitaskScheduler();
-        vLiftProxy = scheduler.add(new VLiftProxy(scheduler, hardware.verticalLift));
-        hSlideProxy = scheduler.add(new HSlideProxy(scheduler, hardware));
-        hClawProxy = scheduler.add(new HClawProxy(scheduler, hardware));
+        scheduler = mainScheduler;
 
         telemetry.log().clear();
         telemetry.log().add("Set and ready to roll!");
@@ -224,12 +228,12 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
 
             boolean shouldScoreHigh = gamepad2.left_trigger > 0.5;
             boolean shouldScoreHigh2 = gamepad2.right_trigger > 0.5;
-//            if (shouldScoreHigh && !isScoreHigh) {
-//                ScoreHighBasket1();
-//            }
-//            if (shouldScoreHigh2 && !isScoreHigh2) {
-//                ScoreHighBasket2();
-//            }
+            if (shouldScoreHigh && !isScoreHigh) {
+                ScoreHighBasket1();
+            }
+            if (shouldScoreHigh2 && !isScoreHigh2) {
+                ScoreHighBasket2();
+            }
             boolean shouldSpecimenPick = gamepad2.b;
 //            if (shouldSpecimenPick && !isSpecimenPick) {
 //                specimenWallPick();
@@ -441,10 +445,12 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         abandonLock(Locks.ArmAssembly);
         abandonLock(vLiftProxy.CONTROL);
         scheduler.add(
-                groupOf(inner -> {
-                            inner.add(vLiftProxy.moveTo(Hardware.VLIFT_SCORE_HIGH, 5, 2.0));
-//                            inner.add(run(() -> hardware.arm.setTargetPosition(222)));
-                        }
+                groupOf(inner ->
+                    inner.add(groupOf(a -> {
+                        a.add(vLiftProxy.moveTo(Hardware.VLIFT_SCORE_HIGH, 5, 2.0));
+                        a.add(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)));
+                        a.add(run(() -> hardware.arm.setPosition(Hardware.ARM_SCORE)));
+                    })).then(run(() -> hardware.wrist.setPosition(1)))
                 ).extraDepends(
                         Locks.ArmAssembly,
                         vLiftProxy.CONTROL
@@ -454,23 +460,27 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
 
     public void ScoreHighBasket2() {
         // prevent doing this by accident
-        if (hardware.verticalLift.getCurrentPosition() < 700) return;
-//        if (hardware.arm.getCurrentPosition() < 190) return;
+        if (hardware.verticalLift.getCurrentPosition() < Hardware.VLIFT_SCORE_HIGH - 100) return;
         abandonLock(Locks.ArmAssembly);
         abandonLock(vLiftProxy.CONTROL);
-        scheduler.add(groupOf(inner -> inner.add(run(() -> hardware.wrist.setPosition(0.94)))
-                .then(await(200))
-                .then(run(() -> hardware.claw.setPosition(Hardware.CLAW_OPEN)))
-                .then(await(100))
-                .then(run(() -> hardware.wrist.setPosition(0.28)))
-                .then(await(500))
-//                .then(run(() -> hardware.arm.setTargetPosition(0)))
-                .then(await(500))
-                .then(vLiftProxy.moveTo(0, 5, 2.0)))
-                .extraDepends(
-                        Locks.ArmAssembly,
-                        vLiftProxy.CONTROL
-                ));
+        scheduler.add(groupOf(
+                inner -> inner.add(run(() -> hardware.claw.setPosition(Hardware.CLAW_OPEN)))
+                        .then(await(300))
+                        .then(run(() -> {
+                            hardware.arm.setPosition(Hardware.ARM_UP);
+                            hardware.wrist.setPosition(Hardware.WRIST_UP);
+                        }))
+                        .then(await(400))
+                        .then(vLiftProxy.moveTo(0, 5, 2.0))
+                        .then(await(300))
+                        .then(run(() -> {
+                            hardware.wrist.setPosition(Hardware.WRIST_TRANSFER);
+                            hardware.arm.setPosition(Hardware.ARM_WAIT);
+                        }))
+        ).extraDepends(
+                Locks.ArmAssembly,
+                vLiftProxy.CONTROL
+        ));
     }
 
     private void stepper() {
@@ -608,15 +618,15 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
                             hardware.claw.setPosition(Hardware.CLAW_OPEN);
                             hardware.wrist.setPosition(Hardware.WRIST_TRANSFER);
                             hardware.arm.setPosition(Hardware.ARM_TRANSFER);
+                            hardware.flip.setPosition(Hardware.FLIP_UP);
                         }))
                         .then(await(700))
-                        .then(run(() -> hardware.flip.setPosition(Hardware.FLIP_UP)))
-                        .then(await(500))
                         .then(hSlideProxy.moveTransfer())
                         .then(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)))
                         .then(await(200))
                         .then(hClawProxy.aSetClaw(Hardware.FRONT_OPEN))
-                        .then(await(500))
+                        .then(hSlideProxy.moveToPreset(HSlideProxy.Position.KEEP_CLEAR))
+                        .then(await(300))
                         .then(run(() -> hardware.arm.setPosition(Hardware.ARM_SCORE)))
         ).extraDepends(
                 hClawProxy.CONTROL_CLAW,

@@ -14,9 +14,15 @@ import dev.aether.collaborative_multitasking.TaskTemplate;
 
 public class HSlideProxy extends TaskTemplate {
     public enum Position {
-        IN,
-        OUT,
-        TRANSFER;
+        IN(Hardware.RIGHT_SLIDE_IN),
+        OUT(Hardware.RIGHT_SLIDE_OUT),
+        TRANSFER(Hardware.RIGHT_SLIDE_TRANSFER),
+        KEEP_CLEAR(Hardware.RIGHT_SLIDE_KEEP_CLEAR);
+
+        public final double actual;
+        Position(double actual) {
+            this.actual = actual;
+        }
     }
 
     private static final Set<SharedResource> requires = Set.of(Hardware.Locks.horizontalRight);
@@ -28,9 +34,13 @@ public class HSlideProxy extends TaskTemplate {
     private double position = Hardware.RIGHT_SLIDE_IN;
     private ITask activeTask = null;
 
-    public HSlideProxy(@NotNull Scheduler scheduler, Hardware hardware) {
+    public HSlideProxy(@NotNull Scheduler scheduler, Hardware hardware, Position start) {
         super(scheduler);
         this.hardware = hardware;
+        positionEn = start;
+        position = start.actual;
+
+        update();
     }
 
     public boolean isOut() {
@@ -64,21 +74,21 @@ public class HSlideProxy extends TaskTemplate {
     }
 
     public void moveInSync() {
-        moveTo(Hardware.RIGHT_SLIDE_IN);
+        moveTo(Position.IN.actual);
         positionEn = Position.IN;
     }
 
-    public ITask moveTransfer() {
+    public ITask moveToPreset(Position p) {
         return new TaskTemplate(scheduler) {
             ElapsedTime timer;
 
             @Override
             public void invokeOnStart() {
-                if (positionEn == Position.TRANSFER) finishEarly();
+                if (positionEn == p) finishEarly();
                 if (activeTask != null) activeTask.requestStop();
                 activeTask = this;
-                moveTo(Hardware.RIGHT_SLIDE_TRANSFER);
-                positionEn = Position.TRANSFER;
+                moveTo(p.actual);
+                positionEn = p;
                 timer = new ElapsedTime();
                 timer.reset();
             }
@@ -89,6 +99,10 @@ public class HSlideProxy extends TaskTemplate {
                 return timer.time() >= Hardware.SLIDE_INWARD_TIME;
             }
         };
+    }
+
+    public ITask moveTransfer() {
+        return moveToPreset(Position.TRANSFER);
     }
 
     public ITask moveIn() {
@@ -120,29 +134,11 @@ public class HSlideProxy extends TaskTemplate {
     }
 
     public void moveOutSync() {
-        moveTo(Hardware.RIGHT_SLIDE_OUT);
+        moveTo(Position.OUT.actual);
         positionEn = Position.OUT;
     }
 
     public ITask moveOut() {
-        return new TaskTemplate(scheduler) {
-            ElapsedTime timer;
-
-            @Override
-            public void invokeOnStart() {
-                if (positionEn == Position.OUT) finishEarly();
-                if (activeTask != null) activeTask.requestStop();
-                activeTask = this;
-                moveOutSync();
-                positionEn = Position.OUT;
-                timer = new ElapsedTime();
-                timer.reset();
-            }
-
-            @Override
-            public boolean invokeIsCompleted() {
-                return timer.time() >= Hardware.SLIDE_OUTWARD_TIME;
-            }
-        };
+        return moveToPreset(Position.OUT);
     }
 }
