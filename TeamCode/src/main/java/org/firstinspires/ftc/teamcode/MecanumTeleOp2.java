@@ -475,7 +475,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
                         .then(await(300))
                         .then(run(() -> {
                             hardware.wrist.setPosition(Hardware.WRIST_TRANSFER);
-                            hardware.arm.setPosition(Hardware.ARM_WAIT);
+                            hardware.arm.setPosition(Hardware.ARM_TRANSFER);
                         }))
         ).extraDepends(
                 Locks.ArmAssembly,
@@ -627,7 +627,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
                         .then(hClawProxy.aSetClaw(Hardware.FRONT_OPEN))
                         .then(hSlideProxy.moveToPreset(HSlideProxy.Position.KEEP_CLEAR))
                         .then(await(300))
-                        .then(run(() -> hardware.arm.setPosition(Hardware.ARM_SCORE)))
+                        .then(run(() -> hardware.arm.setPosition(Hardware.ARM_UP)))
         ).extraDepends(
                 hClawProxy.CONTROL_CLAW,
                 Locks.ArmAssembly
