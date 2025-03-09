@@ -54,6 +54,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double FLIP_UP = 0.8;
     public static final double FLIP_ONE_THIRD = 0.4;
     public static final double CLAW_CLOSE = 0.9;
+    public static final double CLAW_CLOSE_HARD = 1.0;
     public static final double CLAW_OPEN = 0.68;
     public static final double WRIST_BACK = 0.3;
     public static final double WRIST_UP = 0.66;
