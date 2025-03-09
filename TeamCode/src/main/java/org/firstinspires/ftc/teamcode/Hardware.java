@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.hardware.Lift;
 import org.firstinspires.ftc.teamcode.hardware.MotorSet;
 import org.firstinspires.ftc.teamcode.hardware.Reversed;
 import org.firstinspires.ftc.teamcode.hardware.ZeroPower;
+import org.firstinspires.ftc.teamcode.mmooover.Motion;
 import org.firstinspires.ftc.teamcode.mmooover.TriOdoProvider;
 
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
@@ -27,6 +28,7 @@ import dev.aether.collaborative_multitasking.SharedResource;
 public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double SCORE_SPECIMEN_ARM_DEG =-100;
     public static final double ARM_SCORE = 0.5;
+    public static final double ARM_SCORE_AUTO = 0.6;
     public static final double ARM_HALF_SPEC = 0.2;
     public static final double ARM_SPEC = 0.31;
     public static final double ARM_UP = 0.47;
@@ -42,11 +44,12 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double RIGHT_SLIDE_KEEP_CLEAR = 0.47;
     @Deprecated public static final double LEFT_SLIDE_KEEP_CLEAR = 1.05 - RIGHT_SLIDE_KEEP_CLEAR;
     public static final double CLAW_TWIST_INIT = 0.48;
-    public static final double CLAW_TWIST_MAX = 0.82;
+    public static final double CLAW_TWIST_90 = 0.82;
     public static final double CLAW_TWIST_MIN = 0.13;
     public static final double SLIDE_INWARD_TIME = 0.75; // seconds
     public static final double SLIDE_OUTWARD_TIME = 0.45; // seconds
     public static final double SLIDE_OVERSHOOT = 0.28;
+    public static final double FLIP_DOWN_PLUS = 0.1;
     public static final double FLIP_DOWN = 0.2;
     public static final double FRONT_OPEN = 0.66;
     public static final double FRONT_CLOSE = 0.40;
@@ -77,6 +80,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final int ASCENT_PREPARE_POS = -2995;
     public static final int ASCENT_FINISH_POS = -50;
 
+    public static final Motion.Calibrate CALIBRATION = new Motion.Calibrate(1.0, 1.0, 1.5);
 
     public static int deg2arm(double degrees) {
         return (int) (degrees / 360.0 * spinTickPerRev);
@@ -274,7 +278,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
         if (clawTwist != null) clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
 
         if (wrist != null) wrist.setPosition(0.28);
-        if (claw != null) claw.setPosition(Hardware.CLAW_CLOSE);
+        if (claw != null) claw.setPosition(Hardware.CLAW_CLOSE_HARD);
 
         // we don't have the proxy object to handle this for us
         // so manually implement the inversion

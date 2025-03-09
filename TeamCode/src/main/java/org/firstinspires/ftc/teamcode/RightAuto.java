@@ -41,9 +41,8 @@ import kotlin.Unit;
 public class RightAuto extends LinearOpMode {
     // Constants //
     public static final double ACCEPT_DIST = 1; // inch. euclidean distance
-    public static final double ACCEPT_TURN = Math.toRadians(5);
+    public static final double ACCEPT_TURN = Math.toRadians(3);
     // power biases
-    public static final Motion.Calibrate CALIBRATION = new Motion.Calibrate(1.0, 1.0, 1.0); // Calibration factors for strafe, forward, and turn.
     public static final double CLAW_CLOSE = 0.02;
     private static final RuntimeException NOT_IMPLEMENTED = new RuntimeException("This operation is not implemented");
     final Pose STARTPOS = new Pose(0, 4.20, Math.toRadians(0));

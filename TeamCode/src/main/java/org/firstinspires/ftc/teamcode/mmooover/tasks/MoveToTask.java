@@ -90,7 +90,7 @@ public class MoveToTask extends TaskTemplate {
                 distanceToTarget,
                 1.0
         );
-        action.apply(hardware.driveMotors, RightAuto.CALIBRATION, rampingSpeed, speed2Power);
+        action.apply(hardware.driveMotors, Hardware.CALIBRATION, rampingSpeed, speed2Power);
         telemetry.addData("forward", action.forward());
         telemetry.addData("right", action.right());
         telemetry.addData("turn (deg)", Math.toDegrees(action.turn()));
