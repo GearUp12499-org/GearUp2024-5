@@ -27,6 +27,8 @@ import dev.aether.collaborative_multitasking.TaskTemplate;
 
 @SuppressLint("DefaultLocale")
 public class MoveToTask extends TaskTemplate {
+    public static final double kD = 0.015;
+
     protected Pose target;
     protected final EncoderTracking tracker;
     protected final Speed2Power speed2Power;
@@ -37,6 +39,8 @@ public class MoveToTask extends TaskTemplate {
     protected ElapsedTime targetTime = new ElapsedTime();
     protected ElapsedTime runTime = new ElapsedTime();
     protected boolean finished = false;
+
+    protected Double lastDistanceToTarget = null;
 
     public MoveToTask(
             @NotNull Scheduler scheduler,
@@ -90,21 +94,32 @@ public class MoveToTask extends TaskTemplate {
                 distanceToTarget,
                 1.0
         );
-        action.apply(hardware.driveMotors, Hardware.CALIBRATION, rampingSpeed, speed2Power);
+
+        double vel;
+        if (lastDistanceToTarget == null) vel = 0;
+        else vel = (distanceToTarget - lastDistanceToTarget) / loopTimer.getLast();
+        lastDistanceToTarget = distanceToTarget;
+
+        double finalSpeed = rampingSpeed + kD * vel;
+
+        action.apply(hardware.driveMotors, Hardware.CALIBRATION, finalSpeed, speed2Power);
         telemetry.addData("forward", action.forward());
         telemetry.addData("right", action.right());
         telemetry.addData("turn (deg)", Math.toDegrees(action.turn()));
         String message = String.format(
                 "##%.3f##{\"pose\":[%.6f,%.6f,%.6f],\"motion\":[%.6f,%.6f,%.6f],\"rampingSpeed\":%.6f," +
                         "\"frontLeft\":%.6f,\"frontRight\":%.6f,\"backLeft\":%.6f,\"backRight\":%.6f," +
-                        "\"distanceToTarget\":%.6f,\"timer\":%.4f,\"avgTickTime\":%.6f}##",
+                        "\"distanceToTarget\":%.6f,\"timer\":%.4f,\"avgTickTime\":%.6f,\"vel\":%.6f," +
+                        "\"finalSpeed\":%.6f,\"immediateTickTime\":%.6f}##",
                 System.currentTimeMillis() / 1000.0,
                 current.x(), current.y(), current.heading(),
                 action.forward(), action.right(), action.turn(),
                 rampingSpeed,
                 action.getLastFL(), action.getLastFR(), action.getLastBL(), action.getLastBR(),
                 distanceToTarget, timeNow,
-                loopTimer.getAvg() * 1000
+                loopTimer.getAvg() * 1000,
+                vel, finalSpeed,
+                loopTimer.getLast() * 1000
         );
         Log.d("DataDump", message);
     }

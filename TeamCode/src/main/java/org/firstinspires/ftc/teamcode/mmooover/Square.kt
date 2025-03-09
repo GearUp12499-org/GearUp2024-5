@@ -30,7 +30,7 @@ class Square : LinearOpMode() {
         speed2Power = Speed2Power(0.2)
         ramps = Ramps(
             Ramps.linear(5.0), // t seconds
-            Ramps.linear(1 / 6.0), // inches from target
+            Ramps.linear(1 / 3.0), // inches from target
 //                Easing.power(3.0, 12.0),
             Ramps.LimitMode.SCALE
         )
