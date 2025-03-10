@@ -34,8 +34,8 @@ object LimelightDetectionMode {
 
     fun toArray(bitset: Int): DoubleArray {
         return doubleArrayOf(
-            if ((bitset and RED) > 0) 1.0 else 0.0,
             if ((bitset and YELLOW) > 0) 1.0 else 0.0,
+            if ((bitset and RED) > 0) 1.0 else 0.0,
             if ((bitset and BLUE) > 0) 1.0 else 0.0,
         )
     }
@@ -71,7 +71,8 @@ class LimelightSamplePickup constructor(
             angle = 180 - angle
             pickupPosition = Hardware.CLAW_TWIST_INIT + (angle * 0.0037)
         }
-        twistDelay = (100.0 + (500 / 0.33) * abs(pickupPosition - Hardware.CLAW_TWIST_INIT)) / 1000.0
+        twistDelay =
+            (100.0 + (500 / 0.33) * abs(pickupPosition - Hardware.CLAW_TWIST_INIT)) / 1000.0
 
         extraDeps.addAll(depends)
         this.with {
@@ -95,10 +96,11 @@ class LimelightSamplePickup constructor(
                     val detectRed = red - blue > 100 && red - green > 100
                     val detectYellow = green - blue > 100 && green - red > 100 && red >= 350
                     if (!(
-                        (detectBlue && (enabled and LimelightDetectionMode.BLUE) > 0) ||
-                        (detectRed && (enabled and LimelightDetectionMode.RED) > 0) ||
-                        detectYellow
-                    )) {
+                                (detectBlue && (enabled and LimelightDetectionMode.BLUE) > 0) ||
+                                        (detectRed && (enabled and LimelightDetectionMode.RED) > 0) ||
+                                        detectYellow
+                                )
+                    ) {
                         hClawProxy.setClaw(Hardware.FRONT_OPEN)
                     } else {
                         val flipThird = 0.66
@@ -106,7 +108,7 @@ class LimelightSamplePickup constructor(
                             .then(run { hardware.clawTwist.position = Hardware.CLAW_TWIST_INIT })
                             .then(hSlideProxy.moveIn())
                             .then(hClawProxy.aSetFlip(Hardware.FLIP_UP))
-                            .then(run {Log.w("A", "AAAAAA")})
+                            .then(run { Log.w("A", "AAAAAA") })
                     }
                 })
         }
@@ -133,6 +135,7 @@ class LimelightSearch @JvmOverloads constructor(
     }
 
     private val limelight = hardware.limelight
+
     //private val lightRight = hardware.lightRight
     private val lightLeft = hardware.lightLeft
     private val lightRight = hardware.lightRight
