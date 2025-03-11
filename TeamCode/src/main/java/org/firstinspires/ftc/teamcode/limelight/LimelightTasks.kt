@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.Hardware
 import org.firstinspires.ftc.teamcode.hardware.HClawProxy
 import org.firstinspires.ftc.teamcode.hardware.HSlideProxy
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 @Suppress("unused")
 private inline operator fun DoubleArray.component6() = get(5)
@@ -41,7 +42,7 @@ object LimelightDetectionMode {
     }
 }
 
-class LimelightSamplePickup constructor(
+class LimelightPickupImmediate constructor(
     scheduler: Scheduler,
     private val hardware: Hardware,
     private val hSlideProxy: HSlideProxy,
@@ -56,6 +57,10 @@ class LimelightSamplePickup constructor(
 
     private fun wait(seconds: Number) = Pause(innerScheduler, seconds.toDouble())
     private fun run(lambda: () -> Unit) = OneShot(innerScheduler, lambda)
+
+    private fun groupOf(contents: Scheduler.() -> Unit): TaskGroup {
+        return TaskGroup(scheduler).with(contents)
+    }
 
     private val lightLeft = hardware.lightLeft
     private val lightRight = hardware.lightRight
@@ -76,41 +81,27 @@ class LimelightSamplePickup constructor(
 
         extraDeps.addAll(depends)
         this.with {
-            it.add(wait(0.200))
+            it.add(run {
+                clawTwist.position = pickupPosition
+            })
                 .then(hClawProxy.aSetFlip(Hardware.FLIP_DOWN))
-                .then(wait(0.400))
-                .then(run { clawTwist.position = pickupPosition })
-                .then(wait(0.100))
-                .then(hClawProxy.aSetClaw(Hardware.FRONT_CLOSE))
-                .then(wait(0.300))
-                .then(run { clawTwist.position = Hardware.CLAW_TWIST_INIT })
-                .then(wait(twistDelay))
-                .then(hClawProxy.aSetFlip(Hardware.FLIP_UP))
-                .then(wait(0.100))
+                .then(wait(0.200))
                 .then(run {
-                    val red = clawColor.red()
-                    val green = clawColor.green()
-                    val blue = clawColor.blue()
-
-                    val detectBlue = blue - green > 100 && blue - red > 100
-                    val detectRed = red - blue > 100 && red - green > 100
-                    val detectYellow = green - blue > 100 && green - red > 100 && red >= 350
-                    if (!(
-                                (detectBlue && (enabled and LimelightDetectionMode.BLUE) > 0) ||
-                                        (detectRed && (enabled and LimelightDetectionMode.RED) > 0) ||
-                                        detectYellow
-                                )
-                    ) {
-                        hClawProxy.setClaw(Hardware.FRONT_OPEN)
-                    } else {
-                        val flipThird = 0.66
-                        it.add(hClawProxy.aSetFlip(flipThird))
-                            .then(run { hardware.clawTwist.position = Hardware.CLAW_TWIST_INIT })
-                            .then(hSlideProxy.moveIn())
-                            .then(hClawProxy.aSetFlip(Hardware.FLIP_UP))
-                            .then(run { Log.w("A", "AAAAAA") })
-                    }
+                    hClawProxy.setFlip(Hardware.FLIP_DOWN_PLUS)
                 })
+                .then(wait(0.100))
+                .then(hClawProxy.aSetClaw(Hardware.FRONT_CLOSE_HARD))
+                .then(wait(0.100))
+                .then(hClawProxy.aSetFlip(Hardware.FLIP_DOWN))
+                .then(wait(0.100))
+                .then(run { clawTwist.position = Hardware.CLAW_TWIST_INIT })
+                .then(hClawProxy.aSetFlipClaw(Hardware.FLIP_ONE_THIRD, Hardware.FRONT_CLOSE))
+                .then(groupOf {
+                    add(hSlideProxy.moveTransfer())
+                    add(wait(0.350))
+                        .then(hClawProxy.aSetClaw(Hardware.FRONT_CLOSE_HARD));
+                })
+                .then(hClawProxy.aSetFlip(Hardware.FLIP_UP))
         }
     }
 
@@ -130,6 +121,19 @@ class LimelightSearch @JvmOverloads constructor(
     private val telemetry: Telemetry? = null,
 ) :
     TaskTemplate(scheduler) {
+
+    enum class ResultStatus(val intValue: Int?, val message: String) {
+        ERROR_RAISED(-1, "Catastrophic failure (Pipeline raised error)"),
+        NO_MATCH(0, "No samples detected"),
+        MATCH_NO_PICKUP(1, "Sample detected, but can't grab"),
+        PICKUP(2, "Sample detected in grab range"),
+        ELSE(-2, "Catastrophic failure (Pipeline returned invalid status code)");
+
+        companion object {
+            fun getForId(id: Int) = entries.firstOrNull { it.intValue == id } ?: ELSE
+        }
+    }
+
     companion object {
         private var lastEnabledState = -1
     }
@@ -139,6 +143,8 @@ class LimelightSearch @JvmOverloads constructor(
     //private val lightRight = hardware.lightRight
     private val lightLeft = hardware.lightLeft
     private val lightRight = hardware.lightRight
+    private val colorLeft = hardware.colorLeft
+    private val colorRight = hardware.colorRight
 
     private val depends = setOf(
         hSlideProxy.CONTROL,
@@ -169,8 +175,7 @@ class LimelightSearch @JvmOverloads constructor(
         }
 
         limelight.start()
-        lightLeft.position = 0.0
-        lightRight.position = 0.0
+        lightLeft.position = 1.0
         lightRight.position = 1.0 // white
         hSlideProxy.moveOutSync()
         hClawProxy.setClaw(Hardware.FRONT_OPEN)
@@ -178,6 +183,7 @@ class LimelightSearch @JvmOverloads constructor(
 
     var isRecognized = false; private set
     private var liveAngle = 0.0
+    private var liveStatus = ResultStatus.NO_MATCH
 
     override fun invokeOnTick() {
         val result = limelight.latestResult
@@ -187,34 +193,42 @@ class LimelightSearch @JvmOverloads constructor(
         }
         data("LL Pipeline No", limelight.status.pipelineIndex)
         val pyOut = result.pythonOutput
-        val (_, xCoord, yCoord, wVal, hVal, _, angle, _, inside) = pyOut
-        val ratio = hVal / wVal
+        val (status, xOff, yOff, angle) = pyOut
+        val statusT = ResultStatus.getForId(status.roundToInt())
+        data("LL: status", statusT.message)
+        data("LL: x", xOff)
+        data("LL: y", yOff)
         data("LL: angle", angle)
-        data("LL: x", xCoord)
-        data("LL: y", yCoord)
-        data("LL: w", wVal)
-        data("LL: h", hVal)
-        data("LL: ratio", ratio)
 
+        isRecognized = statusT == ResultStatus.PICKUP
+        val color = when (statusT) {
+            ResultStatus.PICKUP -> Hardware.LAMP_GREEN
+            ResultStatus.MATCH_NO_PICKUP -> Hardware.LAMP_ORANGE
+            else -> 0.0
+        }
         liveAngle = angle
-        isRecognized = inside > 0.5
-        lightLeft.position = if (isRecognized) Hardware.LAMP_GREEN else 0.0
-        lightRight.position = if (isRecognized) Hardware.LAMP_GREEN else 0.0
+        liveStatus = statusT
+        colorLeft.position = color
+        colorRight.position = color
     }
 
     fun proceed(): Boolean {
-        if (!isRecognized) return false
-        done = true
-        scheduler.add(
-            LimelightSamplePickup(
-                scheduler,
-                hardware,
-                hSlideProxy,
-                hClawProxy,
-                enabled,
-                liveAngle
+        when (liveStatus) {
+            ResultStatus.PICKUP -> scheduler.add(
+                LimelightPickupImmediate(
+                    scheduler,
+                    hardware,
+                    hSlideProxy,
+                    hClawProxy,
+                    enabled,
+                    liveAngle
+                )
             )
-        )
+
+            ResultStatus.MATCH_NO_PICKUP -> /* not implemented */ {}
+            else -> return false
+        }
+        done = true
         return true
     }
 
