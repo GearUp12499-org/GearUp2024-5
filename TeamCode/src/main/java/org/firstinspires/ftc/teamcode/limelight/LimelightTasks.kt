@@ -19,6 +19,7 @@ import org.firstinspires.ftc.teamcode.limelight.LimelightSearch.ResultStatus.ent
 import org.firstinspires.ftc.teamcode.mmooover.MMoverDataPack
 import org.firstinspires.ftc.teamcode.mmooover.Motion
 import org.firstinspires.ftc.teamcode.mmooover.Pose
+import org.firstinspires.ftc.teamcode.mmooover.tasks.MoveToTask
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.component3
@@ -117,25 +118,21 @@ class LimelightPickupImmediate(
 class LimelightMoveAdjust(
     scheduler: Scheduler,
     private val hardware: Hardware,
-    mmoverData: MMoverDataPack,
+    private val mmoverData: MMoverDataPack,
     x: Number,
     y: Number,
     angle: Number,
     private val hSlideProxy: HSlideProxy,
     private val hClawProxy: HClawProxy,
     private val telemetry: Telemetry?
-) : TaskTemplate(scheduler) {
+) : TaskGroup(scheduler) {
     private val limelight = hardware.limelight
     private val colorLeft = hardware.colorLeft
     private val colorRight = hardware.colorRight
 
-    private val speed2Power = mmoverData.speed2Power
-    private val calibration = Hardware.CALIBRATION
-
     private val motors = hardware.driveMotors
 
-    private val runTime = ElapsedTime()
-    private val targetTime = ElapsedTime()
+    private lateinit var targetPose: Pose
     private var forward = -y.toDouble()
     private var timerLimit = hypot(x.toDouble(), y.toDouble()) * .50 /* seconds per inch */
     private var right = x.toDouble()
@@ -162,91 +159,25 @@ class LimelightMoveAdjust(
     override fun invokeOnStart() {
         colorLeft.position = Hardware.LAMP_PURPLE
         colorRight.position = Hardware.LAMP_PURPLE
-        runTime.reset()
-        targetTime.reset()
+        targetPose = mmoverData.tracking.getPose() + Motion(forward, right, 0)
+        this.with {
+            val t = MoveToTask(scheduler, mmoverData, targetPose, telemetry)
+            t.acceptDist = 0.25
+            it.add(t)
+        }
     }
 
-    private var finished = false
-
-    override fun invokeOnTick() {
-        if (targetTime.time() > 0.2) {
-            Log.i("Autodetect", "matched OK")
-            scheduler.add(LimelightPickupImmediate(
-                scheduler, hardware, hSlideProxy, hClawProxy, angle
-            ))
-            finished = true;
-            return;
-        }
-        val result = limelight.latestResult
-        if (result == null) {
-            data("Limelight", "Result is null")
-            return
-        }
-        data("LL Pipeline No", limelight.status.pipelineIndex)
-        val pyOut = result.pythonOutput
-        val (status, xOff, yOff, angle) = pyOut
-        this.angle = angle
-        val statusT = ResultStatus.getForId(status.roundToInt())
-        var factor = 1.0
-        when (statusT) {
-            /* something's broken */
-            ResultStatus.ERROR_RAISED, ResultStatus.ELSE -> {
-                colorLeft.position = Hardware.LAMP_RED
-                colorRight.position = Hardware.LAMP_RED
-                factor = 0.8
-            }
-            /* we've lost track of it */
-            ResultStatus.NO_MATCH -> {
-                colorLeft.position = Hardware.LAMP_RED
-                colorRight.position = Hardware.LAMP_RED
-                factor = 0.8
-            }
-            /* we can grab it! */
-            ResultStatus.PICKUP -> {
-                colorLeft.position = Hardware.LAMP_GREEN
-                colorRight.position = Hardware.LAMP_GREEN
-                forward = 0.0
-                right = 0.0
-                motors.setAll(0)
-                return
-            }
-            /* we still see it... */
-            ResultStatus.MATCH_NO_PICKUP -> {
-                colorLeft.position = Hardware.LAMP_PURPLE
-                colorRight.position = Hardware.LAMP_PURPLE
-                forward = -yOff
-                right = xOff
-            }
-        }
-        targetTime.reset()
-
-        var fl = forward * calibration.preferForward + right * (calibration.preferStrafe + 0.1)
-        var fr = forward * calibration.preferForward - right * (calibration.preferStrafe + 0.1)
-        var bl = forward * calibration.preferForward - right * calibration.preferStrafe
-        var br = forward * calibration.preferForward + right * calibration.preferStrafe
-        val div = max(2.0, max(abs(fl), max(abs(fr), max(abs(bl), abs(br)))))
-        fl /= div
-        fr /= div
-        bl /= div
-        br /= div
-        val maxSpeed = 0.3 * factor
-        fl *= maxSpeed
-        fr *= maxSpeed
-        bl *= maxSpeed
-        br *= maxSpeed
-        fl = speed2Power.speed2power(fl)
-        fr = speed2Power.speed2power(fr)
-        bl = speed2Power.speed2power(bl)
-        br = speed2Power.speed2power(br)
-        motors.set(fl, fr, bl, br)
-    }
-
-    override fun invokeIsCompleted(): Boolean {
-        return finished || runTime.time() > timerLimit
-    }
+    private operator fun Pose.plus(value: Motion) = Pose(
+        this.x + value.forward * cos(this.heading) + value.right * sin(this.heading),
+        this.y + value.forward * sin(this.heading) - value.right * cos(this.heading),
+        this.heading
+    )
 
     override fun invokeOnFinish() {
         super.invokeOnFinish()
+        scheduler.add(LimelightPickupImmediate(
+            scheduler, hardware, hSlideProxy, hClawProxy, angle
+        ))
         colorLeft.position = 0.0
         colorRight.position = 0.0
         motors.setAll(0)

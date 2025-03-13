@@ -90,7 +90,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         tracker = new EncoderTracking(hardware);
         tracker.setOrientationProvider(() -> heading);
         loopTimer = new LoopStopwatch();
-        speed2Power = new Speed2Power(0.20); // Set a speed2Power corresponding to a speed of 0.20 seconds
+        speed2Power = new Speed2Power(0.25); // Set a speed2Power corresponding to a speed of 0.20 seconds
         ramps = new Ramps(
                 Ramps.linear(2.0),
                 Ramps.linear(1 / 12.0),
@@ -301,6 +301,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
 
             scheduler.tick();
             tracker.step();
+            loopTimer.click();
             telemetry.addData("Wrist Position", hardware.wrist.getPosition());
             telemetry.addData("Claw Position", hardware.claw.getPosition());
             telemetry.addData("Vertical position", verticalPosition);
@@ -312,6 +313,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
                 telemetry.addLine(str);
                 return Unit.INSTANCE;
             });
+
             telemetry.update();
         }
 

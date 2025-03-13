@@ -29,7 +29,9 @@ import dev.aether.collaborative_multitasking.TaskTemplate;
 
 @SuppressLint("DefaultLocale")
 public class MoveToTask extends TaskTemplate {
-    public static final double kD = 0.015;
+    public static final double kD = 0.005;
+
+    public double acceptDist = 1.0;
 
     protected Pose target;
     protected final EncoderTracking tracker;
@@ -72,7 +74,7 @@ public class MoveToTask extends TaskTemplate {
 
         double linear = current.linearDistanceTo(target);
         double angular = current.subtractAngle(target);
-        if (linear > RightAuto.ACCEPT_DIST || abs(angular) > RightAuto.ACCEPT_TURN) {
+        if (linear > acceptDist || abs(angular) > RightAuto.ACCEPT_TURN) {
             targetTime.reset();
         }
         // Waits at the target for 0.5 seconds
