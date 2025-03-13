@@ -20,10 +20,9 @@ import org.firstinspires.ftc.teamcode.hardware.VLiftProxy;
 import org.firstinspires.ftc.teamcode.limelight.LimelightDetectionMode;
 import org.firstinspires.ftc.teamcode.limelight.LimelightSearch;
 import org.firstinspires.ftc.teamcode.mmooover.EncoderTracking;
-import org.firstinspires.ftc.teamcode.mmooover.Pose;
+import org.firstinspires.ftc.teamcode.mmooover.MMoverDataPack;
 import org.firstinspires.ftc.teamcode.mmooover.Ramps;
 import org.firstinspires.ftc.teamcode.mmooover.Speed2Power;
-import org.firstinspires.ftc.teamcode.mmooover.tasks.MoveRelTask;
 import org.firstinspires.ftc.teamcode.utilities.LoopStopwatch;
 
 import java.util.function.Consumer;
@@ -60,6 +59,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
     private Speed2Power speed2Power;
     private org.firstinspires.ftc.teamcode.hardware.VLiftProxy vLiftProxy;
     private double heading = 0.0;
+    private MMoverDataPack mmoverData;
 
     /**
      * Forces any tasks using this lock to be stopped immediately.
@@ -86,12 +86,6 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         return new TaskGroup(scheduler).with(contents);
     }
 
-    private MoveRelTask moveRel(Pose offset) {
-        return new MoveRelTask(
-                scheduler, hardware, offset, tracker, loopTimer, speed2Power, ramps, telemetry
-        );
-    }
-
     private void hardwareInit() {
         tracker = new EncoderTracking(hardware);
         tracker.setOrientationProvider(() -> heading);
@@ -102,6 +96,10 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
                 Ramps.linear(1 / 12.0),
 //                Easing.power(3.0, 12.0),
                 Ramps.LimitMode.SCALE
+        );
+
+        mmoverData = new MMoverDataPack(
+                hardware, tracker, loopTimer, speed2Power, ramps
         );
 
         hardware.sharedHardwareInit();
@@ -655,8 +653,9 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
             activeSearchTask.proceed();
             return;
         }
+        abandonLock(Locks.DriveMotors);
         int enabled = LimelightDetectionMode.RED | LimelightDetectionMode.YELLOW;
-        activeSearchTask = scheduler.add(new LimelightSearch(scheduler, hardware, hSlideProxy, hClawProxy, enabled, telemetry));
+        activeSearchTask = scheduler.add(new LimelightSearch(scheduler, hardware, mmoverData, hSlideProxy, hClawProxy, enabled, telemetry));
     }
 
     // go to MecanumTeleOp2 for functionality

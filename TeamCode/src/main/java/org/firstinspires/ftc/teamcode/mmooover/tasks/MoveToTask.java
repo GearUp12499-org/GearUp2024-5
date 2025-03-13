@@ -12,12 +12,14 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Hardware;
 import org.firstinspires.ftc.teamcode.RightAuto;
 import org.firstinspires.ftc.teamcode.mmooover.EncoderTracking;
+import org.firstinspires.ftc.teamcode.mmooover.MMoverDataPack;
 import org.firstinspires.ftc.teamcode.mmooover.Motion;
 import org.firstinspires.ftc.teamcode.mmooover.Pose;
 import org.firstinspires.ftc.teamcode.mmooover.Ramps;
 import org.firstinspires.ftc.teamcode.mmooover.Speed2Power;
 import org.firstinspires.ftc.teamcode.utilities.LoopStopwatch;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
@@ -33,7 +35,7 @@ public class MoveToTask extends TaskTemplate {
     protected final EncoderTracking tracker;
     protected final Speed2Power speed2Power;
     protected final Ramps ramps;
-    protected final Telemetry telemetry;
+    protected final @Nullable Telemetry telemetry;
     protected final LoopStopwatch loopTimer;
     protected final Hardware hardware;
     protected ElapsedTime targetTime = new ElapsedTime();
@@ -44,22 +46,18 @@ public class MoveToTask extends TaskTemplate {
 
     public MoveToTask(
             @NotNull Scheduler scheduler,
-            @NotNull Hardware hardware,
+            @NotNull MMoverDataPack mmoverData,
             @NotNull Pose target,
-            @NotNull EncoderTracking tracker,
-            @NotNull LoopStopwatch loopTimer,
-            @NotNull Speed2Power speed2Power,
-            @NotNull Ramps ramps,
-            @NotNull Telemetry telemetry
+            @Nullable Telemetry telemetry
     ) {
         super(scheduler);
         this.target = target;
-        this.tracker = tracker;
-        this.speed2Power = speed2Power;
-        this.ramps = ramps;
+        this.tracker = mmoverData.tracking;
+        this.speed2Power = mmoverData.speed2Power;
+        this.ramps = mmoverData.ramps;
         this.telemetry = telemetry;
-        this.loopTimer = loopTimer;
-        this.hardware = hardware;
+        this.loopTimer = mmoverData.loopTimer;
+        this.hardware = mmoverData.hardware;
     }
 
     @Override
@@ -103,9 +101,11 @@ public class MoveToTask extends TaskTemplate {
         double finalSpeed = rampingSpeed + kD * vel;
 
         action.apply(hardware.driveMotors, Hardware.CALIBRATION, finalSpeed, speed2Power);
-        telemetry.addData("forward", action.forward());
-        telemetry.addData("right", action.right());
-        telemetry.addData("turn (deg)", Math.toDegrees(action.turn()));
+        if (telemetry != null) {
+            telemetry.addData("forward", action.forward());
+            telemetry.addData("right", action.right());
+            telemetry.addData("turn (deg)", Math.toDegrees(action.turn()));
+        }
         String message = String.format(
                 "##%.3f##{\"pose\":[%.6f,%.6f,%.6f],\"motion\":[%.6f,%.6f,%.6f],\"rampingSpeed\":%.6f," +
                         "\"frontLeft\":%.6f,\"frontRight\":%.6f,\"backLeft\":%.6f,\"backRight\":%.6f," +

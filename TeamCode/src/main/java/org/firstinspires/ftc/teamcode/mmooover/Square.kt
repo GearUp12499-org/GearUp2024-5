@@ -6,8 +6,8 @@ import dev.aether.collaborative_multitasking.MultitaskScheduler
 import org.firstinspires.ftc.teamcode.Hardware
 import org.firstinspires.ftc.teamcode.mmooover.tasks.MoveToTask
 import org.firstinspires.ftc.teamcode.utilities.LoopStopwatch
+import org.firstinspires.ftc.teamcode.utilities.degrees
 
-private val Number.degrees: Double; get() = this.toDouble() * Math.PI / 180.0
 
 @TeleOp
 class Square : LinearOpMode() {
@@ -21,6 +21,7 @@ class Square : LinearOpMode() {
     private lateinit var loopTimer: LoopStopwatch
     private lateinit var speed2Power: Speed2Power
     private lateinit var ramps: Ramps
+    private lateinit var mMoverDataPack: MMoverDataPack
 
     private fun hwInit() {
         hardware = Hardware(hardwareMap)
@@ -34,10 +35,13 @@ class Square : LinearOpMode() {
 //                Easing.power(3.0, 12.0),
             Ramps.LimitMode.SCALE
         )
+        mMoverDataPack = MMoverDataPack(
+            hardware, tracker, loopTimer, speed2Power, ramps
+        )
     }
 
     private fun moveTo(target: Pose) = MoveToTask(
-        scheduler, hardware, target, tracker, loopTimer, speed2Power, ramps, telemetry
+        scheduler, mMoverDataPack, target, telemetry
     )
 
     override fun runOpMode() {

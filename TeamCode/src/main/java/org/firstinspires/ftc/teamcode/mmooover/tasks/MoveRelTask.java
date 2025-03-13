@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.mmooover.tasks;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Hardware;
 import org.firstinspires.ftc.teamcode.mmooover.EncoderTracking;
+import org.firstinspires.ftc.teamcode.mmooover.MMoverDataPack;
 import org.firstinspires.ftc.teamcode.mmooover.Pose;
 import org.firstinspires.ftc.teamcode.mmooover.Ramps;
 import org.firstinspires.ftc.teamcode.mmooover.Speed2Power;
@@ -18,15 +19,11 @@ public class MoveRelTask extends MoveToTask {
 
     public MoveRelTask(
             @NotNull Scheduler scheduler,
-            @NotNull Hardware hardware,
+            @NotNull MMoverDataPack mmoverData,
             @NotNull Pose offset,
-            @NotNull EncoderTracking tracker,
-            @NotNull LoopStopwatch loopTimer,
-            @NotNull Speed2Power speed2Power,
-            @NotNull Ramps ramps,
             @NotNull Telemetry telemetry
     ) {
-        super(scheduler, hardware, new Pose(0, 0, 0), tracker, loopTimer, speed2Power, ramps, telemetry);
+        super(scheduler, mmoverData, new Pose(0, 0, 0), telemetry);
         this.offset = offset;
     }
 

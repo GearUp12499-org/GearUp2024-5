@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.hardware.HClawProxy;
 import org.firstinspires.ftc.teamcode.hardware.HSlideProxy;
 import org.firstinspires.ftc.teamcode.hardware.VLiftProxy;
 import org.firstinspires.ftc.teamcode.mmooover.EncoderTracking;
+import org.firstinspires.ftc.teamcode.mmooover.MMoverDataPack;
 import org.firstinspires.ftc.teamcode.mmooover.Pose;
 import org.firstinspires.ftc.teamcode.mmooover.Ramps;
 import org.firstinspires.ftc.teamcode.mmooover.Speed2Power;
@@ -49,6 +50,8 @@ public class LeftAuto extends LinearOpMode {
     private Speed2Power speed2Power;
     private MultitaskScheduler scheduler;
 
+    private MMoverDataPack mmoverData;
+
     private ITask run(Runnable it) {
         return new OneShot(scheduler, it);
     }
@@ -67,7 +70,7 @@ public class LeftAuto extends LinearOpMode {
 
     private MoveToTask moveTo(Pose target) {
         return new MoveToTask(
-                scheduler, hardware, target, tracker, loopTimer, speed2Power, ramps, telemetry
+                scheduler, mmoverData, target, telemetry
         );
     }
 
@@ -159,6 +162,10 @@ public class LeftAuto extends LinearOpMode {
                 Ramps.linear(1 / 12.0), // inches from target
 //                Easing.power(3.0, 12.0),
                 Ramps.LimitMode.SCALE
+        );
+
+        mmoverData = new MMoverDataPack(
+                hardware, tracker, loopTimer, speed2Power, ramps
         );
 
         hardware.sharedHardwareInit();

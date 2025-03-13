@@ -3,6 +3,7 @@
 package org.firstinspires.ftc.teamcode.limelight
 
 import android.util.Log
+import com.qualcomm.robotcore.util.ElapsedTime
 import dev.aether.collaborative_multitasking.OneShot
 import dev.aether.collaborative_multitasking.Scheduler
 import dev.aether.collaborative_multitasking.TaskGroup
@@ -10,22 +11,24 @@ import dev.aether.collaborative_multitasking.TaskTemplate
 import dev.aether.collaborative_multitasking.ext.Pause
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.Hardware
+import org.firstinspires.ftc.teamcode.Hardware.Locks
 import org.firstinspires.ftc.teamcode.hardware.HClawProxy
 import org.firstinspires.ftc.teamcode.hardware.HSlideProxy
+import org.firstinspires.ftc.teamcode.limelight.LimelightSearch.ResultStatus
+import org.firstinspires.ftc.teamcode.limelight.LimelightSearch.ResultStatus.entries
+import org.firstinspires.ftc.teamcode.mmooover.MMoverDataPack
+import org.firstinspires.ftc.teamcode.mmooover.Motion
+import org.firstinspires.ftc.teamcode.mmooover.Pose
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.component3
+import kotlin.collections.component4
 import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.hypot
+import kotlin.math.max
 import kotlin.math.roundToInt
-
-@Suppress("unused")
-private inline operator fun DoubleArray.component6() = get(5)
-
-@Suppress("unused")
-private inline operator fun DoubleArray.component7() = get(6)
-
-@Suppress("unused")
-private inline operator fun DoubleArray.component8() = get(7)
-
-@Suppress("unused")
-private inline operator fun DoubleArray.component9() = get(8)
+import kotlin.math.sin
 
 
 object LimelightDetectionMode {
@@ -42,12 +45,11 @@ object LimelightDetectionMode {
     }
 }
 
-class LimelightPickupImmediate constructor(
+class LimelightPickupImmediate(
     scheduler: Scheduler,
     private val hardware: Hardware,
     private val hSlideProxy: HSlideProxy,
     private val hClawProxy: HClawProxy,
-    private val enabled: Int,
     private var angle: Double
 ) : TaskGroup(scheduler) {
     private val depends = setOf(
@@ -99,7 +101,7 @@ class LimelightPickupImmediate constructor(
                 .then(groupOf {
                     add(hSlideProxy.moveTransfer())
                     add(wait(0.350))
-                        .then(hClawProxy.aSetClaw(Hardware.FRONT_CLOSE_HARD));
+                        .then(hClawProxy.aSetClaw(Hardware.FRONT_CLOSE_HARD))
                 })
                 .then(hClawProxy.aSetFlip(Hardware.FLIP_UP))
         }
@@ -112,9 +114,150 @@ class LimelightPickupImmediate constructor(
     }
 }
 
+class LimelightMoveAdjust(
+    scheduler: Scheduler,
+    private val hardware: Hardware,
+    mmoverData: MMoverDataPack,
+    x: Number,
+    y: Number,
+    angle: Number,
+    private val hSlideProxy: HSlideProxy,
+    private val hClawProxy: HClawProxy,
+    private val telemetry: Telemetry?
+) : TaskTemplate(scheduler) {
+    private val limelight = hardware.limelight
+    private val colorLeft = hardware.colorLeft
+    private val colorRight = hardware.colorRight
+
+    private val speed2Power = mmoverData.speed2Power
+    private val calibration = Hardware.CALIBRATION
+
+    private val motors = hardware.driveMotors
+
+    private val runTime = ElapsedTime()
+    private val targetTime = ElapsedTime()
+    private var forward = -y.toDouble()
+    private var timerLimit = hypot(x.toDouble(), y.toDouble()) * .50 /* seconds per inch */
+    private var right = x.toDouble()
+    private var angle = angle.toDouble()
+
+    private val depends = setOf(
+        Locks.DriveMotors,
+        Locks.Signals,
+        Locks.Limelight
+    )
+
+    private fun data(caption: String, value: Any?) = when {
+        telemetry != null -> telemetry.addData(caption, value)
+        else -> null
+    }
+
+    private fun line(caption: String) = when {
+        telemetry != null -> telemetry.addLine(caption)
+        else -> null
+    }
+
+    override fun requirements() = depends
+
+    override fun invokeOnStart() {
+        colorLeft.position = Hardware.LAMP_PURPLE
+        colorRight.position = Hardware.LAMP_PURPLE
+        runTime.reset()
+        targetTime.reset()
+    }
+
+    private var finished = false
+
+    override fun invokeOnTick() {
+        if (targetTime.time() > 0.2) {
+            Log.i("Autodetect", "matched OK")
+            scheduler.add(LimelightPickupImmediate(
+                scheduler, hardware, hSlideProxy, hClawProxy, angle
+            ))
+            finished = true;
+            return;
+        }
+        val result = limelight.latestResult
+        if (result == null) {
+            data("Limelight", "Result is null")
+            return
+        }
+        data("LL Pipeline No", limelight.status.pipelineIndex)
+        val pyOut = result.pythonOutput
+        val (status, xOff, yOff, angle) = pyOut
+        this.angle = angle
+        val statusT = ResultStatus.getForId(status.roundToInt())
+        var factor = 1.0
+        when (statusT) {
+            /* something's broken */
+            ResultStatus.ERROR_RAISED, ResultStatus.ELSE -> {
+                colorLeft.position = Hardware.LAMP_RED
+                colorRight.position = Hardware.LAMP_RED
+                factor = 0.8
+            }
+            /* we've lost track of it */
+            ResultStatus.NO_MATCH -> {
+                colorLeft.position = Hardware.LAMP_RED
+                colorRight.position = Hardware.LAMP_RED
+                factor = 0.8
+            }
+            /* we can grab it! */
+            ResultStatus.PICKUP -> {
+                colorLeft.position = Hardware.LAMP_GREEN
+                colorRight.position = Hardware.LAMP_GREEN
+                forward = 0.0
+                right = 0.0
+                motors.setAll(0)
+                return
+            }
+            /* we still see it... */
+            ResultStatus.MATCH_NO_PICKUP -> {
+                colorLeft.position = Hardware.LAMP_PURPLE
+                colorRight.position = Hardware.LAMP_PURPLE
+                forward = -yOff
+                right = xOff
+            }
+        }
+        targetTime.reset()
+
+        var fl = forward * calibration.preferForward + right * (calibration.preferStrafe + 0.1)
+        var fr = forward * calibration.preferForward - right * (calibration.preferStrafe + 0.1)
+        var bl = forward * calibration.preferForward - right * calibration.preferStrafe
+        var br = forward * calibration.preferForward + right * calibration.preferStrafe
+        val div = max(2.0, max(abs(fl), max(abs(fr), max(abs(bl), abs(br)))))
+        fl /= div
+        fr /= div
+        bl /= div
+        br /= div
+        val maxSpeed = 0.3 * factor
+        fl *= maxSpeed
+        fr *= maxSpeed
+        bl *= maxSpeed
+        br *= maxSpeed
+        fl = speed2Power.speed2power(fl)
+        fr = speed2Power.speed2power(fr)
+        bl = speed2Power.speed2power(bl)
+        br = speed2Power.speed2power(br)
+        motors.set(fl, fr, bl, br)
+    }
+
+    override fun invokeIsCompleted(): Boolean {
+        return finished || runTime.time() > timerLimit
+    }
+
+    override fun invokeOnFinish() {
+        super.invokeOnFinish()
+        colorLeft.position = 0.0
+        colorRight.position = 0.0
+        motors.setAll(0)
+        limelight.stop()
+    }
+}
+
 class LimelightSearch @JvmOverloads constructor(
     scheduler: Scheduler,
     private val hardware: Hardware,
+    private val mmoverData: MMoverDataPack,
     private val hSlideProxy: HSlideProxy,
     private val hClawProxy: HClawProxy,
     private var enabled: Int,
@@ -150,8 +293,8 @@ class LimelightSearch @JvmOverloads constructor(
         hSlideProxy.CONTROL,
         hClawProxy.CONTROL_CLAW,
         hClawProxy.CONTROL_FLIP,
-        Hardware.Locks.Signals,
-        Hardware.Locks.Limelight
+        Locks.Signals,
+        Locks.Limelight
     )
 
     override fun requirements() = depends
@@ -181,8 +324,9 @@ class LimelightSearch @JvmOverloads constructor(
         hClawProxy.setClaw(Hardware.FRONT_OPEN)
     }
 
-    var isRecognized = false; private set
     private var liveAngle = 0.0
+    private var liveXOff = 0.0
+    private var liveYOff = 0.0
     private var liveStatus = ResultStatus.NO_MATCH
 
     override fun invokeOnTick() {
@@ -200,7 +344,6 @@ class LimelightSearch @JvmOverloads constructor(
         data("LL: y", yOff)
         data("LL: angle", angle)
 
-        isRecognized = statusT == ResultStatus.PICKUP
         val color = when (statusT) {
             ResultStatus.PICKUP -> Hardware.LAMP_GREEN
             ResultStatus.MATCH_NO_PICKUP -> Hardware.LAMP_ORANGE
@@ -208,24 +351,42 @@ class LimelightSearch @JvmOverloads constructor(
         }
         liveAngle = angle
         liveStatus = statusT
+        liveXOff = xOff
+        liveYOff = yOff
         colorLeft.position = color
         colorRight.position = color
     }
 
     fun proceed(): Boolean {
         when (liveStatus) {
-            ResultStatus.PICKUP -> scheduler.add(
-                LimelightPickupImmediate(
+            ResultStatus.PICKUP -> {
+                scheduler.add(
+                    LimelightPickupImmediate(
+                        scheduler,
+                        hardware,
+                        hSlideProxy,
+                        hClawProxy,
+                        liveAngle
+                    )
+                )
+                lightRight.position = 0.0
+                limelight.stop()
+            }
+
+            ResultStatus.MATCH_NO_PICKUP -> scheduler.add(
+                LimelightMoveAdjust(
                     scheduler,
                     hardware,
+                    mmoverData,
+                    liveXOff,
+                    liveYOff,
+                    liveAngle,
                     hSlideProxy,
                     hClawProxy,
-                    enabled,
-                    liveAngle
+                    telemetry
                 )
             )
 
-            ResultStatus.MATCH_NO_PICKUP -> /* not implemented */ {}
             else -> return false
         }
         done = true
@@ -237,7 +398,5 @@ class LimelightSearch @JvmOverloads constructor(
     override fun invokeOnFinish() {
         lightRight.position = 0.0
         lightLeft.position = 0.0
-        lightRight.position = 0.0
-        limelight.stop()
     }
 }
