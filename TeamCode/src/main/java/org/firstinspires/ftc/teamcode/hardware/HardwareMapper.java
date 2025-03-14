@@ -5,6 +5,8 @@ import android.annotation.SuppressLint;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PwmControl;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -114,6 +116,16 @@ public abstract class HardwareMapper {
                     }
             );
 
+    static final DeviceAnnotation<GoBildaExtendedServo, ServoImplEx> goBildaExtendedServo =
+            new DeviceAnnotation<>(
+                    GoBildaExtendedServo.class,
+                    ServoImplEx.class,
+                    (annotation, target) -> {
+                        // https://github.com/goBILDA-Official/FTC-Servo-Helper-Examples/blob/main/ServoExExample.java
+                        target.setPwmRange(new PwmControl.PwmRange(500, 2500));
+                    }
+            );
+
     private final HardwareMap thisMap;
 
     private <A extends Annotation, B extends Annotation> void assertNotAnnotated(
@@ -165,6 +177,7 @@ public abstract class HardwareMapper {
         reversed.use(field, result);
         zeroPower.use(field, result);
         autoClearEncoder.use(field, result);
+        goBildaExtendedServo.use(field, result);
     }
 
     private void matchEncoderFor(@NotNull Field field, @NotNull Class<?> targetType, @NotNull EncoderFor annotation, boolean optional) {
@@ -199,6 +212,7 @@ public abstract class HardwareMapper {
         reversedEncoder.use(field, wrapper);
         assertNotAnnotated(field, ZeroPower.class, EncoderFor.class);
         autoClearEncoder.use(field, result);
+        assertNotAnnotated(field, GoBildaExtendedServo.class, EncoderFor.class);
     }
 
     @SuppressLint("DefaultLocale")

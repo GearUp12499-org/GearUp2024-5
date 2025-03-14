@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.hardware.Ascent;
 import org.firstinspires.ftc.teamcode.hardware.AutoClearEncoder;
 import org.firstinspires.ftc.teamcode.hardware.Encoder;
 import org.firstinspires.ftc.teamcode.hardware.EncoderFor;
+import org.firstinspires.ftc.teamcode.hardware.GoBildaExtendedServo;
 import org.firstinspires.ftc.teamcode.hardware.MultiServo;
 import org.firstinspires.ftc.teamcode.hardware.HardwareMapper;
 import org.firstinspires.ftc.teamcode.hardware.HardwareName;
@@ -21,12 +22,13 @@ import org.firstinspires.ftc.teamcode.mmooover.TriOdoProvider;
 
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 import dev.aether.collaborative_multitasking.SharedResource;
 
 
 public class Hardware extends HardwareMapper implements TriOdoProvider {
-    public static final double SCORE_SPECIMEN_ARM_DEG =-100;
+    public static final double SCORE_SPECIMEN_ARM_DEG = -100;
     public static final double ARM_SCORE = 0.5;
     public static final double ARM_SCORE_AUTO = 0.6;
     public static final double ARM_HALF_SPEC = 0.2;
@@ -34,14 +36,15 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double ARM_UP = 0.47;
     public static final double ARM_WAIT = 0.10;
     public static final double ARM_TRANSFER = 0.05;
+    public static final double ARM_PICKUP_WALL = 0.95;
     public static final double spinTickPerRev = 751.8;
     public static final double RIGHT_SLIDE_OUT = 0.65;
     @Deprecated public static final double LEFT_SLIDE_OUT = 1.05 - RIGHT_SLIDE_OUT;
     public static final double RIGHT_SLIDE_IN = 0.34;
     @Deprecated public static final double LEFT_SLIDE_IN = 1.05 - RIGHT_SLIDE_IN;
-    public static final double RIGHT_SLIDE_TRANSFER = 0.40;
+    public static final double RIGHT_SLIDE_TRANSFER = 0.42;
     public static final double LEFT_SLIDE_TRANSFER = 1.05 - RIGHT_SLIDE_TRANSFER;
-    public static final double RIGHT_SLIDE_KEEP_CLEAR = 0.45;
+    public static final double RIGHT_SLIDE_KEEP_CLEAR = 0.47;
     @Deprecated public static final double LEFT_SLIDE_KEEP_CLEAR = 1.05 - RIGHT_SLIDE_KEEP_CLEAR;
     public static final double CLAW_TWIST_INIT = 0.48;
     public static final double CLAW_TWIST_90 = 0.82;
@@ -50,15 +53,15 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double SLIDE_OUTWARD_TIME = 0.45; // seconds
     public static final double SLIDE_OVERSHOOT = 0.28;
     public static final double FLIP_DOWN_PLUS = 0.1;
-    public static final double FLIP_DOWN = 0.2;
+    public static final double FLIP_DOWN = 0.145;
     public static final double FRONT_OPEN = 0.66;
     public static final double FRONT_CLOSE = 0.40;
     public static final double FRONT_CLOSE_HARD = 0.30;
     public static final double FLIP_UP = 0.8;
     public static final double FLIP_ONE_THIRD = 0.4;
-    public static final double CLAW_CLOSE = 0.9;
-    public static final double CLAW_CLOSE_HARD = 1.0;
-    public static final double CLAW_OPEN = 0.68;
+    public static final double CLAW_CLOSE = 0.68;
+    public static final double CLAW_CLOSE_HARD = 0.58;
+    public static final double CLAW_OPEN = 0.9;
     public static final double WRIST_BACK = 0.3;
     public static final double WRIST_UP = 0.66;
     public static final double WRIST_SCORE = 0.89;
@@ -194,10 +197,12 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public MultiServo arm;
 
     @HardwareName("armLeft")
-    private Servo armLeft;
+    @GoBildaExtendedServo
+    private ServoImplEx armLeft;
 
     @HardwareName("armRight")
-    private Servo armRight;
+    @GoBildaExtendedServo
+    private ServoImplEx armRight;
 
     @HardwareName("clawTwist")
     public Servo clawTwist;

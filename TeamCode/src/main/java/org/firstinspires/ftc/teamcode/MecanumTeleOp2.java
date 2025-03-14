@@ -513,7 +513,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
                     hardware.claw.setPosition(Hardware.CLAW_OPEN);
                     hardware.wrist.setPosition(0);
                     hardware.arm.setPosition(1);
-                }))
+                })).then(vLiftProxy.moveTo(0, 5, 0.5))
         ).extraDepends(Locks.ArmAssembly));
     }
 
@@ -523,14 +523,14 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         scheduler.add(
                 groupOf(it -> it.add(run(() -> {
                                     hardware.claw.setPosition(Hardware.CLAW_OPEN);
-                                    hardware.arm.setPosition(1);
+                                    hardware.arm.setPosition(Hardware.ARM_PICKUP_WALL);
                                 }))
                                 .then(await(100))
                                 .then(run(() -> hardware.wrist.setPosition(0)))
                                 .then(await(300))
                                 .then(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE_HARD)))
                                 .then(await(200))
-                                .then(vLiftProxy.moveTo(50, 5, 1.0))
+                                .then(vLiftProxy.moveTo(80, 5, 1.0))
                 ).extraDepends(
                         vLiftProxy.CONTROL,
                         Locks.ArmAssembly
