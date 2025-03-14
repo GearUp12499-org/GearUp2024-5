@@ -6,7 +6,6 @@ import android.annotation.SuppressLint;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.hardware.AscentProxy;
@@ -15,7 +14,7 @@ import org.firstinspires.ftc.teamcode.hardware.HClawProxy;
 import org.firstinspires.ftc.teamcode.hardware.HSlideProxy;
 import org.firstinspires.ftc.teamcode.hardware.VLiftProxy;
 import org.firstinspires.ftc.teamcode.mmooover.EncoderTracking;
-import org.firstinspires.ftc.teamcode.mmooover.Motion;
+import org.firstinspires.ftc.teamcode.mmooover.MMoverDataPack;
 import org.firstinspires.ftc.teamcode.mmooover.Pose;
 import org.firstinspires.ftc.teamcode.mmooover.Ramps;
 import org.firstinspires.ftc.teamcode.mmooover.Speed2Power;
@@ -60,14 +59,15 @@ public class RightAuto extends LinearOpMode {
     private HClawProxy hClawProxy;
     private AscentProxy ascentProxy;
     private Ramps ramps;
-    private Ramps rampsSlowEdition;
     private LoopStopwatch loopTimer;
     private Speed2Power speed2Power;
     private MultitaskScheduler scheduler;
 
+    private MMoverDataPack mmoverData;
+
     private MoveRelTask moveRel(Pose offset) {
         return new MoveRelTask(
-                scheduler, hardware, offset, tracker, loopTimer, speed2Power, ramps, telemetry
+                scheduler, mmoverData, offset, telemetry
         );
     }
 
@@ -89,13 +89,7 @@ public class RightAuto extends LinearOpMode {
 
     private MoveToTask moveTo(Pose target) {
         return new MoveToTask(
-                scheduler, hardware, target, tracker, loopTimer, speed2Power, ramps, telemetry
-        );
-    }
-
-    private MoveToTask moveToSlow(Pose target) {
-        return new MoveToTask(
-                scheduler, hardware, target, tracker, loopTimer, speed2Power, rampsSlowEdition, telemetry
+                scheduler, mmoverData, target, telemetry
         );
     }
 
@@ -125,11 +119,10 @@ public class RightAuto extends LinearOpMode {
 //                Easing.power(3.0, 12.0),
                 Ramps.LimitMode.SCALE
         );
-        rampsSlowEdition = new Ramps(
-                x -> 0.25,
-                Ramps.linear(1/12.0),
-//                Easing.power(3.0, 12.0),
-                Ramps.LimitMode.SCALE
+        //                Easing.power(3.0, 12.0),
+
+        mmoverData = new MMoverDataPack(
+                hardware, tracker, loopTimer, speed2Power, ramps
         );
 
         hardware.sharedHardwareInit();
