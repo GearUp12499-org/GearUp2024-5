@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.hardware.AscentProxy;
 import org.firstinspires.ftc.teamcode.hardware.BlinkLightsTask;
 import org.firstinspires.ftc.teamcode.hardware.HClawProxy;
 import org.firstinspires.ftc.teamcode.hardware.HSlideProxy;
@@ -48,7 +47,8 @@ public class RightAuto extends LinearOpMode {
     Hardware hardware;
     private final Runnable setup = () -> {
         hardware.claw.setPosition(CLAW_CLOSE);
-        hardware.wrist.setPosition(0.28);
+        hardware.wrist.setPosition(Hardware.WRIST_UP);
+        hardware.arm.setPosition(Hardware.ARM_HALF_SPEC);
 //        hardware.arm.setTargetPosition(0);
 //        hardware.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //        hardware.arm.setPower(0.2);
@@ -57,7 +57,6 @@ public class RightAuto extends LinearOpMode {
     private VLiftProxy vLiftProxy;
     private HSlideProxy hSlideProxy;
     private HClawProxy hClawProxy;
-    private AscentProxy ascentProxy;
     private Ramps ramps;
     private LoopStopwatch loopTimer;
     private Speed2Power speed2Power;
@@ -126,23 +125,23 @@ public class RightAuto extends LinearOpMode {
         );
 
         hardware.sharedHardwareInit();
+//        hardware.arm.setPosition(Hardware.ARM_PRE_WALL_PICK);
+        hardware.wrist.setPosition(Hardware.WRIST_UP);
     }
 
     private ITask grab() {
-        final double flipThird = 0.66;
-        ITask result = groupOf(inner -> inner.add(hClawProxy.aSetClaw(Hardware.FRONT_OPEN))
+        return groupOf(inner -> inner.add(hClawProxy.aSetClaw(Hardware.FRONT_OPEN))
                 .then(hSlideProxy.moveOut())
                 .then(hClawProxy.aSetFlip(Hardware.FLIP_DOWN))
-                .then(await(500))
-                .then(hClawProxy.aSetClaw(Hardware.FRONT_CLOSE))
+                .then(await(200))
+                .then(hClawProxy.aSetClaw(Hardware.FRONT_CLOSE_HARD))
                 .then(await(250))
-                .then(hClawProxy.aSetFlip(flipThird))
-                .then(hSlideProxy.moveIn())
-                .then(hClawProxy.aSetFlip(Hardware.FLIP_UP)));
-        return result;
+                .then(hClawProxy.aSetFlip(Hardware.FLIP_ONE_THIRD))
+                .then(hSlideProxy.moveToPreset(HSlideProxy.Position.TRANSFER))
+        );
     }
 
-    private ITask transfer() {
+    private ITask drop() {
         return groupOf(
                 it -> it.add(vLiftProxy.moveTo(0, 5, 1.0))
                         .then(run(() -> {
@@ -186,22 +185,21 @@ public class RightAuto extends LinearOpMode {
 //    }
 
     private ITask preScoreSpecimen() {
-        return groupOf(it -> it.add(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)))
-//                .then(run(() -> hardware.arm.setTargetPosition(Hardware.deg2arm(-99))))
-                .then(vLiftProxy.moveTo(Hardware.VLIFT_SCORE_SPECIMEN, 5, 1.0)));
+        return run(() -> {
+            hardware.wrist.setPosition(Hardware.WRIST_UP);
+            hardware.arm.setPosition(Hardware.ARM_HALF_SPEC);
+        });
     }
 
     private ITask postScoreSpecimen() {
-        return groupOf(it -> it.add(run(() -> {
-                    hardware.wrist.setPosition(0.28);
-//                    hardware.arm.setTargetPosition(Hardware.deg2arm(0));
-                }))
-                .then(await(450))
-                .then(vLiftProxy.moveTo(0, 5, .25)));
+        return run(() -> {
+                    hardware.wrist.setPosition(0);
+            hardware.arm.setPosition(Hardware.ARM_PRE_WALL_PICK);
+        });
     }
 
     private ITask scoreSpecimen() {
-        return groupOf(it -> it.add(run(() -> hardware.wrist.setPosition(1)))
+        return groupOf(it -> it.add(run(() -> hardware.arm.setPosition(Hardware.ARM_SPEC)))
                 .then(await(300))
                 .then(moveRel(new Pose(-4.0, 0, 0)))
                 .then(run(() -> hardware.claw.setPosition(Hardware.CLAW_OPEN)))
@@ -210,52 +208,39 @@ public class RightAuto extends LinearOpMode {
     }
 
     private ITask pickSpecimen() {
-        return groupOf(it -> it.add(run(() -> hardware.claw.setPosition(Hardware.CLAW_OPEN)))
+        return groupOf(it -> it.add(run(() -> {
+                            hardware.claw.setPosition(Hardware.CLAW_OPEN);
+                            hardware.arm.setPosition(Hardware.ARM_PICKUP_WALL);
+                        }))
+                        .then(await(100))
+                        .then(run(() -> hardware.wrist.setPosition(0)))
+                        .then(await(300))
+                        .then(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE_HARD)))
                         .then(await(200))
-                        .then(run(() -> hardware.wrist.setPosition(Hardware.WRIST_UP)))
-                        .then(await(200))
-//                        .then(run(() -> hardware.arm.setTargetPosition(65)))
-                        .then(await(500))
-                        .then(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)))
-                        .then(await(200))
-                        .then(vLiftProxy.moveTo(50, 3, 0.4))
-                        .then(run(() -> hardware.wrist.setPosition(Hardware.WRIST_BACK)))
-//                        .then(await(200))
-//                        .then(run(() -> hardware.arm.setTargetPosition(Hardware.deg2arm(10))))
-                        .then(await(200))
-                        .then(vLiftProxy.moveTo(0, 5, 0))
+                        .then(vLiftProxy.moveTo(80, 5, 1.0))
         );
     }
 
     public void runAuto() {
         scheduler.add(new OneShot(scheduler, setup))
                 .then(groupOf(a -> {
-                    a.add(moveTo(new Pose(29, 12, 0)));
-                    a.add(preScoreSpecimen());
+                    a.add(moveTo(new Pose(34, 12, 0)));
                 }))
                 .then(scoreSpecimen())
                 .then(groupOf(a -> {
-                    a.add(moveTo(new Pose(17.0, -36, 0)));
+                    a.add(moveTo(new Pose(17.0, -35.5, 0)));
                     a.add(postScoreSpecimen());
                 }))
                 .then(grab())
                 .then(groupOf(a -> {
-//                    a.add(transfer())
-//                            .then(drop());
-                    a.add(moveTo(new Pose(11.5, -36, Math.toRadians(30))));
+                    a.add(moveTo(new Pose(11.5, -36, Math.toRadians(-150))));
                 }))
-//                .then(moveTo(new Pose(15.5, -46.25, 0)))
-//                .then(grab())
-//                .then(groupOf(a -> {
-//                    a.add(transfer())
-//                            .then(drop());
-//                    a.add(moveTo(new Pose(11.5, -46.25, 0)));
-//                }))
-//                .then(moveTo(new Pose(14, -27, 0)))
-//                .then(await(500))
+                .then(run(() -> hardware.clawFront.setPosition(Hardware.FRONT_OPEN)))
+                .then(await(300))
                 .then(groupOf(a -> {
                     a.add(moveTo(new Pose(4, -27, 0)));
                     a.add(blinkenlights(.5));
+                    a.add(hSlideProxy.moveIn());
                 }))
                 .then(run(() -> hardware.driveMotors.setAll(-0.30)))
                 .then(await(300))
@@ -263,29 +248,16 @@ public class RightAuto extends LinearOpMode {
                 .then(pickSpecimen())
                 .then(lightColor(Hardware.LAMP_PURPLE))
                 .then(groupOf(a -> {
-                    a.add(moveTo(new Pose(29, 8, 0)));
+                    a.add(moveTo(new Pose(22, 10, 0)));
                     a.add(preScoreSpecimen());
                 }))
-                .then(scoreSpecimen())
-                .then(groupOf(a -> {
-                    a.add(moveTo(new Pose(4, -27, 0)));
-                    a.add(postScoreSpecimen());
-                    a.add(blinkenlights(.5));
-                }))
-                .then(run(() -> hardware.driveMotors.setAll(-0.30)))
-                .then(await(300))
-                .then(run(() -> hardware.driveMotors.setAll(0)))
-                .then(pickSpecimen())
-                .then(lightColor(Hardware.LAMP_PURPLE))
-                .then(groupOf(a -> {
-                    a.add(moveTo(new Pose(29, 4, 0)));
-                    a.add(preScoreSpecimen());
-                }))
+                .then(moveTo(new Pose(34, 10, 0)))
                 .then(scoreSpecimen())
                 .then(groupOf(a -> {
                     a.add(moveTo(new Pose(6, -27, 0)));
                     a.add(postScoreSpecimen());
-                }));
+                }))
+        ;
     }
 
     @Override
@@ -298,8 +270,6 @@ public class RightAuto extends LinearOpMode {
         vLiftProxy = scheduler.add(new VLiftProxy(scheduler, hardware.verticalLift));
         hSlideProxy = scheduler.add(new HSlideProxy(scheduler, hardware, HSlideProxy.Position.IN));
         hClawProxy = scheduler.add(new HClawProxy(scheduler, hardware));
-        ascentProxy = scheduler.add(new AscentProxy(scheduler, hardware.ascent));
-        hardware.ascent.calibrate(Hardware.ASCENT_INIT_POS);
 
         ElapsedTime finalizeTimer = new ElapsedTime();
 //        AtomicReference<Double> scoredIn = new AtomicReference<>((double) 0);
@@ -309,17 +279,14 @@ public class RightAuto extends LinearOpMode {
         scheduler.add(new BackgroundTasks(
                 scheduler, tracker, loopTimer
         ));
-        scheduler.add(ascentProxy.target(Hardware.ASCENT_UP_POS));
 //        mainAuto();
         runAuto();
-
-        hardware.ascent.setTargetPosition(Hardware.ASCENT_INIT_POS);
 
         telemetry.addLine("Initialized.");
         telemetry.addLine(String.format("%d in queue.", scheduler.taskCount()));
         telemetry.update();
 
-        while (!isStarted() && !isStopRequested()) hardware.ascent.update();
+        waitForStart();
 
         telemetry.update();
         finalizeTimer.reset();

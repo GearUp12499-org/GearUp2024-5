@@ -17,7 +17,8 @@ public class HSlideProxy extends TaskTemplate {
         IN(Hardware.RIGHT_SLIDE_IN),
         OUT(Hardware.RIGHT_SLIDE_OUT),
         TRANSFER(Hardware.RIGHT_SLIDE_TRANSFER),
-        KEEP_CLEAR(Hardware.RIGHT_SLIDE_KEEP_CLEAR);
+        KEEP_CLEAR(Hardware.RIGHT_SLIDE_KEEP_CLEAR),
+        HOLD(Hardware.RIGHT_SLIDE_HOLD);
 
         public final double actual;
         Position(double actual) {

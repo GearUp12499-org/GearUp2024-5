@@ -512,7 +512,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         scheduler.add(groupOf(it -> it.add(run(() -> {
                     hardware.claw.setPosition(Hardware.CLAW_OPEN);
                     hardware.wrist.setPosition(0);
-                    hardware.arm.setPosition(1);
+                    hardware.arm.setPosition(Hardware.ARM_PRE_WALL_PICK);
                 })).then(vLiftProxy.moveTo(0, 5, 0.5))
         ).extraDepends(Locks.ArmAssembly));
     }
@@ -656,8 +656,9 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
             return;
         }
         abandonLock(Locks.DriveMotors);
-        int enabled = LimelightDetectionMode.RED | LimelightDetectionMode.YELLOW;
-        activeSearchTask = scheduler.add(new LimelightSearch(scheduler, hardware, mmoverData, hSlideProxy, hClawProxy, enabled, telemetry));
+        int myColor = isRed() ? LimelightDetectionMode.RED : LimelightDetectionMode.BLUE;
+        myColor |= LimelightDetectionMode.YELLOW;
+        activeSearchTask = scheduler.add(new LimelightSearch(scheduler, hardware, mmoverData, hSlideProxy, hClawProxy, myColor, telemetry));
     }
 
     // go to MecanumTeleOp2 for functionality

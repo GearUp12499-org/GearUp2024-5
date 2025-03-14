@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.hardware.Ascent;
 import org.firstinspires.ftc.teamcode.hardware.AutoClearEncoder;
 import org.firstinspires.ftc.teamcode.hardware.Encoder;
 import org.firstinspires.ftc.teamcode.hardware.EncoderFor;
@@ -37,6 +36,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double ARM_WAIT = 0.10;
     public static final double ARM_TRANSFER = 0.05;
     public static final double ARM_PICKUP_WALL = 0.95;
+    public static final double ARM_PRE_WALL_PICK = 1.00;
     public static final double spinTickPerRev = 751.8;
     public static final double RIGHT_SLIDE_OUT = 0.65;
     @Deprecated public static final double LEFT_SLIDE_OUT = 1.05 - RIGHT_SLIDE_OUT;
@@ -46,6 +46,8 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double LEFT_SLIDE_TRANSFER = 1.05 - RIGHT_SLIDE_TRANSFER;
     public static final double RIGHT_SLIDE_KEEP_CLEAR = 0.47;
     @Deprecated public static final double LEFT_SLIDE_KEEP_CLEAR = 1.05 - RIGHT_SLIDE_KEEP_CLEAR;
+    public static final double RIGHT_SLIDE_HOLD = 0.53;
+    @Deprecated public static final double LEFT_SLIDE_HOLD = 1.05 - RIGHT_SLIDE_HOLD;
     public static final double CLAW_TWIST_INIT = 0.48;
     public static final double CLAW_TWIST_90 = 0.82;
     public static final double CLAW_TWIST_MIN = 0.13;
@@ -228,8 +230,6 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     @HardwareName("clawColor")
     public ColorSensor clawColor;
 
-    public Ascent ascent;
-
     @HardwareName("limelight")
     public Limelight3A limelight;
 
@@ -305,7 +305,6 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
                 backRight
         );
         verticalLift = new Lift(verticalSlide, verticalSlide2);
-        ascent = null;
         if (leftFlip != null && rightFlip != null) {
             flip = new MultiServo(rightFlip, leftFlip, 1.0);
         } else flip = null;
