@@ -33,7 +33,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double ARM_SPEC = 0.31;
     public static final double ARM_UP = 0.47;
     public static final double ARM_WAIT = 0.10;
-    public static final double ARM_TRANSFER = 0.05;
+    public static final double ARM_TRANSFER = 0.02;
     public static final double spinTickPerRev = 751.8;
     public static final double RIGHT_SLIDE_OUT = 0.65;
     @Deprecated public static final double LEFT_SLIDE_OUT = 1.05 - RIGHT_SLIDE_OUT;
@@ -50,7 +50,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double SLIDE_OUTWARD_TIME = 0.45; // seconds
     public static final double SLIDE_OVERSHOOT = 0.28;
     public static final double FLIP_DOWN_PLUS = 0.1;
-    public static final double FLIP_DOWN = 0.2;
+    public static final double FLIP_DOWN = 0.145;
     public static final double FRONT_OPEN = 0.66;
     public static final double FRONT_CLOSE = 0.40;
     public static final double FRONT_CLOSE_HARD = 0.30;
