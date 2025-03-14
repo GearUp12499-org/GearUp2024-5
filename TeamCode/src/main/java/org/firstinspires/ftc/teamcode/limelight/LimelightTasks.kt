@@ -94,9 +94,9 @@ class LimelightPickupImmediate(
                 })
                 .then(wait(0.100))
                 .then(hClawProxy.aSetClaw(Hardware.FRONT_CLOSE_HARD))
-                .then(wait(0.100))
+                .then(wait(0.150))
                 .then(hClawProxy.aSetFlip(Hardware.FLIP_DOWN))
-                .then(wait(0.100))
+                .then(wait(0.150))
                 .then(run { clawTwist.position = Hardware.CLAW_TWIST_INIT })
                 .then(hClawProxy.aSetFlipClaw(Hardware.FLIP_ONE_THIRD, Hardware.FRONT_CLOSE))
                 .then(groupOf {
