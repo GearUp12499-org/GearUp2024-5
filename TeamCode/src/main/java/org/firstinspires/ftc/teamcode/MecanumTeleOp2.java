@@ -452,7 +452,6 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
                             a.add(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)));
                             a.add(run(() -> hardware.arm.setPosition(Hardware.ARM_SCORE)));
                         })).then(run(() -> hardware.wrist.setPosition(1)))
-                                .then(await(300))
                 ).extraDepends(
                         Locks.ArmAssembly,
                         vLiftProxy.CONTROL
