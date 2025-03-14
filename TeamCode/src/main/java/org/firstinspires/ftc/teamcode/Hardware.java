@@ -39,9 +39,9 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     @Deprecated public static final double LEFT_SLIDE_OUT = 1.05 - RIGHT_SLIDE_OUT;
     public static final double RIGHT_SLIDE_IN = 0.34;
     @Deprecated public static final double LEFT_SLIDE_IN = 1.05 - RIGHT_SLIDE_IN;
-    public static final double RIGHT_SLIDE_TRANSFER = 0.42;
+    public static final double RIGHT_SLIDE_TRANSFER = 0.40;
     public static final double LEFT_SLIDE_TRANSFER = 1.05 - RIGHT_SLIDE_TRANSFER;
-    public static final double RIGHT_SLIDE_KEEP_CLEAR = 0.47;
+    public static final double RIGHT_SLIDE_KEEP_CLEAR = 0.45;
     @Deprecated public static final double LEFT_SLIDE_KEEP_CLEAR = 1.05 - RIGHT_SLIDE_KEEP_CLEAR;
     public static final double CLAW_TWIST_INIT = 0.48;
     public static final double CLAW_TWIST_90 = 0.82;
