@@ -92,7 +92,7 @@ public class LeftAuto extends LinearOpMode {
                         .then(await(200))
                         .then(groupOf(inner -> {
                             inner.add(hClawProxy.aSetClaw(Hardware.FRONT_OPEN));
-                            inner.add(hSlideProxy.moveToPreset(HSlideProxy.Position.KEEP_CLEAR));
+                            inner.add(hSlideProxy.moveToPreset(HSlideProxy.Position.KEEP_CLEAR, 0.2));
                             inner.add(run(() -> hardware.arm.setPosition(Hardware.ARM_UP)));
                         }))
         ).extraDepends(
