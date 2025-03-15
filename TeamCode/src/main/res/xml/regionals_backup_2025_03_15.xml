@@ -10,7 +10,7 @@
             <Servo name="leftFlip" port="2" />
             <Servo name="lightLeft" port="3" />
             <Servo name="clawFront" port="4" />
-            <Servo name="ascentLeft" port="5" />
+            <ContinuousRotationServo name="ascentLeft" port="5" />
             <KauaiLabsNavxMicro name="gyro" port="0" bus="0" />
         </LynxModule>
         <ServoHub name="Servo Hub 3" port="3">
@@ -28,7 +28,7 @@
             <Servo name="colorRight" port="1" />
             <Servo name="rightFlip" port="2" />
             <Servo name="clawTwist" port="3" />
-            <Servo name="ascentRight" port="4" />
+            <ContinuousRotationServo name="ascentRight" port="4" />
             <Servo name="lightRight" port="5" />
             <RevColorSensorV3 name="clawColor" port="0" bus="1" />
         </LynxModule>

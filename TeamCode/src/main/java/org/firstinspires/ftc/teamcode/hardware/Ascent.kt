@@ -22,20 +22,64 @@ class Ascent(
     private val rightAscentEncoder: Encoder,
 ) {
     companion object {
-        const val MAXIMUM = 0
-        const val MINIMUM = -3400
+        const val MAXIMUM = 3400
+        const val MINIMUM = 0
 
         const val MAXPOW = 1.0
         const val CLOSE = 500.0
 
         const val KP = 1.0 / CLOSE
         const val KI = 0.000
+
+        const val temporalSize = 0.25
+        const val confidence = 0.20
+        const val TOO_MANY_DATA_POINTS = 2048
     }
 
     private var offsetL = 0
     private var offsetR = 0
 
     private var targetPos: Int = 0
+
+    private val temporalBasis = TimeSource.Monotonic.markNow()
+
+    val timePositions: ArrayDeque<Double> = ArrayDeque()
+    val leftPositions: ArrayDeque<Int> = ArrayDeque()
+    val rightPositions: ArrayDeque<Int> = ArrayDeque()
+
+    private fun getDataTime(): Double {
+        val durationNow = (TimeSource.Monotonic.markNow() - temporalBasis).toDouble(DurationUnit.SECONDS)
+        return durationNow - (timePositions.firstOrNull() ?: durationNow)
+    }
+
+    fun getLVelocityOrNothing(): Double? {
+        val duration = getDataTime()
+        if (duration < confidence) return null;
+        return (leftPositions.first() - leftPositions.last()) / duration
+    }
+
+    fun getRVelocityOrNothing(): Double? {
+        val duration = getDataTime()
+        if (duration < confidence) return null;
+        return (rightPositions.first() - rightPositions.last()) / duration
+    }
+
+    private fun pushPositions(left: Int, right: Int) {
+        val durationNow = (TimeSource.Monotonic.markNow() - temporalBasis).toDouble(DurationUnit.SECONDS)
+        while (timePositions.isNotEmpty() && getDataTime() >= temporalSize) {
+            timePositions.removeFirstOrNull()
+            leftPositions.removeFirstOrNull()
+            rightPositions.removeFirstOrNull()
+        }
+
+        if (timePositions.size < TOO_MANY_DATA_POINTS) {
+            timePositions.addLast(durationNow)
+            leftPositions.addLast(left)
+            rightPositions.addLast(right)
+        } else {
+            Log.w("Ascent", "too much data!!!")
+        }
+    }
 
     val leftPosition; get() = leftAscentEncoder.getCurrentPosition() + offsetL
     val rightPosition; get() = rightAscentEncoder.getCurrentPosition() + offsetR
@@ -56,7 +100,7 @@ class Ascent(
     private var eTotal: Double = 0.0
 
     // TODO: detect lack of tension and abort to prevent unspooling?
-    private fun runTo(device: DcMotorSimple, currentPosition: Int) {
+    private fun runTo(device: DcMotorSimple, currentPosition: Int, velocityFn: () -> Double?) {
         val error = targetPos - currentPosition
         if (lastTime != null) {
             val now = timeSource.markNow()
@@ -69,21 +113,30 @@ class Ascent(
             }
         } else lastTime = timeSource.markNow()
         var power = error * KP + eTotal * KI
-
 //        Log.i("Ascent", "error: %d (iE: %f) target: %d actual: %d power: %f".format(error, eTotal, targetPos, currentPosition, power))
 
-        device.power = min(max(power, -MAXPOW), +MAXPOW)
+        val vel = velocityFn()
+        val defaultPow = min(max(power, -MAXPOW), +MAXPOW)
+        device.power = when {
+            vel == null -> defaultPow
+            abs(vel) < 5 -> 0.0
+            else -> defaultPow
+        }
     }
 
     fun update() {
-        runTo(leftAscent, leftPosition)
-        runTo(rightAscent, rightPosition)
+        runTo(leftAscent, leftPosition, ::getLVelocityOrNothing)
+        runTo(rightAscent, rightPosition, ::getRVelocityOrNothing)
+        pushPositions(leftPosition, rightPosition)
     }
 
     fun setTargetPosition(target: Int) {
         targetPos = target
         if (targetPos < MINIMUM) targetPos = MINIMUM
         if (targetPos > MAXIMUM) targetPos = MAXIMUM
+        timePositions.clear()
+        leftPositions.clear()
+        rightPositions.clear()
     }
 
     fun getTargetPosition(): Int = targetPos

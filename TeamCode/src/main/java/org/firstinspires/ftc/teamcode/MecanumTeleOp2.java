@@ -14,6 +14,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.Hardware.Locks;
+import org.firstinspires.ftc.teamcode.hardware.AscentProxy;
 import org.firstinspires.ftc.teamcode.hardware.HClawProxy;
 import org.firstinspires.ftc.teamcode.hardware.HSlideProxy;
 import org.firstinspires.ftc.teamcode.hardware.VLiftProxy;
@@ -53,6 +54,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
     private NavxMicroNavigationSensor navxMicro;
     private HSlideProxy hSlideProxy;
     private HClawProxy hClawProxy;
+    private AscentProxy ascentProxy;
     private EncoderTracking tracker;
     private Ramps ramps;
     private LoopStopwatch loopTimer;
@@ -130,6 +132,9 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         vLiftProxy = mainScheduler.add(new VLiftProxy(mainScheduler, hardware.verticalLift));
         hSlideProxy = mainScheduler.add(new HSlideProxy(mainScheduler, hardware, HSlideProxy.Position.TRANSFER));
         hClawProxy = mainScheduler.add(new HClawProxy(mainScheduler, hardware));
+        ascentProxy = mainScheduler.add(new AscentProxy(mainScheduler, hardware.ascent));
+        hardware.ascent.calibrate(Hardware.ASCENT_INIT_POS);
+        hardware.ascent.setTargetPosition(Hardware.ASCENT_INIT_POS);
 
         ElapsedTime timer = new ElapsedTime();
 
@@ -157,6 +162,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
 
         waitForStart();
         if (isStopRequested()) return;
+        timer.reset();
 
         boolean isFlipIn = false;
         boolean isFlipOut = false;
@@ -170,6 +176,8 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         boolean isTxDump = false;
         boolean isClearArmPos = false;
         boolean isResetVL = false;
+        boolean isAsc1 = false;
+        boolean isAsc2 = false;
         boolean isAutodetect = false;
 
         double yaw_offset = 0.0;
@@ -272,12 +280,19 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
                 if (untwist90) hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
             }
 
-//            if (gamepad1.b) {
-//                hardware.ascent.setTargetPosition(Hardware.ASCENT_PREPARE_POS);
-//            }
-//            if (gamepad1.right_bumper) {
-//                hardware.ascent.setTargetPosition(Hardware.ASCENT_FINISH_POS);
-//            }
+            boolean canDoAscThings = timer.time() > (90);
+            boolean shouldAsc1 = gamepad1.b;
+            boolean shouldAsc2 = gamepad1.right_bumper;
+            if (shouldAsc1 && !isAsc1 && canDoAscThings) {
+                hardware.ascent.setTargetPosition(Hardware.ASCENT_PREPARE_POS);
+                scheduler.add(groupOf(a -> {
+                    a.add(hSlideProxy.moveOut());
+                    a.add(run(() -> hardware.arm.setPosition(Hardware.ARM_PRE_WALL_PICK)));
+                }));
+            }
+            if (shouldAsc2 && !isAsc2 && canDoAscThings) {
+                hardware.ascent.setTargetPosition(Hardware.ASCENT_FINISH_POS);
+            }
 
             boolean shouldFlipIn = gamepad1.right_trigger > 0.5;
             if (shouldFlipIn && !isFlipIn) Flipin();
@@ -300,6 +315,8 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
             isScoreSpecimen2 = shouldScoreSpecimen2;
             isTx = shouldTx;
             isTxDump = shouldTxDump;
+            isAsc1 = shouldAsc1;
+            isAsc2 = shouldAsc2;
             isAutodetect = shouldAutodetect;
 
             int verticalPosition = hardware.verticalLift.getCurrentPosition();
@@ -311,9 +328,11 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
             telemetry.addData("Claw Position", hardware.claw.getPosition());
             telemetry.addData("Vertical position", verticalPosition);
             telemetry.addData("Est pose", tracker.getPose());
-//            telemetry.addData("ascLeft calib", hardware.ascent.getLeftPosition());
-//            telemetry.addData("ascRight calib", hardware.ascent.getRightPosition());
-//            telemetry.addData("asc target", hardware.ascent.getTargetPosition());
+            telemetry.addData("ascLeft vel", hardware.ascent.getLVelocityOrNothing());
+            telemetry.addData("ascRight vel", hardware.ascent.getRVelocityOrNothing());
+            telemetry.addData("ascLeft calib", hardware.ascent.getLeftPosition());
+            telemetry.addData("ascRight calib", hardware.ascent.getRightPosition());
+            telemetry.addData("asc target", hardware.ascent.getTargetPosition());
             scheduler.displayStatus(false, true, (str) -> {
                 telemetry.addLine(str);
                 return Unit.INSTANCE;
