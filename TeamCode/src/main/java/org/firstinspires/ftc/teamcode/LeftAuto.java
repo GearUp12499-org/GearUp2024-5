@@ -90,7 +90,7 @@ public abstract class LeftAuto extends LinearOpMode {
                         }))
                         .then(await(300))
                         .then(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)))
-                        .then(await(200))
+                        .then(await(100))
                         .then(groupOf(inner -> {
                             inner.add(hClawProxy.aSetClaw(Hardware.FRONT_OPEN));
                             inner.add(hSlideProxy.moveToPreset(HSlideProxy.Position.KEEP_CLEAR, 0.2));

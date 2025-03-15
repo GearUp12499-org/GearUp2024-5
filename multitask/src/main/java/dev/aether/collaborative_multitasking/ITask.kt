@@ -45,10 +45,10 @@ interface ITask {
 
     fun then(configure: Task.() -> Unit): Task {
         val task = Task(scheduler)
-        task.name = getCaller()
         task.configure()
         task waitsFor this
         task.register() // ready to go
+        task.name = getCaller()
         return task
     }
 
@@ -56,6 +56,7 @@ interface ITask {
         task.scheduler = scheduler
         task waitsFor this
         task.register()
+        task.name = getCaller()
         return task
     }
 

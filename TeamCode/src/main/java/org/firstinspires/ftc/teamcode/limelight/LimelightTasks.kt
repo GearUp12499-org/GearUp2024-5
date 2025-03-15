@@ -342,11 +342,20 @@ class LimelightAuto(
     private val maxDuration = maxDuration.toDouble()
     private val runtime = ElapsedTime()
 
-    private val limelightSearchTask: LimelightSearch =
-        LimelightSearch(innerScheduler, hardware, mmoverData, hSlideProxy, hClawProxy, enabled)
+    private lateinit var limelightSearchTask: LimelightSearch
 
     init {
+        extraDeps.addAll(listOf(
+            Locks.DriveMotors,
+            Locks.Limelight,
+            Locks.Signals,
+            hSlideProxy.CONTROL,
+            hClawProxy.CONTROL_CLAW,
+            hClawProxy.CONTROL_FLIP,
+            Locks.ArmAssembly,
+        ))
         with {
+            limelightSearchTask = LimelightSearch(it, hardware, mmoverData, hSlideProxy, hClawProxy, enabled)
             it.add(OneShot(it) {
                 hClawProxy.setFlipClaw(Hardware.FLIP_UP, Hardware.FRONT_OPEN)
             })
