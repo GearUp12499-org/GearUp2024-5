@@ -70,6 +70,10 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         scheduler.filteredStop(it -> it.requirements().contains(theLockInQuestion), true, true);
     }
 
+    private void cancelInQueue(SharedResource theLock) {
+        scheduler.filteredStop(it -> it.requirements().contains(theLock) && it.getState() == ITask.State.NotStarted, true, true);
+    }
+
     private OneShot run(Runnable target) {
         return new OneShot(scheduler, target);
     }
@@ -623,6 +627,8 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         ));
     }
 
+    private SharedResource transferKind = new SharedResource("type: transfer");
+
     private TaskGroup transferInternal() {
         return scheduler.add(groupOf(
                 it -> it
@@ -643,13 +649,15 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
                         .then(hSlideProxy.moveToPreset(HSlideProxy.Position.KEEP_CLEAR, 0.2))
         ).extraDepends(
                 hClawProxy.CONTROL_CLAW,
-                Locks.ArmAssembly
+                Locks.ArmAssembly,
+                transferKind
         ));
     }
 
     public void transfer() {
-        abandonLock(hClawProxy.CONTROL_CLAW);
-        abandonLock(Locks.ArmAssembly);
+//        abandonLock(hClawProxy.CONTROL_CLAW);
+//        abandonLock(Locks.ArmAssembly);
+        abandonLock(transferKind);
         transferInternal();
     }
 

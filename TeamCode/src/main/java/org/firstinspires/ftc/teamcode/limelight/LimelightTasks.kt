@@ -256,7 +256,7 @@ open class LimelightSearch @JvmOverloads constructor(
         lightLeft.position = 1.0
         lightRight.position = 1.0 // white
         hSlideProxy.moveOutSync()
-        hClawProxy.setClaw(Hardware.FRONT_OPEN)
+        hClawProxy.setFlipClaw(Hardware.FLIP_UP, Hardware.FRONT_OPEN)
     }
 
     private var liveAngle = 0.0
