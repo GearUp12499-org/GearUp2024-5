@@ -31,7 +31,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double ARM_SCORE = 0.5;
     public static final double ARM_SCORE_AUTO = 0.6;
     public static final double ARM_HALF_SPEC = 0.2;
-    public static final double ARM_SPEC = 0.31;
+    public static final double ARM_SPEC = 0.34;
     public static final double ARM_UP = 0.47;
     public static final double ARM_WAIT = 0.10;
     public static final double ARM_TRANSFER = 0.05;

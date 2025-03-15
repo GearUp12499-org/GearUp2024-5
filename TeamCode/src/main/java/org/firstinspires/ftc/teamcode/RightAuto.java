@@ -185,15 +185,15 @@ public class RightAuto extends LinearOpMode {
 //    }
 
     private ITask preScoreSpecimen() {
-        return run(() -> {
+        return groupOf(it -> it.add(run(() -> {
             hardware.wrist.setPosition(Hardware.WRIST_UP);
             hardware.arm.setPosition(Hardware.ARM_HALF_SPEC);
-        });
+        })).then(vLiftProxy.target(0)));
     }
 
     private ITask postScoreSpecimen() {
         return run(() -> {
-                    hardware.wrist.setPosition(0);
+            hardware.wrist.setPosition(0);
             hardware.arm.setPosition(Hardware.ARM_PRE_WALL_PICK);
         });
     }
@@ -201,7 +201,9 @@ public class RightAuto extends LinearOpMode {
     private ITask scoreSpecimen() {
         return groupOf(it -> it.add(run(() -> hardware.arm.setPosition(Hardware.ARM_SPEC)))
                 .then(await(300))
-                .then(moveRel(new Pose(-4.0, 0, 0)))
+                .then(run(() -> hardware.driveMotors.setAll(-0.30)))
+                .then(await(500))
+                .then(run(() -> hardware.driveMotors.setAll(0)))
                 .then(run(() -> hardware.claw.setPosition(Hardware.CLAW_OPEN)))
                 .then(await(200))
         );
@@ -224,7 +226,7 @@ public class RightAuto extends LinearOpMode {
     public void runAuto() {
         scheduler.add(new OneShot(scheduler, setup))
                 .then(groupOf(a -> {
-                    a.add(moveTo(new Pose(34, 12, 0)));
+                    a.add(moveTo(new Pose(33, 18, 0)));
                 }))
                 .then(scoreSpecimen())
                 .then(groupOf(a -> {
@@ -233,7 +235,7 @@ public class RightAuto extends LinearOpMode {
                 }))
                 .then(grab())
                 .then(groupOf(a -> {
-                    a.add(moveTo(new Pose(11.5, -36, Math.toRadians(-150))));
+                    a.add(moveTo(new Pose(11.5, -35.5, Math.toRadians(-150))));
                 }))
                 .then(run(() -> hardware.clawFront.setPosition(Hardware.FRONT_OPEN)))
                 .then(await(300))
@@ -248,15 +250,30 @@ public class RightAuto extends LinearOpMode {
                 .then(pickSpecimen())
                 .then(lightColor(Hardware.LAMP_PURPLE))
                 .then(groupOf(a -> {
-                    a.add(moveTo(new Pose(22, 10, 0)));
-                    a.add(preScoreSpecimen());
+                    a.add(moveTo(new Pose(22, 14, 0)));
+                    a.add(await(800)).then(preScoreSpecimen());
                 }))
-                .then(moveTo(new Pose(34, 10, 0)))
+                .then(moveTo(new Pose(33, 14, 0)))
                 .then(scoreSpecimen())
                 .then(groupOf(a -> {
-                    a.add(moveTo(new Pose(6, -27, 0)));
+                    a.add(moveTo(new Pose(4, -27, 0)));
+                    a.add(blinkenlights(.5));
                     a.add(postScoreSpecimen());
                 }))
+                .then(run(() -> hardware.driveMotors.setAll(-0.30)))
+                .then(await(300))
+                .then(run(() -> hardware.driveMotors.setAll(0)))
+                .then(pickSpecimen())
+                .then(lightColor(Hardware.LAMP_PURPLE))
+                .then(groupOf(a -> {
+                    a.add(moveTo(new Pose(27, 10, 0)));
+                    a.add(await(800)).then(preScoreSpecimen());
+                }))
+                .then(run(() -> hardware.driveMotors.setAll(0.4)))
+                .then(await(500))
+                .then(run(() -> hardware.driveMotors.setAll(0)))
+                .then(scoreSpecimen())
+                .then(postScoreSpecimen())
         ;
     }
 
