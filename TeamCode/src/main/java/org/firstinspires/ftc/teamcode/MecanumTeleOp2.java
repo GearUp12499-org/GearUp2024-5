@@ -103,6 +103,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         );
 
         hardware.sharedHardwareInit();
+        hardware.arm.setPosition(Hardware.ARM_WAIT);
         hardware.claw.setPosition(Hardware.CLAW_OPEN);
         hardware.limelight.setPollRateHz(100);
         hardware.limelight.pipelineSwitch(6);
@@ -476,7 +477,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
                         .then(await(300))
                         .then(run(() -> {
                             hardware.wrist.setPosition(Hardware.WRIST_TRANSFER);
-                            hardware.arm.setPosition(Hardware.ARM_TRANSFER);
+                            hardware.arm.setPosition(Hardware.ARM_WAIT);
                         }))
         ).extraDepends(
                 Locks.ArmAssembly,
@@ -624,20 +625,22 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
 
     private TaskGroup transferInternal() {
         return scheduler.add(groupOf(
-                it -> it.add(run(() -> {
+                it -> it
+                        .add(run(() -> {
                             hardware.claw.setPosition(Hardware.CLAW_OPEN);
                             hardware.wrist.setPosition(Hardware.WRIST_TRANSFER);
-                            hardware.arm.setPosition(Hardware.ARM_TRANSFER);
                             hardware.flip.setPosition(Hardware.FLIP_UP);
                         }))
-                        .then(await(700))
                         .then(hSlideProxy.moveTransfer())
+                        .then(run(() -> {
+                            hardware.arm.setPosition(Hardware.ARM_TRANSFER);
+                        }))
+                        .then(await(300))
                         .then(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)))
                         .then(await(200))
                         .then(hClawProxy.aSetClaw(Hardware.FRONT_OPEN))
-                        .then(hSlideProxy.moveToPreset(HSlideProxy.Position.KEEP_CLEAR))
-                        .then(await(300))
                         .then(run(() -> hardware.arm.setPosition(Hardware.ARM_UP)))
+                        .then(hSlideProxy.moveToPreset(HSlideProxy.Position.KEEP_CLEAR, 0.2))
         ).extraDepends(
                 hClawProxy.CONTROL_CLAW,
                 Locks.ArmAssembly

@@ -80,6 +80,10 @@ public class HSlideProxy extends TaskTemplate {
     }
 
     public ITask moveToPreset(Position p) {
+        return moveToPreset(p, Hardware.SLIDE_INWARD_TIME);
+    }
+
+    public ITask moveToPreset(Position p, double durat) {
         return new TaskTemplate(scheduler) {
             ElapsedTime timer;
 
