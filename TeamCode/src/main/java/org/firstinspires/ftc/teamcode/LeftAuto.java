@@ -35,6 +35,7 @@ import kotlin.Unit;
 public abstract class LeftAuto extends LinearOpMode {
     private static final RuntimeException NOT_IMPLEMENTED = new RuntimeException("This operation is not implemented");
     final Pose SCORE_HIGH_BASKET = new Pose(5.5 + 2.121320344, 19.5 + 2.121320344, Math.toRadians(-45));
+    final Pose FINISH = new Pose(SCORE_HIGH_BASKET.x(), SCORE_HIGH_BASKET.y(), Math.toRadians(0));
     final Pose PARK_BAD_K2 = new Pose(56, -8.5, Math.toRadians(-90));
     final Pose PARK_BAD = new Pose(56, -11.5, Math.toRadians(-90));
     final Pose PARK_BAD_K = new Pose(56, 12, Math.toRadians(-90));
@@ -71,9 +72,15 @@ public abstract class LeftAuto extends LinearOpMode {
     }
 
     private MoveToTask moveTo(Pose target) {
-        return new MoveToTask(
+        return moveTo(target, 0.005);
+    }
+
+    private MoveToTask moveTo(Pose target, double kd) {
+        MoveToTask value = new MoveToTask(
                 scheduler, mmoverData, target, telemetry
         );
+        value.kD = kd;
+        return value;
     }
 
     private ITask transfer() {
@@ -84,11 +91,11 @@ public abstract class LeftAuto extends LinearOpMode {
                             hardware.wrist.setPosition(Hardware.WRIST_TRANSFER);
                             hardware.flip.setPosition(Hardware.FLIP_UP);
                         }))
-                        .then(hSlideProxy.moveTransfer())
+                        .then(hSlideProxy.moveToPreset(HSlideProxy.Position.TRANSFER, 0.5))
                         .then(run(() -> {
                             hardware.arm.setPosition(Hardware.ARM_TRANSFER);
                         }))
-                        .then(await(300))
+                        .then(await(200))
                         .then(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)))
                         .then(await(100))
                         .then(groupOf(inner -> {
@@ -117,11 +124,11 @@ public abstract class LeftAuto extends LinearOpMode {
                     hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
                 }))
                 .then(groupOf(a -> {
-                    a.add(hSlideProxy.moveTransfer());
-                    a.add(await(350))
-                            .then(hClawProxy.aSetClaw(Hardware.FRONT_CLOSE_HARD));
+                    a.add(hSlideProxy.moveToPreset(HSlideProxy.Position.TRANSFER, 0.5));
+                    a.add(await(250))
+                            .then(hClawProxy.aSetClaw(Hardware.FRONT_CLOSE_HARD))
+                            .then(hClawProxy.aSetFlip(Hardware.FLIP_UP));
                 }))
-                .then(hClawProxy.aSetFlip(Hardware.FLIP_UP))
                 .then(transfer()));
     }
 
@@ -132,20 +139,25 @@ public abstract class LeftAuto extends LinearOpMode {
                 }))
                 .then(await(200))
                 .then(hClawProxy.aSetFlipClaw(Hardware.FLIP_DOWN_PLUS, Hardware.FRONT_CLOSE_HARD))
-                .then(await(400))
-                .then(hClawProxy.aSetFlip(Hardware.FLIP_ONE_THIRD))
+                .then(await(200))
+                .then(groupOf(inner2 -> {
+                    inner2.add(hClawProxy.aSetFlip(Hardware.FLIP_ONE_THIRD));
+                    inner2.add(hSlideProxy.moveToPreset(HSlideProxy.Position.HOLD, 0.2));
+                }))
                 .then(run(() -> hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT)))
-                .then(await(100))
         );
     }
 
+    private ITask preScoreHighBasket() {
+        return groupOf(inner -> {
+            // all of these:
+            inner.add(vLiftProxy.moveTo(Hardware.VLIFT_SCORE_HIGH, 10, 1.2));
+            inner.add(run(() -> hardware.arm.setPosition(Hardware.ARM_UP)));
+        });
+    }
+
     private ITask scoreHighBasket() {
-        return groupOf(inner -> inner.add(groupOf(a -> {
-                            // all of these:
-                            a.add(vLiftProxy.moveTo(Hardware.VLIFT_SCORE_HIGH, 10, 1.2));
-                            a.add(run(() -> hardware.arm.setPosition(Hardware.ARM_UP)));
-                        }))
-                        .then(run(() -> {
+        return groupOf(inner -> inner.add(run(() -> {
                             hardware.arm.setPosition(Hardware.ARM_SCORE_AUTO);
                             hardware.wrist.setPosition(Hardware.WRIST_UP);
                         }))
@@ -167,7 +179,7 @@ public abstract class LeftAuto extends LinearOpMode {
         speed2Power = new Speed2Power(0.20); // Set a speed2Power corresponding to a speed of 0.20 seconds
         ramps = new Ramps(
                 Ramps.linear(5.0), // t seconds
-                Ramps.linear(1 / 5.0), // inches from target
+                Ramps.linear(1 / 3.0), // inches from target
 //                Easing.power(3.0, 12.0),
                 Ramps.LimitMode.SCALE
         );
@@ -179,11 +191,11 @@ public abstract class LeftAuto extends LinearOpMode {
         hardware.sharedHardwareInit();
     }
 
-    private ITask getLimelighted(double maxDuration) {
+    private ITask getLimelighted() {
         int myColor = isRed() ? LimelightDetectionMode.RED : LimelightDetectionMode.BLUE;
         myColor |= LimelightDetectionMode.YELLOW;
         return new LimelightAuto(
-                scheduler, hardware, mmoverData, hSlideProxy, hClawProxy, myColor, maxDuration
+                scheduler, hardware, mmoverData, hSlideProxy, hClawProxy, myColor
         );
     }
 
@@ -205,17 +217,23 @@ public abstract class LeftAuto extends LinearOpMode {
                 scheduler, tracker, loopTimer
         ));
         scheduler
-                .add(moveTo(SCORE_HIGH_BASKET))
-                .then(scoreHighBasket())
+                .add(groupOf(a -> {
+                    a.add(moveTo(SCORE_HIGH_BASKET));
+                    a.add(preScoreHighBasket());
+                }))
                 .then(groupOf(a -> {
-                    a.add(moveTo(new Pose(18.0, 13.25, Math.toRadians(0))));
+                    a.add(scoreHighBasket());
                     a.add(hClawProxy.aSetFlipClaw(Hardware.FLIP_ONE_THIRD, Hardware.FRONT_OPEN))
                             .then(hSlideProxy.moveOut());
+                }))
+                .then(groupOf(a -> {
+                    a.add(moveTo(new Pose(18.0, 13.25, Math.toRadians(0))));
                     a.add(vLiftProxy.moveTo(0, 5, 1.0));
                 }))
                 .then(pickUpYellow())
                 .then(groupOf(a -> {
-                    a.add(pickUpYellowPart2());
+                    a.add(pickUpYellowPart2())
+                            .then(preScoreHighBasket());
                     a.add(moveTo(SCORE_HIGH_BASKET));
                 }))
                 .then(scoreHighBasket())
@@ -227,7 +245,8 @@ public abstract class LeftAuto extends LinearOpMode {
                 }))
                 .then(pickUpYellow())
                 .then(groupOf(a -> {
-                    a.add(pickUpYellowPart2());
+                    a.add(pickUpYellowPart2())
+                            .then(preScoreHighBasket());
                     a.add(moveTo(SCORE_HIGH_BASKET));
                 }))
                 .then(scoreHighBasket())
@@ -241,25 +260,30 @@ public abstract class LeftAuto extends LinearOpMode {
 //                // 12.75 + cos(15 deg) * 2.0
                 .then(fourthYellow())
                 .then(groupOf(a -> {
-                    a.add(pickUpYellowPart2());
+                    a.add(pickUpYellowPart2())
+                            .then(preScoreHighBasket());
                     a.add(moveTo(SCORE_HIGH_BASKET));
                 }))
                 .then(scoreHighBasket())
                 .then(groupOf(a -> {
                     // 56, -11.5, -90
-                    a.add(moveTo(PARK_BAD_K))
-//                            .then(moveTo(PARK_BAD_K2))
-                            .then(moveTo(PARK_BAD_K2));
-                    a.add(hClawProxy.aSetFlipClaw(Hardware.FLIP_ONE_THIRD, Hardware.FRONT_OPEN))
-                            .then(hSlideProxy.moveOut());
+                    ITask moveTo = a.add(moveTo(PARK_BAD_K, 0.0003));
+                    moveTo.then(moveTo(PARK_BAD_K2, 0.01));
+                    moveTo.then(hSlideProxy.moveOut());
+                    a.add(hClawProxy.aSetFlipClaw(Hardware.FLIP_ONE_THIRD, Hardware.FRONT_OPEN));
                     a.add(vLiftProxy.moveTo(0, 5, 1.0));
                 }))
-                .then(getLimelighted(3.0))
+                .then(getLimelighted())
                 .then(groupOf(a -> {
-                    a.add(transfer());
+                    a.add(transfer())
+                            .then(preScoreHighBasket());
                     a.add(moveTo(SCORE_HIGH_BASKET));
                 }))
                 .then(scoreHighBasket())
+                .then(groupOf(a -> {
+                    a.add(moveTo(FINISH, 0));
+                    a.add(vLiftProxy.moveTo(0, 5, 0.1));
+                }))
 //                .then(run(() -> hardware.driveMotors.setAll(0)));
         ;
 

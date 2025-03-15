@@ -101,7 +101,7 @@ public class HSlideProxy extends TaskTemplate {
             @Override
             public boolean invokeIsCompleted() {
                 // FIXME: multiple starting locations et al
-                return timer.time() >= Hardware.SLIDE_INWARD_TIME;
+                return timer.time() >= durat;
             }
         };
     }

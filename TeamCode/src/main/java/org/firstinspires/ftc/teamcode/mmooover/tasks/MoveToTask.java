@@ -29,7 +29,7 @@ import dev.aether.collaborative_multitasking.TaskTemplate;
 
 @SuppressLint("DefaultLocale")
 public class MoveToTask extends TaskTemplate {
-    public static final double kD = 0.005;
+    public double kD = 0.005;
 
     public double acceptDist = 1.0;
 

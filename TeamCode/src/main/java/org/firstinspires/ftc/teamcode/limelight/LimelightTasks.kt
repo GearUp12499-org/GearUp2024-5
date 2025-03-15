@@ -101,8 +101,8 @@ class LimelightPickupImmediate(
                 .then(run { clawTwist.position = Hardware.CLAW_TWIST_INIT })
                 .then(hClawProxy.aSetFlipClaw(Hardware.FLIP_ONE_THIRD, Hardware.FRONT_CLOSE))
                 .then(groupOf {
-                    add(hSlideProxy.moveTransfer())
-                    add(wait(0.350))
+                    add(hSlideProxy.moveToPreset(HSlideProxy.Position.TRANSFER, 0.5))
+                    add(wait(0.250))
                         .then(hClawProxy.aSetClaw(Hardware.FRONT_CLOSE_HARD))
                 })
                 .then(hClawProxy.aSetFlip(Hardware.FLIP_UP))
@@ -161,6 +161,7 @@ class LimelightMoveAdjust(
         colorLeft.position = Hardware.LAMP_PURPLE
         colorRight.position = Hardware.LAMP_PURPLE
         targetPose = mmoverData.tracking.getPose() + Motion(forward, right, 0)
+        Log.i("Limelight", "target pose: %s".format(targetPose.toString()))
         this.with {
             val t = MoveToTask(scheduler, mmoverData, targetPose, telemetry)
             t.acceptDist = 0.25
@@ -323,6 +324,7 @@ open class LimelightSearch @JvmOverloads constructor(
 
             else -> return false
         }
+        Log.i("Limelight", "x, y, r: (%.4f, %.4f, %.4f)".format(liveXOff, liveYOff, liveAngle))
         done = true
         return true
     }
@@ -337,11 +339,8 @@ open class LimelightSearch @JvmOverloads constructor(
 
 class LimelightAuto(
     scheduler: Scheduler, hardware: Hardware, mmoverData: MMoverDataPack,
-    hSlideProxy: HSlideProxy, hClawProxy: HClawProxy, enabled: Int, maxDuration: Number
+    hSlideProxy: HSlideProxy, hClawProxy: HClawProxy, enabled: Int
 ) : TaskGroup(scheduler) {
-    private val maxDuration = maxDuration.toDouble()
-    private val runtime = ElapsedTime()
-
     private lateinit var limelightSearchTask: LimelightSearch
 
     init {
@@ -365,13 +364,11 @@ class LimelightAuto(
 
     override fun invokeOnStart() {
         super.invokeOnStart()
-        runtime.reset()
     }
 
     override fun invokeOnTick() {
         super.invokeOnTick()
         // just spam the thing idfk
         if (limelightSearchTask.state == ITask.State.Ticking) limelightSearchTask.proceed()
-        if (runtime.time() > maxDuration) requestStop()
     }
 }
