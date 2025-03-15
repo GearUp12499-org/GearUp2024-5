@@ -347,6 +347,9 @@ class LimelightAuto(
 
     init {
         with {
+            it.add(OneShot(it) {
+                hClawProxy.setFlipClaw(Hardware.FLIP_UP, Hardware.FRONT_OPEN)
+            })
             it.add(limelightSearchTask)
         }
     }

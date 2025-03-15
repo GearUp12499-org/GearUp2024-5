@@ -248,11 +248,18 @@ public abstract class LeftAuto extends LinearOpMode {
                 .then(groupOf(a -> {
                     // 56, -11.5, -90
                     a.add(moveTo(PARK_BAD_K))
-                            .then(moveTo(PARK_BAD_K2))
-                            .then(moveTo(PARK_BAD));
+//                            .then(moveTo(PARK_BAD_K2))
+                            .then(moveTo(PARK_BAD_K2));
+                    a.add(hClawProxy.aSetFlipClaw(Hardware.FLIP_ONE_THIRD, Hardware.FRONT_OPEN))
+                            .then(hSlideProxy.moveOut());
                     a.add(vLiftProxy.moveTo(0, 5, 1.0));
                 }))
                 .then(getLimelighted(3.0))
+                .then(groupOf(a -> {
+                    a.add(transfer());
+                    a.add(moveTo(SCORE_HIGH_BASKET));
+                }))
+                .then(scoreHighBasket())
 //                .then(run(() -> hardware.driveMotors.setAll(0)));
         ;
 
