@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.hardware.Ascent;
 import org.firstinspires.ftc.teamcode.hardware.AutoClearEncoder;
 import org.firstinspires.ftc.teamcode.hardware.Encoder;
 import org.firstinspires.ftc.teamcode.hardware.EncoderFor;
@@ -231,6 +233,23 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     @HardwareName("clawColor")
     public ColorSensor clawColor;
 
+    @EncoderFor("verticalSlide2")
+    @AutoClearEncoder
+    public Encoder leftAscentEnc;
+
+    @HardwareName("ascentLeft")
+    public CRServo leftAscent;
+
+    @EncoderFor("rightAscentEnc")
+    @AutoClearEncoder
+    public Encoder rightAscentEnc;
+
+    @HardwareName("ascentRight")
+    @Reversed
+    public CRServo rightAscent;
+
+    public Ascent ascent;
+
     @HardwareName("limelight")
     public Limelight3A limelight;
 
@@ -312,6 +331,9 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
         if (armLeft != null && armRight != null) {
             arm = new MultiServo(armLeft, armRight, 1.0);
         } else arm = null;
+        if (leftAscent != null && rightAscent != null) {
+            ascent = new Ascent(leftAscent, leftAscentEnc, rightAscent, rightAscentEnc);
+        } else ascent = null;
     }
 
 }
