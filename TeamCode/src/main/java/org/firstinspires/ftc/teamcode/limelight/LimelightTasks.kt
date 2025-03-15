@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode.limelight
 
 import android.util.Log
 import com.qualcomm.robotcore.util.ElapsedTime
+import dev.aether.collaborative_multitasking.ITask
 import dev.aether.collaborative_multitasking.OneShot
 import dev.aether.collaborative_multitasking.Scheduler
 import dev.aether.collaborative_multitasking.TaskGroup
@@ -175,9 +176,11 @@ class LimelightMoveAdjust(
 
     override fun invokeOnFinish() {
         super.invokeOnFinish()
-        scheduler.add(LimelightPickupImmediate(
-            scheduler, hardware, hSlideProxy, hClawProxy, angle
-        ))
+        scheduler.add(
+            LimelightPickupImmediate(
+                scheduler, hardware, hSlideProxy, hClawProxy, angle
+            )
+        )
         colorLeft.position = 0.0
         colorRight.position = 0.0
         motors.setAll(0)
@@ -185,7 +188,7 @@ class LimelightMoveAdjust(
     }
 }
 
-class LimelightSearch @JvmOverloads constructor(
+open class LimelightSearch @JvmOverloads constructor(
     scheduler: Scheduler,
     private val hardware: Hardware,
     private val mmoverData: MMoverDataPack,
@@ -329,5 +332,34 @@ class LimelightSearch @JvmOverloads constructor(
     override fun invokeOnFinish() {
         lightRight.position = 0.0
         lightLeft.position = 0.0
+    }
+}
+
+class LimelightAuto(
+    scheduler: Scheduler, hardware: Hardware, mmoverData: MMoverDataPack,
+    hSlideProxy: HSlideProxy, hClawProxy: HClawProxy, enabled: Int, maxDuration: Number
+) : TaskGroup(scheduler) {
+    private val maxDuration = maxDuration.toDouble()
+    private val runtime = ElapsedTime()
+
+    private val limelightSearchTask: LimelightSearch =
+        LimelightSearch(innerScheduler, hardware, mmoverData, hSlideProxy, hClawProxy, enabled)
+
+    init {
+        with {
+            it.add(limelightSearchTask)
+        }
+    }
+
+    override fun invokeOnStart() {
+        super.invokeOnStart()
+        runtime.reset()
+    }
+
+    override fun invokeOnTick() {
+        super.invokeOnTick()
+        // just spam the thing idfk
+        if (limelightSearchTask.state == ITask.State.Ticking) limelightSearchTask.proceed()
+        if (runtime.time() > maxDuration) requestStop()
     }
 }

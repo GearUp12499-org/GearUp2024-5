@@ -2,13 +2,14 @@ package org.firstinspires.ftc.teamcode;
 
 import android.annotation.SuppressLint;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.hardware.HClawProxy;
 import org.firstinspires.ftc.teamcode.hardware.HSlideProxy;
 import org.firstinspires.ftc.teamcode.hardware.VLiftProxy;
+import org.firstinspires.ftc.teamcode.limelight.LimelightAuto;
+import org.firstinspires.ftc.teamcode.limelight.LimelightDetectionMode;
 import org.firstinspires.ftc.teamcode.mmooover.EncoderTracking;
 import org.firstinspires.ftc.teamcode.mmooover.MMoverDataPack;
 import org.firstinspires.ftc.teamcode.mmooover.Pose;
@@ -29,10 +30,9 @@ import dev.aether.collaborative_multitasking.TaskTemplate;
 import dev.aether.collaborative_multitasking.ext.Pause;
 import kotlin.Unit;
 
-@Autonomous // Appear on the autonomous drop down
 // STOP POSTING ABOUT DefaultLocale IM TIRED OF SEEING IT
 @SuppressLint("DefaultLocale")
-public class LeftAuto extends LinearOpMode {
+public abstract class LeftAuto extends LinearOpMode {
     private static final RuntimeException NOT_IMPLEMENTED = new RuntimeException("This operation is not implemented");
     final Pose SCORE_HIGH_BASKET = new Pose(5.5 + 2.121320344, 19.5 + 2.121320344, Math.toRadians(-45));
     final Pose PARK_BAD_K2 = new Pose(56, -8.5, Math.toRadians(-90));
@@ -179,6 +179,14 @@ public class LeftAuto extends LinearOpMode {
         hardware.sharedHardwareInit();
     }
 
+    private ITask getLimelighted(double maxDuration) {
+        int myColor = isRed() ? LimelightDetectionMode.RED : LimelightDetectionMode.BLUE;
+        myColor |= LimelightDetectionMode.YELLOW;
+        return new LimelightAuto(
+                scheduler, hardware, mmoverData, hSlideProxy, hClawProxy, myColor, maxDuration
+        );
+    }
+
     @Override
     public void runOpMode() {
         scheduler = new MultitaskScheduler();
@@ -244,6 +252,7 @@ public class LeftAuto extends LinearOpMode {
                             .then(moveTo(PARK_BAD));
                     a.add(vLiftProxy.moveTo(0, 5, 1.0));
                 }))
+                .then(getLimelighted(3.0))
 //                .then(run(() -> hardware.driveMotors.setAll(0)));
         ;
 
@@ -319,5 +328,6 @@ public class LeftAuto extends LinearOpMode {
         }
     }
 
+    abstract boolean isRed();
 }
 
