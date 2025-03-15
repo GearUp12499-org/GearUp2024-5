@@ -35,9 +35,10 @@ import kotlin.Unit;
 public class LeftAuto extends LinearOpMode {
     private static final RuntimeException NOT_IMPLEMENTED = new RuntimeException("This operation is not implemented");
     final Pose SCORE_HIGH_BASKET = new Pose(5.5 + 2.121320344, 19.5 + 2.121320344, Math.toRadians(-45));
+    final Pose PARK_BAD_K2 = new Pose(56, -8.5, Math.toRadians(-90));
     final Pose PARK_BAD = new Pose(56, -11.5, Math.toRadians(-90));
     final Pose PARK_BAD_K = new Pose(56, 12, Math.toRadians(-90));
-    final Pose PICKUP_4 = new Pose(39, 12.5, Math.toRadians(90));
+    final Pose PICKUP_4 = new Pose(39, 14, Math.toRadians(90));
     final Pose PARK1 = new Pose(57.5, 0, Math.toRadians(0));
     final Pose PARK2 = new Pose(55.5, -11, Math.toRadians(0));
     final Pose START = new Pose(0, 4.66, Math.toRadians(0));
@@ -125,7 +126,10 @@ public class LeftAuto extends LinearOpMode {
     }
 
     private ITask fourthYellow() {
-        return groupOf(inner -> inner.add(run(() -> hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_90)))
+        return groupOf(inner -> inner.add(run(() -> {
+                        hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_90);
+                        hClawProxy.setFlip(Hardware.FLIP_DOWN);
+                }))
                 .then(await(200))
                 .then(hClawProxy.aSetFlipClaw(Hardware.FLIP_DOWN_PLUS, Hardware.FRONT_CLOSE_HARD))
                 .then(await(400))
@@ -163,7 +167,7 @@ public class LeftAuto extends LinearOpMode {
         speed2Power = new Speed2Power(0.20); // Set a speed2Power corresponding to a speed of 0.20 seconds
         ramps = new Ramps(
                 Ramps.linear(5.0), // t seconds
-                Ramps.linear(1 / 3.0), // inches from target
+                Ramps.linear(1 / 5.0), // inches from target
 //                Easing.power(3.0, 12.0),
                 Ramps.LimitMode.SCALE
         );
@@ -236,6 +240,7 @@ public class LeftAuto extends LinearOpMode {
                 .then(groupOf(a -> {
                     // 56, -11.5, -90
                     a.add(moveTo(PARK_BAD_K))
+                            .then(moveTo(PARK_BAD_K2))
                             .then(moveTo(PARK_BAD));
                     a.add(vLiftProxy.moveTo(0, 5, 1.0));
                 }))
