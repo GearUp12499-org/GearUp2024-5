@@ -169,6 +169,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         boolean isScoreSpecimen2 = false;
         boolean isTx = false;
         boolean isSwapYellow = false;
+        boolean isSetUpAsc = false;
         boolean isAutodetect = false;
 
         double yaw_offset = 0.0;
@@ -262,6 +263,24 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
                 transfer();
             }
 
+            boolean shouldSetUpAsc = gamepad1.b;
+            if (shouldSetUpAsc && !isSetUpAsc) {
+                scheduler.add(groupOf(a -> {
+                    a.add(hSlideProxy.moveToPreset(HSlideProxy.Position.OUT));
+                    a.add(run(() -> hardware.arm.setPosition(Hardware.ARM_PRE_WALL_PICK)));
+                }));
+            }
+
+            double ascPow = 0.0;
+            if (gamepad1.dpad_up) {
+                ascPow = 1.0;
+            }
+            if (gamepad1.dpad_down) {
+                ascPow = -1.0;
+            }
+            hardware.leftAscent.setPower(ascPow);
+            hardware.rightAscent.setPower(ascPow);
+
             boolean twist90 = gamepad1.y;
             boolean untwist90 = gamepad1.a;
             if (hSlideProxy.isOut() && !scheduler.isResourceInUse(hSlideProxy.CONTROL) && !scheduler.isResourceInUse(hClawProxy.CONTROL_FLIP)) {
@@ -293,6 +312,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
             isScoreSpecimen2 = shouldScoreSpecimen2;
             isTx = shouldTx;
             isSwapYellow = shouldSwapYellow;
+            isSetUpAsc = shouldSetUpAsc;
             isAutodetect = shouldAutodetect;
 
             int verticalPosition = hardware.verticalLift.getCurrentPosition();
@@ -444,13 +464,12 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         abandonLock(Locks.ArmAssembly);
         abandonLock(vLiftProxy.CONTROL);
         scheduler.add(
-                groupOf(inner ->
-                        inner.add(groupOf(a -> {
-                            a.add(vLiftProxy.moveTo(Hardware.VLIFT_SCORE_HIGH, 5, 2.0));
-                            a.add(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)));
-                            a.add(run(() -> hardware.arm.setPosition(Hardware.ARM_SCORE)));
-                        })).then(run(() -> hardware.wrist.setPosition(1)))
-                ).extraDepends(
+                groupOf(inner -> {
+                    inner.add(vLiftProxy.moveTo(Hardware.VLIFT_SCORE_HIGH, 5, 2.0));
+                    inner.add(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)));
+                    inner.add(run(() -> hardware.arm.setPosition(Hardware.ARM_SCORE)));
+                    inner.add(run(() -> hardware.wrist.setPosition(1)));
+                }).extraDepends(
                         Locks.ArmAssembly,
                         vLiftProxy.CONTROL
                 )
@@ -493,14 +512,6 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
             abandonLock(hClawProxy.CONTROL_CLAW);
             hClawProxy.setClaw(Hardware.FRONT_CLOSE_HARD);
         }
-//        if (gamepad1.dpad_up) {
-//            abandonLock(hClawProxy.CONTROL_FLIP);
-//            hClawProxy.setFlip(hClawProxy.getFlipPosition() + 0.01);
-//        }
-//        if (gamepad1.dpad_down) {
-//            abandonLock(hClawProxy.CONTROL_FLIP);
-//            hClawProxy.setFlip(hClawProxy.getFlipPosition() - 0.01);
-//        }
 
         telemetry.addData("FrontClawPos", hClawProxy.getClawPosition());
         telemetry.addData("FlipClawPos", hClawProxy.getFlipPosition());

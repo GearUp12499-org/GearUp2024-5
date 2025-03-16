@@ -248,7 +248,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     @Reversed
     public CRServo rightAscent;
 
-    public Ascent ascent;
+//    public Ascent ascent;
 
     @HardwareName("limelight")
     public Limelight3A limelight;
@@ -334,9 +334,6 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
         if (armLeft != null && armRight != null) {
             arm = new MultiServo(armLeft, armRight, 1.0);
         } else arm = null;
-        if (leftAscent != null && rightAscent != null) {
-            ascent = new Ascent(leftAscent, leftAscentEnc, rightAscent, rightAscentEnc);
-        } else ascent = null;
     }
 
 }
