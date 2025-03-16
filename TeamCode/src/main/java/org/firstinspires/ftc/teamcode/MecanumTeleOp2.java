@@ -132,7 +132,6 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         vLiftProxy = mainScheduler.add(new VLiftProxy(mainScheduler, hardware.verticalLift));
         hSlideProxy = mainScheduler.add(new HSlideProxy(mainScheduler, hardware, HSlideProxy.Position.TRANSFER));
         hClawProxy = mainScheduler.add(new HClawProxy(mainScheduler, hardware));
-        ascentProxy = mainScheduler.add(new AscentProxy(mainScheduler, hardware.ascent));
         hardware.ascent.calibrate(Hardware.ASCENT_INIT_POS);
         hardware.ascent.setTargetPosition(Hardware.ASCENT_INIT_POS);
 
@@ -284,6 +283,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
             boolean shouldAsc1 = gamepad1.b;
             boolean shouldAsc2 = gamepad1.right_bumper;
             if (shouldAsc1 && !isAsc1 && canDoAscThings) {
+                if (ascentProxy == null) ascentProxy = mainScheduler.add(new AscentProxy(mainScheduler, hardware.ascent));
                 hardware.ascent.setTargetPosition(Hardware.ASCENT_PREPARE_POS);
                 scheduler.add(groupOf(a -> {
                     a.add(hSlideProxy.moveOut());
@@ -291,6 +291,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
                 }));
             }
             if (shouldAsc2 && !isAsc2 && canDoAscThings) {
+                if (ascentProxy == null) ascentProxy = mainScheduler.add(new AscentProxy(mainScheduler, hardware.ascent));
                 hardware.ascent.setTargetPosition(Hardware.ASCENT_FINISH_POS);
             }
 
