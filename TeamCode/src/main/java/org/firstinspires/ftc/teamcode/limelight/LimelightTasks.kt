@@ -164,7 +164,7 @@ class LimelightMoveAdjust(
         Log.i("Limelight", "target pose: %s".format(targetPose.toString()))
         this.with {
             val t = MoveToTask(scheduler, mmoverData, targetPose, telemetry)
-            t.acceptDist = 0.25
+            t.acceptDist = 0.35
             it.add(t)
         }
     }
