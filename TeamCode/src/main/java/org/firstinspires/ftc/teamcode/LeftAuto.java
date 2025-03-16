@@ -176,7 +176,7 @@ public abstract class LeftAuto extends LinearOpMode {
     private void hardwareInit() {
         tracker = new EncoderTracking(hardware, START);
         loopTimer = new LoopStopwatch();
-        speed2Power = new Speed2Power(0.20); // Set a speed2Power corresponding to a speed of 0.20 seconds
+        speed2Power = new Speed2Power(0.25); // Set a speed2Power corresponding to a speed of 0.20 seconds
         ramps = new Ramps(
                 Ramps.linear(5.0), // t seconds
                 Ramps.linear(1 / 3.0), // inches from target

@@ -111,7 +111,7 @@ public class RightAuto extends LinearOpMode {
     private void hardwareInit() {
         tracker = new EncoderTracking(hardware, STARTPOS);
         loopTimer = new LoopStopwatch();
-        speed2Power = new Speed2Power(0.20); // Set a speed2Power corresponding to a speed of 0.20 seconds
+        speed2Power = new Speed2Power(0.30); // Set a speed2Power corresponding to a speed of 0.20 seconds
         ramps = new Ramps(
                 Ramps.linear(2.0),
                 Ramps.linear(1 / 12.0),
@@ -226,8 +226,11 @@ public class RightAuto extends LinearOpMode {
     public void runAuto() {
         scheduler.add(new OneShot(scheduler, setup))
                 .then(groupOf(a -> {
-                    a.add(moveTo(new Pose(33, 18, 0)));
+                    a.add(moveTo(new Pose(32, 20, 0)).asCheckpoint());
                 }))
+                .then(run(() -> hardware.driveMotors.setAll(0.40)))
+                .then(await(300))
+                .then(run(() -> hardware.driveMotors.setAll(0)))
                 .then(scoreSpecimen())
                 .then(groupOf(a -> {
                     a.add(moveTo(new Pose(17.0, -35.5, 0)));
@@ -250,10 +253,13 @@ public class RightAuto extends LinearOpMode {
                 .then(pickSpecimen())
                 .then(lightColor(Hardware.LAMP_PURPLE))
                 .then(groupOf(a -> {
-                    a.add(moveTo(new Pose(22, 14, 0)));
-                    a.add(await(800)).then(preScoreSpecimen());
+                    a.add(moveTo(new Pose(22, 14, 0)).asCheckpoint());
+                    a.add(await(1000)).then(preScoreSpecimen());
                 }))
-                .then(moveTo(new Pose(33, 14, 0)))
+                .then(moveTo(new Pose(32, 15, 0)).asCheckpoint())
+                .then(run(() -> hardware.driveMotors.setAll(0.40)))
+                .then(await(300))
+                .then(run(() -> hardware.driveMotors.setAll(0)))
                 .then(scoreSpecimen())
                 .then(groupOf(a -> {
                     a.add(moveTo(new Pose(4, -27, 0)));
@@ -267,13 +273,14 @@ public class RightAuto extends LinearOpMode {
                 .then(lightColor(Hardware.LAMP_PURPLE))
                 .then(groupOf(a -> {
                     a.add(moveTo(new Pose(27, 10, 0)));
-                    a.add(await(800)).then(preScoreSpecimen());
+                    a.add(await(1000)).then(preScoreSpecimen());
                 }))
                 .then(run(() -> hardware.driveMotors.setAll(0.4)))
                 .then(await(500))
                 .then(run(() -> hardware.driveMotors.setAll(0)))
                 .then(scoreSpecimen())
                 .then(postScoreSpecimen())
+                .then(moveTo(new Pose(4, -27, 0)))
         ;
     }
 

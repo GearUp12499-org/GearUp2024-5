@@ -32,6 +32,7 @@ public class MoveToTask extends TaskTemplate {
     public double kD = 0.005;
 
     public double acceptDist = 1.0;
+    public double acceptTurn = Math.toRadians(5);
 
     protected Pose target;
     protected final EncoderTracking tracker;
@@ -45,6 +46,7 @@ public class MoveToTask extends TaskTemplate {
     protected boolean finished = false;
 
     protected Double lastDistanceToTarget = null;
+    protected boolean isCheckpointMode = false;
 
     public MoveToTask(
             @NotNull Scheduler scheduler,
@@ -62,6 +64,13 @@ public class MoveToTask extends TaskTemplate {
         this.hardware = mmoverData.hardware;
     }
 
+    public MoveToTask asCheckpoint() {
+        this.isCheckpointMode = true;
+        this.acceptDist = 3;
+        this.acceptTurn = Math.toRadians(10);
+        return this;
+    }
+
     @Override
     public void invokeOnStart() {
         targetTime.reset();
@@ -74,9 +83,13 @@ public class MoveToTask extends TaskTemplate {
 
         double linear = current.linearDistanceTo(target);
         double angular = current.subtractAngle(target);
-        if (linear > acceptDist || abs(angular) > RightAuto.ACCEPT_TURN) {
+        if (linear > acceptDist || abs(angular) > acceptTurn) {
             targetTime.reset();
+        } else if (isCheckpointMode) {
+            finished = true;
+            return;
         }
+
         // Waits at the target for 0.5 seconds
         if (targetTime.time() > .25) {
             finished = true;
