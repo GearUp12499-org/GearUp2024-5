@@ -124,7 +124,7 @@ public abstract class LeftAuto extends LinearOpMode {
                     hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
                 }))
                 .then(groupOf(a -> {
-                    a.add(hSlideProxy.moveToPreset(HSlideProxy.Position.TRANSFER, 0.5));
+                    a.add(hSlideProxy.moveToPreset(HSlideProxy.Position.TRANSFER, 0.8));
                     a.add(await(250))
                             .then(hClawProxy.aSetClaw(Hardware.FRONT_CLOSE_HARD))
                             .then(hClawProxy.aSetFlip(Hardware.FLIP_UP));
@@ -207,7 +207,7 @@ public abstract class LeftAuto extends LinearOpMode {
         hardwareInit();
 
         vLiftProxy = scheduler.add(new VLiftProxy(scheduler, hardware.verticalLift));
-        hSlideProxy = scheduler.add(new HSlideProxy(scheduler, hardware, HSlideProxy.Position.IN));
+        hSlideProxy = scheduler.add(new HSlideProxy(scheduler, hardware, HSlideProxy.Position.IN, HSlideProxy.Position.OUT));
         hClawProxy = scheduler.add(new HClawProxy(scheduler, hardware));
 
         ElapsedTime finalizeTimer = new ElapsedTime();
@@ -279,7 +279,10 @@ public abstract class LeftAuto extends LinearOpMode {
                             .then(preScoreHighBasket());
                     a.add(moveTo(SCORE_HIGH_BASKET));
                 }))
-                .then(scoreHighBasket())
+                .then(groupOf(a -> {
+                    a.add(scoreHighBasket());
+                    a.add(hSlideProxy.moveToPreset(HSlideProxy.Position.OUT, 0.0));
+                }))
                 .then(groupOf(a -> {
                     a.add(moveTo(FINISH, 0));
                     a.add(vLiftProxy.moveTo(0, 5, 0.1));
@@ -291,7 +294,9 @@ public abstract class LeftAuto extends LinearOpMode {
         telemetry.addLine(String.format("%d in queue.", scheduler.taskCount()));
         telemetry.update();
 
-        waitForStart();
+        while (!isStopRequested() && !opModeIsActive()) {
+            hSlideProxy.update();
+        }
         telemetry.update();
         finalizeTimer.reset();
 

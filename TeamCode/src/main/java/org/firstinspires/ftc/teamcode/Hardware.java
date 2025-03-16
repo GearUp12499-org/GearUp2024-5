@@ -4,9 +4,9 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.hardware.Ascent;
 import org.firstinspires.ftc.teamcode.hardware.AutoClearEncoder;
 import org.firstinspires.ftc.teamcode.hardware.Encoder;
 import org.firstinspires.ftc.teamcode.hardware.EncoderFor;
@@ -41,16 +41,13 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     public static final double ARM_PICKUP_WALL = 0.95;
     public static final double ARM_PRE_WALL_PICK = 1.00;
     public static final double spinTickPerRev = 751.8;
-    public static final double RIGHT_SLIDE_OUT = 0.65;
-    @Deprecated public static final double LEFT_SLIDE_OUT = 1.05 - RIGHT_SLIDE_OUT;
-    public static final double RIGHT_SLIDE_IN = 0.34;
-    @Deprecated public static final double LEFT_SLIDE_IN = 1.05 - RIGHT_SLIDE_IN;
-    public static final double RIGHT_SLIDE_TRANSFER = 0.42;
-    public static final double LEFT_SLIDE_TRANSFER = 1.05 - RIGHT_SLIDE_TRANSFER;
-    public static final double RIGHT_SLIDE_KEEP_CLEAR = 0.47;
-    @Deprecated public static final double LEFT_SLIDE_KEEP_CLEAR = 1.05 - RIGHT_SLIDE_KEEP_CLEAR;
-    public static final double RIGHT_SLIDE_HOLD = 0.53;
-    @Deprecated public static final double LEFT_SLIDE_HOLD = 1.05 - RIGHT_SLIDE_HOLD;
+    // 1425.1 PPR
+    // 300 deg
+    public static final int RIGHT_SLIDE_OUT = 194;
+    public static final int RIGHT_SLIDE_IN = 0;
+    public static final int RIGHT_SLIDE_TRANSFER = 0;
+    public static final int RIGHT_SLIDE_KEEP_CLEAR = 48;
+    public static final int RIGHT_SLIDE_HOLD = 160;
     public static final double CLAW_TWIST_INIT = 0.48;
     public static final double CLAW_TWIST_90 = 0.82;
     public static final double CLAW_TWIST_MIN = 0.13;
@@ -110,7 +107,7 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
         public static final SharedResource ArmAssembly = new SharedResource("ArmAssembly");
 
         /// The `horizontalRight` and `horizontalLeft` servos.
-        public static final SharedResource horizontalRight = new SharedResource("horizontalRight");
+        public static final SharedResource horizontal = new SharedResource("horizontalRight");
 
         public static final SharedResource HSlideClaw = new SharedResource("HSlideClaw");
 
@@ -212,11 +209,19 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
     @HardwareName("clawTwist")
     public Servo clawTwist;
 
-    @HardwareName("horizontalRight")
-    public Servo horizontalRight;
+//    @HardwareName("horizontalRight")
+//    @GoBildaExtendedServo
+//    public ServoImplEx horizontalRight;
+//
+//    @HardwareName("horizontalLeft")
+//    @GoBildaExtendedServo
+//    public ServoImplEx horizontalLeft;
 
-    @HardwareName("horizontalLeft")
-    public Servo horizontalLeft;
+    @HardwareName("horizontal")
+    @AutoClearEncoder
+    @Reversed
+    @ZeroPower(DcMotor.ZeroPowerBehavior.BRAKE)
+    public DcMotorEx horizontal;
 
     @HardwareName("colorLeft")
     public Servo colorLeft;
@@ -307,8 +312,6 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
 
         // we don't have the proxy object to handle this for us
         // so manually implement the inversion
-        if (horizontalRight != null) horizontalRight.setPosition(Hardware.RIGHT_SLIDE_IN);
-        if (horizontalLeft != null) horizontalLeft.setPosition(1.05 - Hardware.RIGHT_SLIDE_IN);
 
         if (lightLeft != null) lightLeft.setPosition(Hardware.LAMP_PURPLE);
         if (lightRight != null) lightRight.setPosition(Hardware.LAMP_PURPLE);

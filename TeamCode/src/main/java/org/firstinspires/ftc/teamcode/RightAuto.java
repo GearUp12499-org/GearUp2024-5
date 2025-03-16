@@ -278,9 +278,12 @@ public class RightAuto extends LinearOpMode {
                 .then(run(() -> hardware.driveMotors.setAll(0.4)))
                 .then(await(500))
                 .then(run(() -> hardware.driveMotors.setAll(0)))
-                .then(scoreSpecimen())
-                .then(postScoreSpecimen())
-                .then(moveTo(new Pose(4, -27, 0)))
+                .then(groupOf(a -> {
+                    a.add(scoreSpecimen())
+                            .then(postScoreSpecimen())
+                            .then(moveTo(new Pose(4, -27, 0)));
+                    a.add(hSlideProxy.moveToPreset(HSlideProxy.Position.OUT, 0.0));
+                }))
         ;
     }
 
@@ -292,7 +295,7 @@ public class RightAuto extends LinearOpMode {
         hardwareInit();
 
         vLiftProxy = scheduler.add(new VLiftProxy(scheduler, hardware.verticalLift));
-        hSlideProxy = scheduler.add(new HSlideProxy(scheduler, hardware, HSlideProxy.Position.IN));
+        hSlideProxy = scheduler.add(new HSlideProxy(scheduler, hardware, HSlideProxy.Position.IN, HSlideProxy.Position.OUT));
         hClawProxy = scheduler.add(new HClawProxy(scheduler, hardware));
 
         ElapsedTime finalizeTimer = new ElapsedTime();
@@ -310,7 +313,9 @@ public class RightAuto extends LinearOpMode {
         telemetry.addLine(String.format("%d in queue.", scheduler.taskCount()));
         telemetry.update();
 
-        waitForStart();
+        while (!isStopRequested() && !opModeIsActive()) {
+            hSlideProxy.update();
+        }
 
         telemetry.update();
         finalizeTimer.reset();

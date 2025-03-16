@@ -32,6 +32,7 @@ public class ServoSteper extends LinearOpMode {
 
 
     double position = (MAX_POS - MIN_POS) / 2; // Start at halfway position
+    double position2 = (MAX_POS - MIN_POS) / 2; // Start at halfway position
     boolean rampUp = true;
 
 
@@ -69,17 +70,35 @@ public class ServoSteper extends LinearOpMode {
                     rampUp = !rampUp;  // Switch ramp direction
                 }
             }
+
+            if (gamepad1.dpad_up) {
+                // Keep stepping up until we hit the max value.
+                position2 += INCREMENT;
+                if (position2 >= MAX_POS) {
+                    position2 = MAX_POS;
+                    rampUp = !rampUp;   // Switch ramp direction
+                }
+            } else if (gamepad1.dpad_down) {
+                // Keep stepping down until we hit the min value.
+                position2 -= INCREMENT;
+                if (position2 <= MIN_POS) {
+                    position2 = MIN_POS;
+                    rampUp = !rampUp;  // Switch ramp direction
+                }
+            }
+
+            //0.65 - 0.48 offset
             //0.02 is open and 0.50 is closed.
 
             // Display the current value
             telemetry.addData("Servo Position", "%5.2f", position);
+            telemetry.addData("Servo Position 2", "%5.2f", position2);
             telemetry.addData(">", "Press Stop to end test.");
             telemetry.update();
 
             // Set the servo to the new position and pause;
             sleep(CYCLE_MS);
             idle();
-            hardware.wrist.setPosition(position);
             //hardware.horizontalLeft.setPosition(1.05-position);
 
         }

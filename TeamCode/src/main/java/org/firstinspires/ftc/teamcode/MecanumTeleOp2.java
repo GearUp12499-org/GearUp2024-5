@@ -126,10 +126,10 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         hardware = new Hardware(hardwareMap);
         hardwareInit();
 
-        // this scheduler will be used for the rest
+        // this scheduler will be used for the restf
         MultitaskScheduler mainScheduler = new MultitaskScheduler();
         vLiftProxy = mainScheduler.add(new VLiftProxy(mainScheduler, hardware.verticalLift));
-        hSlideProxy = mainScheduler.add(new HSlideProxy(mainScheduler, hardware, HSlideProxy.Position.TRANSFER));
+        hSlideProxy = mainScheduler.add(new HSlideProxy(mainScheduler, hardware, HSlideProxy.Position.TRANSFER, HSlideProxy.Position.OUT));
         hClawProxy = mainScheduler.add(new HClawProxy(mainScheduler, hardware));
 
         ElapsedTime timer = new ElapsedTime();

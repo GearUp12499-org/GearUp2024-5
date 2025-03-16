@@ -1,5 +1,11 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
+import android.util.Log;
+import android.view.View;
+
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.MotorControlAlgorithm;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Hardware;
@@ -20,26 +26,37 @@ public class HSlideProxy extends TaskTemplate {
         KEEP_CLEAR(Hardware.RIGHT_SLIDE_KEEP_CLEAR),
         HOLD(Hardware.RIGHT_SLIDE_HOLD);
 
-        public final double actual;
-        Position(double actual) {
+        public final int actual;
+        Position(int actual) {
             this.actual = actual;
         }
     }
 
-    private static final Set<SharedResource> requires = Set.of(Hardware.Locks.horizontalRight);
+    private static final Set<SharedResource> requires = Set.of(Hardware.Locks.horizontal);
     private static int INSTANCE_COUNT = 0;
     public final SharedResource CONTROL = new SharedResource("HSlideProxy" + (++INSTANCE_COUNT));
     private final Hardware hardware;
     private final Scheduler scheduler = getScheduler();
     public Position positionEn = Position.IN;
-    private double position = Hardware.RIGHT_SLIDE_IN;
+    private int positionActual = 0;
+    private int positionVirtual = 0;
+    private int offset;
     private ITask activeTask = null;
 
-    public HSlideProxy(@NotNull Scheduler scheduler, Hardware hardware, Position start) {
+    public HSlideProxy(@NotNull Scheduler scheduler, Hardware hardware, Position start, Position init) {
         super(scheduler);
         this.hardware = hardware;
         positionEn = start;
-        position = start.actual;
+        positionActual = 0;
+        positionVirtual = init.actual;
+        offset = init.actual;
+        moveTo(start.actual);
+        hardware.horizontal.setTargetPosition(0);
+        hardware.horizontal.setPower(1.0);
+        Log.i("hardware", hardware.horizontal.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION).toString());
+        // pIDF: 10.0, 0.05, 0, 0 original
+        hardware.horizontal.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, new PIDFCoefficients(15.0, 0.25, 0.05, 0, MotorControlAlgorithm.LegacyPID));
+        hardware.horizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         update();
     }
@@ -65,12 +82,12 @@ public class HSlideProxy extends TaskTemplate {
     }
 
     public void update() {
-        hardware.horizontalRight.setPosition(position);
-        hardware.horizontalLeft.setPosition(1.05 - position);
+        hardware.horizontal.setTargetPosition(positionActual);
     }
 
-    private void moveTo(double newPos) {
-        position = newPos;
+    private void moveTo(int newPos) {
+        positionVirtual = newPos;
+        positionActual = newPos - offset;
         update();
     }
 
