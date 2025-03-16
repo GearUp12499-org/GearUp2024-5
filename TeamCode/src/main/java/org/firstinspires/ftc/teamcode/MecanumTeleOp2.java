@@ -60,6 +60,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
     private org.firstinspires.ftc.teamcode.hardware.VLiftProxy vLiftProxy;
     private double heading = 0.0;
     private MMoverDataPack mmoverData;
+    private boolean enableYellow = true;
 
     /**
      * Forces any tasks using this lock to be stopped immediately.
@@ -167,13 +168,13 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         boolean isScoreSpecimen = false;
         boolean isScoreSpecimen2 = false;
         boolean isTx = false;
-        boolean isTxDump = false;
-        boolean isClearArmPos = false;
-        boolean isResetVL = false;
+        boolean isSwapYellow = false;
         boolean isAutodetect = false;
 
         double yaw_offset = 0.0;
         while (opModeIsActive()) {
+            telemetry.addData("Detect yellows? ", enableYellow ? "YES!!" : "NO!!");
+            telemetry.addLine("press gp2 right dpad to swap");
 
             Orientation angles = navxMicro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
             if (gamepad1.back) {
@@ -260,10 +261,6 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
             if (shouldTx && !isTx) {
                 transfer();
             }
-            boolean shouldTxDump = gamepad1.x;
-//            if (shouldTxDump && !isTxDump) {
-//                transferAndDrop();
-//            }
 
             boolean twist90 = gamepad1.y;
             boolean untwist90 = gamepad1.a;
@@ -272,12 +269,8 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
                 if (untwist90) hardware.clawTwist.setPosition(Hardware.CLAW_TWIST_INIT);
             }
 
-//            if (gamepad1.b) {
-//                hardware.ascent.setTargetPosition(Hardware.ASCENT_PREPARE_POS);
-//            }
-//            if (gamepad1.right_bumper) {
-//                hardware.ascent.setTargetPosition(Hardware.ASCENT_FINISH_POS);
-//            }
+            boolean shouldSwapYellow = gamepad2.dpad_right;
+            if (shouldSwapYellow && !isSwapYellow) enableYellow = !enableYellow;
 
             boolean shouldFlipIn = gamepad1.right_trigger > 0.5;
             if (shouldFlipIn && !isFlipIn) Flipin();
@@ -299,7 +292,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
             isScoreSpecimen = shouldScoreSpecimen;
             isScoreSpecimen2 = shouldScoreSpecimen2;
             isTx = shouldTx;
-            isTxDump = shouldTxDump;
+            isSwapYellow = shouldSwapYellow;
             isAutodetect = shouldAutodetect;
 
             int verticalPosition = hardware.verticalLift.getCurrentPosition();
@@ -668,7 +661,7 @@ public abstract class MecanumTeleOp2 extends LinearOpMode {
         }
         abandonLock(Locks.DriveMotors);
         int myColor = isRed() ? LimelightDetectionMode.RED : LimelightDetectionMode.BLUE;
-        myColor |= LimelightDetectionMode.YELLOW;
+        if (enableYellow) myColor |= LimelightDetectionMode.YELLOW;
         activeSearchTask = scheduler.add(new LimelightSearch(scheduler, hardware, mmoverData, hSlideProxy, hClawProxy, myColor, telemetry));
     }
 
