@@ -294,7 +294,10 @@ public class Hardware extends HardwareMapper implements TriOdoProvider {
         if (lightLeft != null) lightLeft.setPosition(Hardware.LAMP_PURPLE);
         if (lightRight != null) lightRight.setPosition(Hardware.LAMP_PURPLE);
 
-        if (limelight != null) limelight.stop();
+        if (limelight != null) {
+            limelight.pipelineSwitch(6);
+            limelight.stop();
+        }
     }
 
     public Hardware(HardwareMap hwMap) {

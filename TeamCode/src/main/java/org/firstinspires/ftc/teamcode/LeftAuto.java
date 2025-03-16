@@ -179,7 +179,7 @@ public abstract class LeftAuto extends LinearOpMode {
         speed2Power = new Speed2Power(0.25); // Set a speed2Power corresponding to a speed of 0.20 seconds
         ramps = new Ramps(
                 Ramps.linear(5.0), // t seconds
-                Ramps.linear(1 / 3.0), // inches from target
+                Ramps.linear(1 / 5.0), // inches from target
 //                Easing.power(3.0, 12.0),
                 Ramps.LimitMode.SCALE
         );
@@ -267,7 +267,7 @@ public abstract class LeftAuto extends LinearOpMode {
                 .then(scoreHighBasket())
                 .then(groupOf(a -> {
                     // 56, -11.5, -90
-                    ITask moveTo = a.add(moveTo(PARK_BAD_K, 0.0003));
+                    ITask moveTo = a.add(moveTo(PARK_BAD_K).asCheckpoint());
                     moveTo.then(moveTo(PARK_BAD_K2, 0.01));
                     moveTo.then(hSlideProxy.moveOut());
                     a.add(hClawProxy.aSetFlipClaw(Hardware.FLIP_ONE_THIRD, Hardware.FRONT_OPEN));

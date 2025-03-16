@@ -205,7 +205,8 @@ open class LimelightSearch @JvmOverloads constructor(
         NO_MATCH(0, "No samples detected"),
         MATCH_NO_PICKUP(1, "Sample detected, but can't grab"),
         PICKUP(2, "Sample detected in grab range"),
-        ELSE(-2, "Catastrophic failure (Pipeline returned invalid status code)");
+        FAIL_BAD_DATA(-2, "Catastrophic failure (Pipeline returned something stupid)"),
+        ELSE(-3, "Catastrophic failure (Pipeline returned invalid status code)");
 
         companion object {
             fun getForId(id: Int) = entries.firstOrNull { it.intValue == id } ?: ELSE
@@ -273,7 +274,11 @@ open class LimelightSearch @JvmOverloads constructor(
         data("LL Pipeline No", limelight.status.pipelineIndex)
         val pyOut = result.pythonOutput
         val (status, xOff, yOff, angle) = pyOut
-        val statusT = ResultStatus.getForId(status.roundToInt())
+        var statusT = ResultStatus.getForId(status.roundToInt())
+        if (statusT != ResultStatus.NO_MATCH && (abs(xOff) > 5 || abs(yOff) > 5)) {
+            statusT = ResultStatus.FAIL_BAD_DATA
+            Log.e("Limelight", "Pipeline returned something absurd: (x: %.4f, y: %.4f, r: %.4f)".format(xOff, yOff, angle))
+        }
         data("LL: status", statusT.message)
         data("LL: x", xOff)
         data("LL: y", yOff)
