@@ -127,7 +127,7 @@ class Ascent(
     fun update() {
         runTo(leftAscent, leftPosition, ::getLVelocityOrNothing)
         runTo(rightAscent, rightPosition, ::getRVelocityOrNothing)
-//        pushPositions(leftPosition, rightPosition)
+        pushPositions(leftPosition, rightPosition)
     }
 
     fun setTargetPosition(target: Int) {
