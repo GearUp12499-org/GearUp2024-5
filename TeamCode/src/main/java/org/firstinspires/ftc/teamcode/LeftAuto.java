@@ -95,9 +95,9 @@ public abstract class LeftAuto extends LinearOpMode {
                         .then(run(() -> {
                             hardware.arm.setPosition(Hardware.ARM_TRANSFER);
                         }))
-                        .then(await(200))
+                        .then(await(300))
                         .then(run(() -> hardware.claw.setPosition(Hardware.CLAW_CLOSE)))
-                        .then(await(100))
+                        .then(await(200))
                         .then(groupOf(inner -> {
                             inner.add(hClawProxy.aSetClaw(Hardware.FRONT_OPEN));
                             inner.add(hSlideProxy.moveToPreset(HSlideProxy.Position.KEEP_CLEAR, 0.2));
@@ -111,8 +111,10 @@ public abstract class LeftAuto extends LinearOpMode {
 
     private ITask pickUpYellow() {
         ITask result = groupOf(inner -> inner
-                .add(hClawProxy.aSetFlipClaw(Hardware.FLIP_DOWN_PLUS, Hardware.FRONT_CLOSE_HARD))
-                .then(await(400))
+                .add(hClawProxy.aSetFlip(Hardware.FLIP_DOWN_PLUS))
+                .then(await(300))
+                .then(hClawProxy.aSetClaw(Hardware.FRONT_CLOSE_HARD))
+                .then(await(200))
                 .then(hClawProxy.aSetFlip(Hardware.FLIP_ONE_THIRD))
                 .then(await(100)));
         return result;
