@@ -29,6 +29,11 @@ public class LoopStopwatch {
         return getAvg();
     }
 
+    public double getLast() {
+        if (warmUpIdx == 0) return 0.01;
+        return ticks[Math.floorMod(runAvgIdx - 1, AVERAGE_OVER)] / 1e9;
+    }
+
     public double getAvg() {
         if (warmUpIdx == 0) return -1;
         long total = 0;

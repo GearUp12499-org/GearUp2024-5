@@ -1,5 +1,11 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
+import android.util.Log;
+import android.view.View;
+
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.MotorControlAlgorithm;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Hardware;
@@ -13,22 +19,50 @@ import dev.aether.collaborative_multitasking.SharedResource;
 import dev.aether.collaborative_multitasking.TaskTemplate;
 
 public class HSlideProxy extends TaskTemplate {
-    private static final Set<SharedResource> requires = Set.of(Hardware.Locks.horizontalRight);
+    public enum Position {
+        IN(Hardware.RIGHT_SLIDE_IN),
+        OUT(Hardware.RIGHT_SLIDE_OUT),
+        TRANSFER(Hardware.RIGHT_SLIDE_TRANSFER),
+        KEEP_CLEAR(Hardware.RIGHT_SLIDE_KEEP_CLEAR),
+        HOLD(Hardware.RIGHT_SLIDE_HOLD);
+
+        public final int actual;
+        Position(int actual) {
+            this.actual = actual;
+        }
+    }
+
+    private static final Set<SharedResource> requires = Set.of(Hardware.Locks.horizontal);
     private static int INSTANCE_COUNT = 0;
     public final SharedResource CONTROL = new SharedResource("HSlideProxy" + (++INSTANCE_COUNT));
     private final Hardware hardware;
     private final Scheduler scheduler = getScheduler();
-    boolean isOut = false; // isOut?
-    private double position = Hardware.RIGHT_SLIDE_IN;
+    public Position positionEn = Position.IN;
+    private int positionActual = 0;
+    private int positionVirtual = 0;
+    private int offset;
     private ITask activeTask = null;
 
-    public HSlideProxy(@NotNull Scheduler scheduler, Hardware hardware) {
+    public HSlideProxy(@NotNull Scheduler scheduler, Hardware hardware, Position start, Position init) {
         super(scheduler);
         this.hardware = hardware;
+        positionEn = start;
+        positionActual = 0;
+        positionVirtual = init.actual;
+        offset = init.actual;
+        moveTo(start.actual);
+        hardware.horizontal.setTargetPosition(0);
+        hardware.horizontal.setPower(1.0);
+        Log.i("hardware", hardware.horizontal.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION).toString());
+        // pIDF: 10.0, 0.05, 0, 0 original
+        hardware.horizontal.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, new PIDFCoefficients(15.0, 0.25, 0.05, 0, MotorControlAlgorithm.LegacyPID));
+        hardware.horizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        update();
     }
 
     public boolean isOut() {
-        return isOut;
+        return positionEn == Position.OUT;
     }
 
     @Override
@@ -48,18 +82,49 @@ public class HSlideProxy extends TaskTemplate {
     }
 
     public void update() {
-        hardware.horizontalRight.setPosition(position);
-        hardware.horizontalLeft.setPosition(1.05 - position);
+        hardware.horizontal.setTargetPosition(positionActual);
     }
 
-    private void moveTo(double newPos) {
-        position = newPos;
+    private void moveTo(int newPos) {
+        positionVirtual = newPos;
+        positionActual = newPos - offset;
         update();
     }
 
     public void moveInSync() {
-        moveTo(Hardware.RIGHT_SLIDE_IN);
-        isOut = false;
+        moveTo(Position.IN.actual);
+        positionEn = Position.IN;
+    }
+
+    public ITask moveToPreset(Position p) {
+        return moveToPreset(p, Hardware.SLIDE_INWARD_TIME);
+    }
+
+    public ITask moveToPreset(Position p, double durat) {
+        return new TaskTemplate(scheduler) {
+            ElapsedTime timer;
+
+            @Override
+            public void invokeOnStart() {
+                if (positionEn == p) finishEarly();
+                if (activeTask != null) activeTask.requestStop();
+                activeTask = this;
+                moveTo(p.actual);
+                positionEn = p;
+                timer = new ElapsedTime();
+                timer.reset();
+            }
+
+            @Override
+            public boolean invokeIsCompleted() {
+                // FIXME: multiple starting locations et al
+                return timer.time() >= durat;
+            }
+        };
+    }
+
+    public ITask moveTransfer() {
+        return moveToPreset(Position.TRANSFER);
     }
 
     public ITask moveIn() {
@@ -68,10 +133,10 @@ public class HSlideProxy extends TaskTemplate {
 
             @Override
             public void invokeOnStart() {
-                if (!isOut) requestStop();
+                if (positionEn == Position.IN) finishEarly();
                 if (activeTask != null) activeTask.requestStop();
                 activeTask = this;
-                isOut = false;
+                positionEn = Position.IN;
                 moveInSync();
                 timer = new ElapsedTime();
                 timer.reset();
@@ -84,35 +149,18 @@ public class HSlideProxy extends TaskTemplate {
 
             @Override
             public boolean invokeIsCompleted() {
+                // FIXME: multiple starting locations et al
                 return timer.time() >= Hardware.SLIDE_INWARD_TIME;
             }
         };
     }
 
     public void moveOutSync() {
-        moveTo(Hardware.RIGHT_SLIDE_OUT);
-        isOut = true;
+        moveTo(Position.OUT.actual);
+        positionEn = Position.OUT;
     }
 
     public ITask moveOut() {
-        return new TaskTemplate(scheduler) {
-            ElapsedTime timer;
-
-            @Override
-            public void invokeOnStart() {
-                if (isOut) requestStop();
-                if (activeTask != null) activeTask.requestStop();
-                activeTask = this;
-                moveOutSync();
-                isOut = true;
-                timer = new ElapsedTime();
-                timer.reset();
-            }
-
-            @Override
-            public boolean invokeIsCompleted() {
-                return timer.time() >= Hardware.SLIDE_OUTWARD_TIME;
-            }
-        };
+        return moveToPreset(Position.OUT);
     }
 }

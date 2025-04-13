@@ -12,12 +12,14 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Hardware;
 import org.firstinspires.ftc.teamcode.RightAuto;
 import org.firstinspires.ftc.teamcode.mmooover.EncoderTracking;
+import org.firstinspires.ftc.teamcode.mmooover.MMoverDataPack;
 import org.firstinspires.ftc.teamcode.mmooover.Motion;
 import org.firstinspires.ftc.teamcode.mmooover.Pose;
 import org.firstinspires.ftc.teamcode.mmooover.Ramps;
 import org.firstinspires.ftc.teamcode.mmooover.Speed2Power;
 import org.firstinspires.ftc.teamcode.utilities.LoopStopwatch;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
@@ -27,35 +29,46 @@ import dev.aether.collaborative_multitasking.TaskTemplate;
 
 @SuppressLint("DefaultLocale")
 public class MoveToTask extends TaskTemplate {
+    public double kD = 0.005;
+
+    public double acceptDist = 1.0;
+    public double acceptTurn = Math.toRadians(5);
+
     protected Pose target;
     protected final EncoderTracking tracker;
     protected final Speed2Power speed2Power;
     protected final Ramps ramps;
-    protected final Telemetry telemetry;
+    protected final @Nullable Telemetry telemetry;
     protected final LoopStopwatch loopTimer;
     protected final Hardware hardware;
     protected ElapsedTime targetTime = new ElapsedTime();
     protected ElapsedTime runTime = new ElapsedTime();
     protected boolean finished = false;
 
+    protected Double lastDistanceToTarget = null;
+    protected boolean isCheckpointMode = false;
+
     public MoveToTask(
             @NotNull Scheduler scheduler,
-            @NotNull Hardware hardware,
+            @NotNull MMoverDataPack mmoverData,
             @NotNull Pose target,
-            @NotNull EncoderTracking tracker,
-            @NotNull LoopStopwatch loopTimer,
-            @NotNull Speed2Power speed2Power,
-            @NotNull Ramps ramps,
-            @NotNull Telemetry telemetry
+            @Nullable Telemetry telemetry
     ) {
         super(scheduler);
         this.target = target;
-        this.tracker = tracker;
-        this.speed2Power = speed2Power;
-        this.ramps = ramps;
+        this.tracker = mmoverData.tracking;
+        this.speed2Power = mmoverData.speed2Power;
+        this.ramps = mmoverData.ramps;
         this.telemetry = telemetry;
-        this.loopTimer = loopTimer;
-        this.hardware = hardware;
+        this.loopTimer = mmoverData.loopTimer;
+        this.hardware = mmoverData.hardware;
+    }
+
+    public MoveToTask asCheckpoint() {
+        this.isCheckpointMode = true;
+        this.acceptDist = 3;
+        this.acceptTurn = Math.toRadians(10);
+        return this;
     }
 
     @Override
@@ -70,41 +83,58 @@ public class MoveToTask extends TaskTemplate {
 
         double linear = current.linearDistanceTo(target);
         double angular = current.subtractAngle(target);
-        if (linear > RightAuto.ACCEPT_DIST || abs(angular) > RightAuto.ACCEPT_TURN) {
+        if (linear > acceptDist || abs(angular) > acceptTurn) {
             targetTime.reset();
+        } else if (isCheckpointMode) {
+            finished = true;
+            return;
         }
-        // Waits at the target for one second
-        if (targetTime.time() > .5) {
+
+        // Waits at the target for 0.5 seconds
+        if (targetTime.time() > .25) {
             finished = true;
             return;
         }
         // figure out how to get to the target position
         Motion action = tracker.getMotionToTarget(target, hardware);
-        double dToTarget = sqrt(
+        double distanceToTarget = sqrt(
                 action.forward() * action.forward()
                         + action.right() * action.right()
                         + action.turn() * action.turn());
-        double now = runTime.time();
-        double speed = ramps.ease(
-                now,
-                dToTarget,
+        double timeNow = runTime.time();
+        double rampingSpeed = ramps.ease(
+                timeNow,
+                distanceToTarget,
                 1.0
         );
-        action.apply(hardware.driveMotors, RightAuto.CALIBRATION, speed, speed2Power);
-        telemetry.addData("forward", action.forward());
-        telemetry.addData("right", action.right());
-        telemetry.addData("turn (deg)", Math.toDegrees(action.turn()));
+
+        double vel;
+        if (lastDistanceToTarget == null) vel = 0;
+        else vel = (distanceToTarget - lastDistanceToTarget) / loopTimer.getLast();
+        lastDistanceToTarget = distanceToTarget;
+
+        double finalSpeed = rampingSpeed + kD * vel;
+
+        action.apply(hardware.driveMotors, Hardware.CALIBRATION, finalSpeed, speed2Power);
+        if (telemetry != null) {
+            telemetry.addData("forward", action.forward());
+            telemetry.addData("right", action.right());
+            telemetry.addData("turn (deg)", Math.toDegrees(action.turn()));
+        }
         String message = String.format(
-                "##%.3f##{\"pose\":[%.6f,%.6f,%.6f],\"motion\":[%.6f,%.6f,%.6f],\"speed\":%.6f," +
+                "##%.3f##{\"pose\":[%.6f,%.6f,%.6f],\"motion\":[%.6f,%.6f,%.6f],\"rampingSpeed\":%.6f," +
                         "\"frontLeft\":%.6f,\"frontRight\":%.6f,\"backLeft\":%.6f,\"backRight\":%.6f," +
-                        "\"dToTarget\":%.6f,\"timer\":%.4f,\"avgTickTime\":%.6f}##",
+                        "\"distanceToTarget\":%.6f,\"timer\":%.4f,\"avgTickTime\":%.6f,\"vel\":%.6f," +
+                        "\"finalSpeed\":%.6f,\"immediateTickTime\":%.6f}##",
                 System.currentTimeMillis() / 1000.0,
                 current.x(), current.y(), current.heading(),
                 action.forward(), action.right(), action.turn(),
-                speed,
+                rampingSpeed,
                 action.getLastFL(), action.getLastFR(), action.getLastBL(), action.getLastBR(),
-                dToTarget, now,
-                loopTimer.getAvg() * 1000
+                distanceToTarget, timeNow,
+                loopTimer.getAvg() * 1000,
+                vel, finalSpeed,
+                loopTimer.getLast() * 1000
         );
         Log.d("DataDump", message);
     }

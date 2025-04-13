@@ -15,7 +15,6 @@ import org.firstinspires.ftc.teamcode.mmooover.PoseFromToProcessor;
 import java.util.List;
 
 @TeleOp
-@Disabled
 public class OdometryTeleOp extends LinearOpMode {
 
     @Override

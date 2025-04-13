@@ -22,7 +22,7 @@ internal fun getCaller(): String {
 }
 
 open class MultitaskScheduler
-@JvmOverloads constructor(private val throwDebuggingErrors: Boolean = false) : Scheduler() {
+@JvmOverloads constructor(private val throwDebuggingErrors: Boolean = true) : Scheduler() {
     private val locks: MutableMap<String, Int?> = mutableMapOf()
     private val tasks: MutableMap<Int, ITask> = mutableMapOf()
     private val lockIdName: MutableMap<String, SharedResource> = mutableMapOf()
@@ -280,15 +280,15 @@ open class MultitaskScheduler
     override fun task(configure: Task.() -> Unit): Task {
         val task = Task(this)
         task.configure()
-        task.name = getCaller()
         task.register()
+        task.name = getCaller()
         return task
     }
 
     override fun <T : ITask> add(t: T): T {
         t.scheduler = this
-        t.name = getCaller()
         t.register()
+        t.name = getCaller()
         return t
     }
 

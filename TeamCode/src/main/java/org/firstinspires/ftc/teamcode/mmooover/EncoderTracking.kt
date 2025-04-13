@@ -130,6 +130,6 @@ class EncoderTracking @JvmOverloads constructor(
         val estHeading = lastPose.heading + (.5 * deltaHeading)
         val forward = cos(estHeading) * dx + sin(estHeading) * dy
         val strafe = sin(estHeading) * dx - cos(estHeading) * dy
-        return Motion(forward, strafe, dh * robot.forwardOffset)
+        return Motion(forward, strafe, -dh * robot.forwardOffset)
     }
 }

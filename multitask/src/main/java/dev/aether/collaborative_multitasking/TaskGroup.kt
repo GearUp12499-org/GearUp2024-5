@@ -2,17 +2,21 @@ package dev.aether.collaborative_multitasking
 
 import java.util.function.Consumer
 
-class TaskGroupScheduler : MultitaskScheduler() {
+class TaskGroupScheduler(internal val outerRequirements: MutableSet<SharedResource>) : MultitaskScheduler() {
+    internal var errorOnNewLockAcquire = false
     val subtaskRequirements: MutableSet<SharedResource> = mutableSetOf()
 
     override fun register(task: ITask): Int {
-        subtaskRequirements.addAll(task.requirements())
+        val toAdd = task.requirements() - (outerRequirements + subtaskRequirements)
+        if (!toAdd.isEmpty() && errorOnNewLockAcquire) throw IllegalStateException("Too late to add additional requirements (already committed) - try using extraDepends to specify dependencies earlier")
+        subtaskRequirements.addAll(toAdd)
         return super.register(task)
     }
 }
 
 open class TaskGroup(outerScheduler: Scheduler) : TaskTemplate(outerScheduler) {
-    protected val innerScheduler = TaskGroupScheduler()
+    protected val extraDeps: MutableSet<SharedResource> = mutableSetOf()
+    protected val innerScheduler = TaskGroupScheduler(extraDeps)
 
     /**
      * Access the inner scheduler, cast to a generic Scheduler. Not recommended for general use.
@@ -29,8 +33,6 @@ open class TaskGroup(outerScheduler: Scheduler) : TaskTemplate(outerScheduler) {
         return this
     }
 
-    protected val extraDeps: MutableSet<SharedResource> = mutableSetOf()
-
     fun extraDepends(vararg with: SharedResource): TaskGroup {
         extraDeps.addAll(with)
         return this
@@ -40,6 +42,12 @@ open class TaskGroup(outerScheduler: Scheduler) : TaskTemplate(outerScheduler) {
 
     override fun requirements(): Set<SharedResource> {
         return innerScheduler.subtaskRequirements + extraDeps
+    }
+
+    override fun invokeOnStart() {
+        super.invokeOnStart()
+        // If we try to grab more stuff, the list of requirements could change, resulting in a 'non-owned free' error
+        innerScheduler.errorOnNewLockAcquire = true
     }
 
     override fun invokeOnTick() {

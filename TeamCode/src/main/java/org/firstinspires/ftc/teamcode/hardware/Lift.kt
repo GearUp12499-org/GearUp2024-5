@@ -31,7 +31,7 @@ class Lift(val primaryMotor: DcMotor, val secondaryMotor: DcMotor) {
         const val CLOSE = Hardware.VLIFT_CLOSENESS
 
         const val KP = 1.0 / CLOSE
-        const val KI = .20 // maybe
+        const val KI = .05 // maybe
         const val KD = 0.0
     }
     val currentPosition; get() = primaryMotor.currentPosition
