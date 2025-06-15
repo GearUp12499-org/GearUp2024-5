@@ -52,7 +52,7 @@ android {
         signingConfig signingConfigs.debug
         applicationId 'com.qualcomm.ftcrobotcontroller'
 
-        compileSdk 34
+        compileSdk 35
         minSdkVersion 24
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 28
@@ -113,6 +113,9 @@ android {
 
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+    packagingOptions {
+        pickFirst '**/*.so'
     }
 
     sourceSets.main {

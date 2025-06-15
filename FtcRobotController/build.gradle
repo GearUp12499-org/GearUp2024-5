@@ -6,13 +6,16 @@ import java.text.SimpleDateFormat
 apply plugin: 'com.android.library'
 
 android {
-
     defaultConfig {
-        compileSdk 34
+        compileSdk 35
         minSdkVersion 24
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 28
         buildConfigField "String", "APP_BUILD_TIME", '"' + (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ROOT).format(new Date())) + '"'
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     compileOptions {
@@ -20,9 +23,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     namespace = 'com.qualcomm.ftcrobotcontroller'
-    buildFeatures {
-        buildConfig true
-    }
 }
 
 apply from: '../build.dependencies.gradle'
